@@ -10,3 +10,10 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+.metadata/
+Flying-Cookie-Arena-Deluxe/.classpath
+Flying-Cookie-Arena-Deluxe/.project
+Flying-Cookie-Arena-Deluxe/.settings/org.eclipse.jdt.core.prefs
+Flying-Cookie-Arena-Deluxe/OpenAL64.dll
+Flying-Cookie-Arena-Deluxe/lwjgl64.dll
+Flying-Cookie-Arena-Deluxe/bin/
