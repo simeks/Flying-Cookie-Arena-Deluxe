@@ -79,7 +79,7 @@ public class Application extends SimpleApplication {
 
     	
 		
-		for (int i = 0; i < 25; ++i)
+		for (int i = 0; i < 2; ++i)
 		{
 			
 			// Spawn a bot
