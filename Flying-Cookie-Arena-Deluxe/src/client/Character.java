@@ -1,7 +1,5 @@
 package client;
 
-import client.HUD.BrushColor;
-
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.LoopMode;
@@ -17,7 +15,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
-public class Character {
+public class Character extends Entity {
 	private AnimControl animControl;
 	private AnimChannel animChannelTop;
 	private AnimChannel animChannelBase;
@@ -28,7 +26,6 @@ public class Character {
 	private Vector3f velocity = new Vector3f(0,0,0);
 	private boolean sprint = false;
 	
-	private Crate pickedUpCrate = null;
 
 	
 	public Node getNode()
@@ -173,9 +170,12 @@ public class Character {
 		controller.setViewDirection(direction);
 	}
 	
-	public Character(BulletAppState bulletAppState, AssetManager assetManager, World level, Node rootNode)
+	public Character(World world)
 	{
-		this.level = level;
+		super(world);
+		
+		AssetManager assetManager = Application.getInstance().getAssetManager();
+		BulletAppState bulletAppState = Application.getInstance().getBulletAppState();
 		
 		// Load the character model
 		node = assetManager.loadModel("Models/Sinbad/Sinbad.mesh.xml");
@@ -197,7 +197,7 @@ public class Character {
 		animChannelTop.setAnim("IdleTop");
 		animChannelBase.setAnim("IdleBase");
 
-		rootNode.attachChild(node);
+		world.getRootNode().attachChild(node);
 	}
 	
 }

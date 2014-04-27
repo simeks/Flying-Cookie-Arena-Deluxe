@@ -17,30 +17,13 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.Spatial.CullHint;
 import com.jme3.scene.shape.Box;
 
-public class CampFire implements Entity {
+public class CampFire extends Entity {
 	private static final ColorRGBA lightColor = ColorRGBA.White; 
 	private Node node;
 	private PointLight pointLight;
-	ParticleEmitter flame;
+	private ParticleEmitter flame;
 	private boolean lit = true;
 	
-
-	// Called when the user interacts with this object.
-	public void interact()
-	{
-		toggleLit();
-	}
-	// Returns the tool-tip for this object.
-	public String getToolTip()
-	{
-		return "Press [E] to light up or extinguish a camp fire.";
-	}
-	
-	// Performs a test checking if the object intersects the specified ray.
-	public void collideWith(Ray ray, CollisionResults results)
-	{
-		node.collideWith(ray, results);
-	}
 
 	public Vector3f getPosition()
 	{
@@ -52,32 +35,13 @@ public class CampFire implements Entity {
 		return node;
 	}
 	
-	public boolean isLit()
+	public CampFire(World world, Vector3f position)
 	{
-		return lit;
-	}
-	
-	public void toggleLit()
-	{
-		if(lit)
-		{
-		    flame.setLowLife(0.0f);
-		    flame.setHighLife(0.0f);
-			pointLight.setColor(ColorRGBA.Black);
-			lit = false;
-		}
-		else
-		{
-		    flame.setLowLife(1.0f);
-		    flame.setHighLife(4.0f);
-			pointLight.setColor(lightColor);
-			lit = true;
-		}
-	}
-	
-	public CampFire(AssetManager assetManager, Node rootNode, Vector3f position)
-	{
+		super(world);
+				
 		node = new Node();
+		
+		AssetManager assetManager = Application.getInstance().getAssetManager();
 		
 		// Place some wood for the fire
 		Spatial wood = assetManager.loadModel("Models/campfire.obj");
@@ -113,7 +77,7 @@ public class CampFire implements Entity {
     	
     	// The light doesn't seem to be working when it's connected to the campfire node so we need to keep track of
     	//	it separately.
-    	rootNode.addLight(pointLight); 
+    	world.getRootNode().addLight(pointLight); 
 
 	    
 	    flame.setLocalTranslation(new Vector3f(0,0.75f,0));
@@ -122,7 +86,7 @@ public class CampFire implements Entity {
 		node.attachChild(wood);
 		node.move(position);
 
-		rootNode.attachChild(node);
+		world.getRootNode().attachChild(node);
     	
 	}
 }

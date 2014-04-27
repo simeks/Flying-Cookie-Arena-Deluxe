@@ -1,6 +1,8 @@
 package client;
  
 import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Random;
 
 import com.jme3.app.SimpleApplication;
@@ -24,11 +26,12 @@ import com.jme3.util.SkyFactory;
 
 // Our main class
 public class Application extends SimpleApplication {
+	static private Application sInstance = null;
 	private BulletAppState bulletAppState;
-	private World level;
-	private CharacterView characterView;
 
-	private ArrayList<AI> bots = new ArrayList<AI>();
+	private Map<GameState.GameStateId, GameState> gameStates = 
+			new EnumMap<GameState.GameStateId, GameState>(GameState.GameStateId.class);
+	private GameState.GameStateId currentState;
 	
 	enum CameraView
 	{
@@ -39,26 +42,25 @@ public class Application extends SimpleApplication {
 	
 	
     public static void main(String[] args){
-    	Application app = new Application();
-        app.start();
+        Application.getInstance().start();
     }
 
+    public void changeState(GameState.GameStateId state) {
+    	if(state != currentState) {
+    		gameStates.get(currentState).exitState();
+    		gameStates.get(state).enterState();
+    		currentState = state;
+    	}
+    }
+    
     
     @Override
 	public void simpleUpdate(float tpf) {
-    	
-    	characterView.update(tpf);
-    	
-    	// Update ai
-    	for(AI ai : bots)
-    	{
-    		ai.update(tpf);
-    	}
-    	
+		gameStates.get(currentState).update(tpf);
+		
 		super.simpleUpdate(tpf);
 	}
 
-    
 	@Override
     public void simpleInitApp() {
 		flyCam.setEnabled(false);
@@ -69,27 +71,25 @@ public class Application extends SimpleApplication {
     	bulletAppState = new BulletAppState();
     	stateManager.attach(bulletAppState);
 
-    	level = new World(bulletAppState, assetManager, rootNode, 250, 250);
-    	characterView = new CharacterView(inputManager, bulletAppState, assetManager, level, rootNode);
-    	
     	cam.setFrustumFar(2000.0f);
-    	characterView.attachCamera(cam);
-    	currentView = CameraView.CHARACTER_VIEW;
-    	
 
-    	
+		gameStates.put(GameState.GameStateId.MENU_STATE, new MenuState());
+		gameStates.put(GameState.GameStateId.LOBBY_STATE, new LobbyState());
+		gameStates.put(GameState.GameStateId.MAIN_STATE, new MainState());
 		
-		for (int i = 0; i < 2; ++i)
-		{
-			
-			// Spawn a bot
-			Character aiCharacter = new Character(bulletAppState, assetManager, level, rootNode);
-			aiCharacter.setPosition(new Vector3f(20 + i * -20, 100, 80 + i * 5));
-			
-			
-			AI ai = new AI(aiCharacter);
-			ai.setTarget(characterView.getCharacter());
-			bots.add(ai);
-		}
+		currentState = GameState.GameStateId.MAIN_STATE;
+		gameStates.get(currentState).enterState();
     }
+	
+	public BulletAppState getBulletAppState() {
+		return bulletAppState;
+	}
+	
+	static public Application getInstance() {
+		if(sInstance == null)
+		{
+			sInstance = new Application();
+		}
+		return sInstance;
+	}
 }
