@@ -19,6 +19,7 @@ import com.jme3.light.DirectionalLight;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.niftygui.NiftyJmeDisplay;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
@@ -27,6 +28,7 @@ import com.jme3.util.SkyFactory;
 // Our main class
 public class Application extends SimpleApplication {
 	static private Application sInstance = null;
+	private NiftyJmeDisplay niftyDisplay = null;
 	private BulletAppState bulletAppState;
 	private Session session = new Session();
 
@@ -74,16 +76,29 @@ public class Application extends SimpleApplication {
 
     	cam.setFrustumFar(2000.0f);
 
+    	// init nifty for gui.
+    	niftyDisplay = new NiftyJmeDisplay(
+			getAssetManager(), 
+			getInputManager(), 
+			getAudioRenderer(), 
+			getGuiViewPort()
+		);
+    	getGuiViewPort().addProcessor(niftyDisplay);
+    	
 		gameStates.put(GameState.GameStateId.MENU_STATE, new MenuState());
 		gameStates.put(GameState.GameStateId.LOBBY_STATE, new LobbyState());
 		gameStates.put(GameState.GameStateId.MAIN_STATE, new MainState());
 		
-		currentState = GameState.GameStateId.MAIN_STATE;
+		currentState = GameState.GameStateId.MENU_STATE;
 		gameStates.get(currentState).enterState();
     }
 	
 	public BulletAppState getBulletAppState() {
 		return bulletAppState;
+	}
+	
+	public NiftyJmeDisplay getNiftyDisplay() {
+		return niftyDisplay;
 	}
 	
 	static public Application getInstance() {
