@@ -28,6 +28,7 @@ import com.jme3.util.SkyFactory;
 public class Application extends SimpleApplication {
 	static private Application sInstance = null;
 	private BulletAppState bulletAppState;
+	private Session session = new Session();
 
 	private Map<GameState.GameStateId, GameState> gameStates = 
 			new EnumMap<GameState.GameStateId, GameState>(GameState.GameStateId.class);
