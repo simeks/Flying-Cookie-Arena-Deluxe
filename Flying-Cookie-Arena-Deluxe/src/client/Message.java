@@ -18,4 +18,13 @@ public abstract class Message implements Serializable {
 	}
 }
 
+class HelloMessage extends Message {
+
+	public HelloMessage(Type type, int peer) {
+		super(type, peer);
+		// TODO Auto-generated constructor stub
+	}
+	
+}
+
 
