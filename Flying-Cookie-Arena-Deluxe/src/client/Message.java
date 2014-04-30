@@ -1,30 +1,43 @@
 package client;
 
 import java.io.Serializable;
+import java.net.InetAddress;
 
 public abstract class Message implements Serializable {
 	public enum Type {
 		HELLO,
-		WELCOME,
-		HEARTBEAT
+		YOUR_PEER_ID,
+		PEER_LIST
 	};
 	
 	Type type;
-	int peer;
 	
-	public Message(Type type, int peer) {
+	public Message(Type type) {
 		this.type = type;
-		this.peer = peer;
 	}
 }
 
+/// Message sent from a new peer to the master peer when connecting.
 class HelloMessage extends Message {
-
-	public HelloMessage(Type type, int peer) {
-		super(type, peer);
-		// TODO Auto-generated constructor stub
-	}
+	InetAddress addr;
+	int port;
 	
+	public HelloMessage(InetAddress addr, int port) {
+		super(Type.HELLO);
+		this.addr = addr;
+		this.port = port;
+	}
 }
 
+/// Sent from the master peer to a new connecting peer.
+class YourPeerIdMessage extends Message {
+	int peerId; // New peers id.
+	int masterPeerId; // Id of master peer.
+	
+	public YourPeerIdMessage(int peerId, int masterPeerId) {
+		super(Type.HELLO);
+		this.peerId = peerId;
+		this.masterPeerId = masterPeerId;
+	}
+}
 

@@ -60,7 +60,8 @@ public class Application extends SimpleApplication {
     @Override
 	public void simpleUpdate(float tpf) {
 		gameStates.get(currentState).update(tpf);
-		
+
+		session.update();
 		super.simpleUpdate(tpf);
 	}
 
@@ -99,6 +100,10 @@ public class Application extends SimpleApplication {
 	
 	public NiftyJmeDisplay getNiftyDisplay() {
 		return niftyDisplay;
+	}
+	
+	public Session getSession() {
+		return session;
 	}
 	
 	static public Application getInstance() {
