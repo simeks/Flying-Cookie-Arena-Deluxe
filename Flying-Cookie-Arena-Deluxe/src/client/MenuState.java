@@ -85,7 +85,7 @@ public class MenuState implements GameState {
 		screen.findNiftyControl("ServerListStatus", TextField.class).setText("Update interval is "+nextUpdate);
 	}
 	
-	// callback from when you click join
+	// @brief callback from join button
 	public void joinGameLobby(String server) {
 		String peer = server;
 		//Application.getSession().addPeer(peer);
@@ -100,8 +100,9 @@ public class MenuState implements GameState {
 		Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
 	}
 
+	// @brief callback from create button
 	public void createGameLobby() {
-		String peer = niftyDisplay.getNifty().getCurrentScreen().findNiftyControl("ServerListList", TextField.class).getText();
+		//String peer = niftyDisplay.getNifty().getCurrentScreen().findNiftyControl("ServerListList", TextField.class).getText();
 		//Application.getSession().addPeer(peer);
 		try {
 			Application.getInstance().getSession().createSession(Application.GAME_PORT);
@@ -110,6 +111,18 @@ public class MenuState implements GameState {
 			e.printStackTrace();
 		}
 		Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
+	}
+
+	// @brief callback from direct connect button
+	public void directConnect() {
+		//String peer = niftyDisplay.getNifty().getCurrentScreen().findNiftyControl("ServerListList", TextField.class).getText();
+		//Application.getSession().addPeer(peer);
+		Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
+	}
+
+	// @brief callback from quit button
+	public void quit() {
+		Application.getInstance().stop();
 	}
 	
 	public MenuState() {
@@ -152,7 +165,7 @@ public class MenuState implements GameState {
     				width("100%");
     				
     				text(new TextBuilder("ServerListStatus") {{
-	               		alignCenter();
+	               		alignRight();
 	               		valignTop();
 	        			text("Loading... ");
 	               		color("#000");
@@ -180,19 +193,54 @@ public class MenuState implements GameState {
 	               		color("#fff");
 	               		text("");
 	                    alignLeft();
-	                    valignCenter();
-	                    height("10%");
+	                    valignTop();
+	                    height("20%");
 	                    width("30%");
 	                    marginLeft("20%");
+	                    marginTop("20%");
 	                }});
 	               	
 	                control(new ButtonBuilder("ServerListNewGameButton", "Start new game"){{
 	                    alignRight();
-	                    valignCenter();
-	                    height("10%");
+	                    valignTop();
+	                    height("20%");
 	                    width("30%");
 	                    marginRight("20%");
+	                    marginTop("20%");
 	                    interactOnClick("createGameLobby()");
+	                }});
+	                
+	                control(new TextFieldBuilder("ServerListDirectConnectField"){{
+	       				font("Interface/Fonts/Default.fnt");
+	               		color("#fff");
+	               		text("");
+	                    alignLeft();
+	                    valignBottom();
+	                    height("20%");
+	                    width("30%");
+	                    marginLeft("20%");
+	                    marginBottom("10%");
+	                }});
+	               	
+	                control(new ButtonBuilder("ServerListDirectConnectButton", "Direct Connect"){{
+	                    alignRight();
+	                    valignBottom();
+	                    height("20%");
+	                    width("30%");
+	                    marginRight("20%");
+	                    marginBottom("10%");
+	                    interactOnClick("directConnect()");
+	                }});
+	                
+
+	                control(new ButtonBuilder("ServerListQuitButton", "Quit"){{
+	                    alignRight();
+	                    valignBottom();
+	                    height("20%");
+	                    width("10%");
+	                    marginRight("90%");
+	                    marginBottom("10%");
+	                    interactOnClick("quit()");
 	                }});
             	}});
 	        }});
