@@ -26,7 +26,6 @@ public class LobbyState implements GameState {
 	
 	public void toggleReady() {
 		exitState();
-		niftyDisplay.getNifty().exit();
 		Application.getInstance().changeState(GameState.GameStateId.MAIN_STATE);
 	}
 	

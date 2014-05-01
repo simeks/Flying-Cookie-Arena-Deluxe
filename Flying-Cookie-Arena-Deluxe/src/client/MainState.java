@@ -13,6 +13,9 @@ import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
 
+import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.builder.ScreenBuilder;
+
 public class MainState implements GameState {
 	private World world;
 	private Node cameraNode;
@@ -55,6 +58,10 @@ public class MainState implements GameState {
 			else if (name.equals("Sprint")) {
 				character.setSprint(keyPressed);
 			}
+			else if (name.equals("Quit")) {
+				exitState();
+				Application.getInstance().changeState(GameStateId.LOBBY_STATE);
+			}
 		}
 	};	
 	
@@ -92,6 +99,7 @@ public class MainState implements GameState {
         inputManager.addMapping("invRotateY", new MouseAxisTrigger(MouseInput.AXIS_X, true));
         inputManager.addMapping("invRotateX", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
         inputManager.addMapping("Sprint", new KeyTrigger(KeyInput.KEY_LSHIFT));
+        inputManager.addMapping("Quit", new KeyTrigger(KeyInput.KEY_ESCAPE));
 
     }
 
@@ -100,13 +108,15 @@ public class MainState implements GameState {
 		Application.getInstance().getRootNode().attachChild(world.getRootNode());
 
     	InputManager inputManager = Application.getInstance().getInputManager();
+    	inputManager.deleteMapping(Application.INPUT_MAPPING_EXIT);
         inputManager.addListener(actionListener, "Jump", "MoveLeft", "MoveRight", "MoveForward", 
-        		"MoveBackward", "Sprint");
+        		"MoveBackward", "Sprint", "Quit");
         inputManager.addListener(analogListener, "RotateX", "RotateY", "invRotateX", "invRotateY");
 
         // Hide the mouse cursor
     	inputManager.setCursorVisible(false);
     	
+		Application.getInstance().getNiftyDisplay().getNifty().gotoScreen("hud");
 
 		Camera camera = Application.getInstance().getCamera();
 		cameraNode.attachChild(new CameraNode("camera", camera));
@@ -149,6 +159,15 @@ public class MainState implements GameState {
 		cameraNode = new Node();
     	cameraNode.setLocalTranslation(0, 2, 1);
 		character.getNode().attachChild(cameraNode);
+
+		Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
+	    nifty.loadStyleFile("nifty-default-styles.xml");
+	    nifty.loadControlFile("nifty-default-controls.xml");
+	    
+		final GameState state = this;
+		nifty.addScreen("hud", new ScreenBuilder("Nifty Screen") {{
+			controller(new client.MyScreenController(state));
+		}}.build(nifty));
 		
 		initInput();
 	}

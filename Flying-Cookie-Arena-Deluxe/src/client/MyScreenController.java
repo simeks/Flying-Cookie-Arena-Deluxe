@@ -27,6 +27,18 @@ public class MyScreenController implements ScreenController {
 			((MenuState) gs).createGameLobby();
 		}
 	}
+	
+	public void quit() {
+		if(gs instanceof MenuState) {
+			((MenuState) gs).quit();
+		}
+	}
+	
+	public void directConnect() {
+		if(gs instanceof MenuState) {
+			((MenuState) gs).directConnect();
+		}
+	}
 
 	public void exitLobbyState() {
 		if(gs instanceof LobbyState) {
