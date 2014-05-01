@@ -8,48 +8,46 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
-/// @brief Class handling connection to a specific destination.
-public class NetWrite {
-	private InetAddress destAddr;
-	private int destPort;
-	
-	private DatagramSocket socket;
-	
-	private ArrayList<NetPacket> unackedPackets = new ArrayList<NetPacket>(); // Holds sent packets that haven't been acked yet.
-	private int nextPacketId = 0;
-	
-	/// @brief Constructor
-	/// @param addr Destination address.
-	/// @param port Destination port.
-	public NetWrite(InetAddress destAddr, int destPort) throws Exception {
-		this.destAddr = destAddr;
-		this.destPort = destPort;
+public class NetWrite  {
+	private class OutgoingPacket {
+		public InetAddress addr;
+		public int port;
+		public NetPacket packet;
 		
-		socket = new DatagramSocket();
-		
+		public OutgoingPacket(InetAddress addr, int port, NetPacket packet) {
+			this.addr = addr;
+			this.port = port;
+			this.packet = packet;
+		}
 	}
 	
+	private DatagramSocket socket;
+
+	private ArrayList<OutgoingPacket> unackedPackets = new ArrayList<OutgoingPacket>(); // Holds sent packets that haven't been acked yet.
+	private int nextPacketId = 0;
+	
+	
+	public NetWrite(DatagramSocket socket) {
+		this.socket = socket;
+	}
+
 	public void update() {
 		
 		long threshold = 500; // 0.5s, TODO: Change this.
 		long currentTime = System.currentTimeMillis();
 		
 		// Check if any packets needs resending
-		for(NetPacket packet : unackedPackets) {
-			if((packet.sentTime + threshold) < currentTime) {
+		for(OutgoingPacket packet : unackedPackets) {
+			if((packet.packet.sentTime + threshold) < currentTime) {
 				sendPacket(packet);
 			}
 		}
 	}
 	
-	public void send(Message msg, boolean reliable) {
-		byte flags = 0;
-		if(reliable) {
-			flags |= NetPacket.RELIABLE;
-		}
-		
-		NetPacket packet = new NetPacket(nextPacketId++, Application.getInstance().getSession().getMyPeerId(), flags, msg);
+	public void send(InetAddress destAddr, int destPort, Message msg, boolean reliable) {
+		OutgoingPacket packet = new OutgoingPacket(destAddr, destPort, new MessagePacket(nextPacketId++, msg, reliable));
 		sendPacket(packet);
 		
 		if(reliable) {
@@ -58,34 +56,36 @@ public class NetWrite {
 			
 	}
 	
-	public void sendAck(int packetId) {
-		
-	}
-	
 	/// @brief Acknowledges that the specified packet have been received.
 	public void ackPacket(int packetId) {
-		for(NetPacket packet : unackedPackets) {
-			if(packet.id == packetId) {
+		for(OutgoingPacket packet : unackedPackets) {
+			if(packet.packet.id == packetId) {
 				unackedPackets.remove(packet);
 				return;
 			}
 		}
 	}
 	
-	private void sendPacket(NetPacket packet) {
+	private void sendPacket(OutgoingPacket packet) {
 		try {
-			packet.sentTime = System.currentTimeMillis();
-			
+			packet.packet.sentTime = System.currentTimeMillis();
+
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			packet.write(new DataOutputStream(bos));
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeObject(packet.packet);
+			oos.close();
 			
 			byte[] data = bos.toByteArray();
-			DatagramPacket udpPacket = new DatagramPacket(data, data.length, destAddr, destPort);
+			DatagramPacket udpPacket = new DatagramPacket(data, data.length, packet.addr, packet.port);
+			
 			socket.send(udpPacket);
+			
 			
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}
+	}	
+	
+	
 }

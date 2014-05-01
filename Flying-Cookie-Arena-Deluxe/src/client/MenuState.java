@@ -1,5 +1,6 @@
 package client;
 
+import java.net.InetAddress;
 import java.util.Vector;
 
 import com.jme3.asset.AssetManager;
@@ -34,6 +35,10 @@ public class MenuState implements GameState {
 	    
 	    nifty = niftyDisplay.getNifty();
 	    //nifty.getCurrentScreen().findElementByName("ServerListServerNameField").setFocus();
+
+	    Vector<String> servers = new Vector<String>();
+	    servers.add("127.0.0.1");
+	    updateServerList(servers, "");
 	}
 
 	@Override
@@ -51,7 +56,7 @@ public class MenuState implements GameState {
 	public void updateServerList(Vector<String> servers, String nextUpdate) {
 		Nifty nifty = niftyDisplay.getNifty();
 		Screen screen = nifty.getCurrentScreen();
-		Element serverListPanel = screen.findElementByName("ServerList");
+		Element serverListPanel = screen.findElementByName("ServerListList");
 		// add new
 		for(final String server : servers) {
 			if(!serversInList.contains(server)) {
@@ -84,12 +89,26 @@ public class MenuState implements GameState {
 	public void joinGameLobby(String server) {
 		String peer = server;
 		//Application.getSession().addPeer(peer);
+
+		try {
+			Application.getInstance().getSession().connectToSession(InetAddress.getByName("localhost"), Application.GAME_PORT);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
 	}
 
 	public void createGameLobby() {
 		String peer = niftyDisplay.getNifty().getCurrentScreen().findNiftyControl("ServerListList", TextField.class).getText();
 		//Application.getSession().addPeer(peer);
+		try {
+			Application.getInstance().getSession().createSession(Application.GAME_PORT);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
 	}
 	

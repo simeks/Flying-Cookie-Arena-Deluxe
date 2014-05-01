@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
@@ -27,6 +29,8 @@ import com.jme3.util.SkyFactory;
 
 // Our main class
 public class Application extends SimpleApplication {
+	static final int GAME_PORT = 23456; // TODO: Allow the user to change this in the application.
+	
 	static private Application sInstance = null;
 	private NiftyJmeDisplay niftyDisplay = null;
 	private BulletAppState bulletAppState;
@@ -45,6 +49,7 @@ public class Application extends SimpleApplication {
 	
 	
     public static void main(String[] args){
+		Logger.getLogger("com.jme3").setLevel(Level.SEVERE);
         Application.getInstance().start();
     }
 
@@ -67,6 +72,8 @@ public class Application extends SimpleApplication {
 
 	@Override
     public void simpleInitApp() {
+		setPauseOnLostFocus(false);
+		
 		flyCam.setEnabled(false);
 		setDisplayStatView(false); 
 		setDisplayFps(false);
@@ -92,7 +99,13 @@ public class Application extends SimpleApplication {
 		
 		currentState = GameState.GameStateId.MENU_STATE;
 		gameStates.get(currentState).enterState();
+
     }
+	@Override
+	public void destroy() { 
+		session.disconnect();
+		super.destroy();
+	}
 	
 	public BulletAppState getBulletAppState() {
 		return bulletAppState;

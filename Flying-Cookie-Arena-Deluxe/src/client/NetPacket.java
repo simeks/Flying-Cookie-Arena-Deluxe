@@ -5,57 +5,50 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
-public class NetPacket {
-	public static final byte RELIABLE = 0x1;
+public class NetPacket implements Serializable {
+	public static final int MESSAGE = 0;
+	public static final int RELIABLE_MESSAGE = 1; // Reliable messages requires an acknowledgement from the receiver.
+	public static final int ACK = 2;
 	
 	public int id;
-	public int peer; // Senders peer-id
-	public byte flags;
+	public int type;
 	public long sentTime; // Time when the packet was last sent.
 	
-	public Message msg;
 	
-	public NetPacket(int id, int peer, byte flags, Message msg) {
+	public NetPacket(int type, int id) {
+		this.type = type;
 		this.id = id;
-		this.peer = peer;
-		this.flags = flags;
-		this.msg = msg;
 		this.sentTime = 0;
 	}
 	
-	public NetPacket() {
+	public NetPacket(int type) {
+		this.type = type;
 		id = -1;
-		flags = 0;
-		msg = null;
 		sentTime = 0;
 	}
 	
-	
-	/// @brief Writes the packet to the specified stream.
-	public void write(DataOutputStream s) throws IOException {
-		s.writeInt(id);
-		s.writeInt(peer);
-		s.writeByte(flags);
-		s.writeLong(sentTime);
-		
-		ObjectOutputStream oos = new ObjectOutputStream(s);
-		oos.writeObject(msg);
-	}
-	
-	/// @brief Reads a packet from the specified stream.
-	public void read(DataInputStream s) throws IOException {
-		id = s.readInt();
-		peer = s.readInt();
-		flags = s.readByte();
-		sentTime = s.readLong();
-		
-		ObjectInputStream ois = new ObjectInputStream(s);
-		try {
-			msg = (Message)ois.readObject();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 }
+
+class MessagePacket extends NetPacket {
+	public Message msg;
+	
+	public MessagePacket(int id, Message msg, boolean reliable) {
+		super((reliable ? RELIABLE_MESSAGE : MESSAGE), id);
+		this.msg = msg;
+	}
+	
+}
+
+class AckPacket extends NetPacket {
+	public int ackId; // Packet to acknowledge
+	
+	public AckPacket(int id, int ackId) {
+		super(ACK, id);
+		this.ackId = ackId;
+	}
+	
+}
+
+
