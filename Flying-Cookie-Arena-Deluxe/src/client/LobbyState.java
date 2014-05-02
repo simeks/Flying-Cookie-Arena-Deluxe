@@ -19,13 +19,11 @@ public class LobbyState implements GameState {
 	private NiftyJmeDisplay niftyDisplay;
 	
 	public void exitLobbyState() {
-		exitState();
-		//Application.getSession().reset();
+		Application.getInstance().getSession().disconnect();
 		Application.getInstance().changeState(GameState.GameStateId.MENU_STATE);
 	}
 	
 	public void toggleReady() {
-		exitState();
 		Application.getInstance().changeState(GameState.GameStateId.MAIN_STATE);
 	}
 	
@@ -46,6 +44,7 @@ public class LobbyState implements GameState {
 
 	@Override
 	public void exitState() {
+		Application.getInstance().getLobbyServerConnection().close();
     	InputManager inputManager = Application.getInstance().getInputManager();
     	inputManager.setCursorVisible(true);
 	}

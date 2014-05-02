@@ -35,6 +35,7 @@ public class Application extends SimpleApplication {
 	private NiftyJmeDisplay niftyDisplay = null;
 	private BulletAppState bulletAppState;
 	private Session session = new Session();
+	private LobbyServerConnection lobbyServer = new LobbyServerConnection("130.240.202.79", 5000);
 
 	private Map<GameState.GameStateId, GameState> gameStates = 
 			new EnumMap<GameState.GameStateId, GameState>(GameState.GameStateId.class);
@@ -117,6 +118,10 @@ public class Application extends SimpleApplication {
 	
 	public Session getSession() {
 		return session;
+	}
+	
+	public LobbyServerConnection getLobbyServerConnection() {
+		return lobbyServer;
 	}
 	
 	static public Application getInstance() {

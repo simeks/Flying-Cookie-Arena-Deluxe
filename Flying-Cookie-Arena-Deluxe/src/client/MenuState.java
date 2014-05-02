@@ -1,7 +1,21 @@
 package client;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import org.json.simple.JSONArray;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+import client.NetRead.ReceivedMessage;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.input.InputManager;
@@ -31,18 +45,36 @@ public class MenuState implements GameState {
 	private NiftyJmeDisplay niftyDisplay;
 	private Vector<String> serversInList;
 	
+	
 	@Override
 	public void enterState() {
 		Nifty nifty = niftyDisplay.getNifty();
 		Application.getInstance().getFlyByCamera().setDragToRotate(true);
 	    nifty.gotoScreen("ServerListScreen"); // start the screen
 	    
-	    nifty = niftyDisplay.getNifty();
+	    nifty.getCurrentScreen().findNiftyControl("ServerListStatus", Label.class).setText("Loading... ");
+	    
+	    //nifty = niftyDisplay.getNifty();
 	    //nifty.getCurrentScreen().findElementByName("ServerListServerNameField").setFocus();
+	    
+	    LobbyServerConnection serverConnection = Application.getInstance().getLobbyServerConnection();
+	    serverConnection.setCallback(new LobbyServerCallback() {
+			@Override
+			public void onReceiveServerList(Map<String, String> servers, String status) {
+				updateServerList(servers, status);
+			}
 
-	    Vector<String> servers = new Vector<String>();
-	    servers.add("127.0.0.1");
-	    updateServerList(servers, "");
+			@Override
+			public void onAck() {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+		if(!serverConnection.isConnected()) {
+			serverConnection.connect();
+			new Thread(serverConnection).start();
+		}
+		serverConnection.subscribeToServerList();
 	}
 
 	@Override
@@ -57,18 +89,21 @@ public class MenuState implements GameState {
 		
 	}
 	
-	public void updateServerList(Vector<String> servers, String nextUpdate) {
+	public void updateServerList(Map<String, String> servers, String nextUpdate) {
 		Nifty nifty = niftyDisplay.getNifty();
 		Screen screen = nifty.getCurrentScreen();
 		Element serverListPanel = screen.findElementByName("ServerListList2");
 		
 		// add new
-		for(final String server : servers) {
+		for (Map.Entry<String, String> entry : servers.entrySet()) {
+		    final String server = entry.getKey();
+		    String serverName = entry.getValue();
+		    
 			if(!serversInList.contains(server)) {
 				serversInList.add(server);
 				
 				serverListPanel.add(
-					new ButtonBuilder(serversInList.indexOf(server)+"", server) {{
+					new ButtonBuilder(serversInList.indexOf(server)+"", serverName) {{
 						childLayoutCenter();
 						visibleToMouse(true);
 						interactOnClick("joinGameLobby(" + server + ")");
@@ -85,11 +120,16 @@ public class MenuState implements GameState {
 		}
 		
 		// remove old
+		Vector<String> removeUs = new Vector<String>();
 		for(String server : serversInList) {
-			if(!servers.contains(server)) {
-				serversInList.remove(server);
+			if(!servers.containsKey(server)) {
 				serverListPanel.findElementByName(serversInList.indexOf(server)+"").markForRemoval();
+				removeUs.add(server);
+				// todo: reposition to fill this hole.. 
 			}
+		}
+		for(String server : removeUs) {
+			serversInList.remove(server);
 		}
 		
 		screen.findNiftyControl("ServerListStatus", Label.class).setText("Update interval is "+nextUpdate);
@@ -106,32 +146,51 @@ public class MenuState implements GameState {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
+    	Application.getInstance().getLobbyServerConnection().close();
 		Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
 	}
 
 	// @brief callback from create button
 	public void createGameLobby() {
-		//String peer = niftyDisplay.getNifty().getCurrentScreen().findNiftyControl("ServerListList", TextField.class).getText();
-		//Application.getSession().addPeer(peer);
 		try {
 			Application.getInstance().getSession().createSession(Application.GAME_PORT);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			return;
 		}
+		
+		String name = Application.getInstance().getNiftyDisplay().getNifty().
+				getCurrentScreen().findNiftyControl("ServerListServerNameField", TextField.class).getText();
+    	Application.getInstance().getLobbyServerConnection().createServer(name, Application.GAME_PORT);
+    	
 		Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
 	}
 
 	// @brief callback from direct connect button
 	public void directConnect() {
-		//String peer = niftyDisplay.getNifty().getCurrentScreen().findNiftyControl("ServerListList", TextField.class).getText();
-		//Application.getSession().addPeer(peer);
+		String ip = Application.getInstance().getNiftyDisplay().getNifty().
+				getCurrentScreen().findNiftyControl("ServerListServerDirectConnectField", TextField.class).getText();
+		try {
+			Application.getInstance().getSession().connectToSession(InetAddress.getByName(ip), Application.GAME_PORT);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return;
+		}
+		Application.getInstance().getLobbyServerConnection().close();
 		Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
 	}
 
 	// @brief callback from quit button
 	public void quit() {
+		exitState();
+		Application.getInstance().getLobbyServerConnection().close();
 		Application.getInstance().stop();
 	}
 	
@@ -308,5 +367,4 @@ public class MenuState implements GameState {
 	    
 	    //nifty.registerMusic("mymusic", "Interface/xyz.ogg");
 	}
-	
 }
