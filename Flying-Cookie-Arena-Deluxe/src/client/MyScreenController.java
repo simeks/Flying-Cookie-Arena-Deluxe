@@ -3,7 +3,11 @@ package client;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
+
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.NiftyEventSubscriber;
+import de.lessvoid.nifty.controls.Chat;
+import de.lessvoid.nifty.controls.ChatTextSendEvent;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
@@ -51,6 +55,19 @@ public class MyScreenController implements ScreenController {
 			((LobbyState) gs).toggleReady();
 		}
 	}
+
+	
+	@NiftyEventSubscriber(pattern=".*LobbyChat")
+	public final void onSendText(final String id, final ChatTextSendEvent event) {
+		if(!(gs instanceof LobbyState)) {
+			return;
+		}
+		String text = event.getText();
+		Chat chat = event.getChatControl();
+		if (!text.equals("") && chat instanceof Chat) {
+			((LobbyState) gs).onSendText(text, chat);
+		}
+	}
 	
 	
 	@Override
@@ -60,6 +77,10 @@ public class MyScreenController implements ScreenController {
 	public void onEndScreen() { }
 
 	@Override
-	public void onStartScreen() { }
+	public void onStartScreen() {
+		if(gs instanceof LobbyState) {
+			((LobbyState) gs).onStartScreen();
+		}
+	}
 	
 };

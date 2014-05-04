@@ -1,36 +1,65 @@
 package client;
 
+import java.util.Properties;
+
 import com.jme3.input.InputManager;
 import com.jme3.niftygui.NiftyJmeDisplay;
 
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.NiftyEventSubscriber;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.builder.TextBuilder;
+import de.lessvoid.nifty.controls.Chat;
+import de.lessvoid.nifty.controls.ChatTextSendEvent;
+import de.lessvoid.nifty.controls.Controller;
 import de.lessvoid.nifty.controls.button.builder.ButtonBuilder;
 import de.lessvoid.nifty.controls.chatcontrol.ChatBoxViewConverter;
+import de.lessvoid.nifty.controls.chatcontrol.ChatControl;
 import de.lessvoid.nifty.controls.chatcontrol.builder.ChatBuilder;
 import de.lessvoid.nifty.controls.scrollpanel.builder.ScrollPanelBuilder;
 import de.lessvoid.nifty.controls.textfield.builder.TextFieldBuilder;
+import de.lessvoid.nifty.elements.Element;
+import de.lessvoid.nifty.input.NiftyInputEvent;
+import de.lessvoid.nifty.render.NiftyImage;
+import de.lessvoid.nifty.screen.Screen;
+import de.lessvoid.xml.xpp3.Attributes;
 
 public class LobbyState implements GameState {
 
 	private NiftyJmeDisplay niftyDisplay;
-	
+
+	/// @brief called when exit is clicked. 
 	public void exitLobbyState() {
 		Application.getInstance().getSession().disconnect();
 		Application.getInstance().changeState(GameState.GameStateId.MENU_STATE);
 	}
-	
+
+	/// @brief called when ready is clicked
 	public void toggleReady() {
 		Application.getInstance().changeState(GameState.GameStateId.MAIN_STATE);
+	}
+
+	/// @brief called when the screen is ready. 
+	public void onStartScreen() {
+		Nifty nifty = niftyDisplay.getNifty();
+	    Chat chat = nifty.getCurrentScreen().findNiftyControl("LobbyChat", Chat.class);
+	    chat.addPlayer("You", nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
+	}
+
+	/// @brief called when message was sent. 
+	public void onSendText(String text, Chat chat) {
+		System.out.println(text);
+		Nifty nifty = niftyDisplay.getNifty();
+		chat.receivedChatLine(text, nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
 	}
 	
 	@Override
 	public void enterState() {
 		Application app = Application.getInstance();
 	    Nifty nifty = niftyDisplay.getNifty();
+	    nifty.gotoScreen("ServerLobbyScreen"); // start the screen
 	    
 	    app.getGuiViewPort().addProcessor(niftyDisplay);
 	    app.getFlyByCamera().setDragToRotate(true);
@@ -53,7 +82,6 @@ public class LobbyState implements GameState {
 	    
 	    //nifty.registerMusic("mymusic", "Interface/xyz.ogg");
 	    
-	    nifty.gotoScreen("ServerLobbyScreen"); // start the screen
 	}
 
 	@Override
@@ -108,13 +136,13 @@ public class LobbyState implements GameState {
     				height("70%");
     				width("100%");
     				
-	               	control(new ChatBuilder("LobbyChat", 0) {{
+	               	control(new ChatBuilder("LobbyChat", 20) {{
 	               		alignCenter();
 	               		valignBottom();
 	       				height("90%");
 	       				width("100%");
+	       		    	controller(new ChatControl());
                		}});
-	               
 	            }});
 	            
 	            panel(new PanelBuilder("LobbyButtonPanel") {{
