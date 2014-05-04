@@ -104,6 +104,7 @@ public class Application extends SimpleApplication {
     }
 	@Override
 	public void destroy() { 
+		lobbyServer.close();
 		session.disconnect();
 		super.destroy();
 	}

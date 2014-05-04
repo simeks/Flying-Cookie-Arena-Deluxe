@@ -85,7 +85,11 @@ public class MenuState implements GameState {
 
 	@Override
 	public void update(float dt) {
-		// TODO Auto-generated method stub
+
+		if(Application.getInstance().getSession().getState() == Session.State.CONNECTED) {
+	    	Application.getInstance().getLobbyServerConnection().close();
+			Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
+		}
 		
 	}
 	
@@ -147,8 +151,7 @@ public class MenuState implements GameState {
 			e.printStackTrace();
 		}
 
-    	Application.getInstance().getLobbyServerConnection().close();
-		Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
+		// TODO: Do some stuff here to indicate that we're trying to join a session...
 	}
 
 	// @brief callback from create button

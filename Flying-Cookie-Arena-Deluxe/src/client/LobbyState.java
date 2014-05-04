@@ -35,7 +35,21 @@ public class LobbyState implements GameState {
 	    app.getGuiViewPort().addProcessor(niftyDisplay);
 	    app.getFlyByCamera().setDragToRotate(true);
 
+	    app.getSession().registerEffect(Message.Type.CHAT_MSG, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				System.out.println("Chat (Peer: " + m.peer + "): " + ((ChatMessage)m).message);
+			}
+		});
 	    
+	    ChatMessage chatMsg = new ChatMessage("Hello!");
+	    try {
+			app.getSession().sendToAll(chatMsg, true);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	    
 	    //nifty.registerMusic("mymusic", "Interface/xyz.ogg");
 	    
@@ -44,8 +58,11 @@ public class LobbyState implements GameState {
 
 	@Override
 	public void exitState() {
-		Application.getInstance().getLobbyServerConnection().close();
-    	InputManager inputManager = Application.getInstance().getInputManager();
+		Application app = Application.getInstance();
+		app.getSession().unregisterEffect(Message.Type.CHAT_MSG);
+		
+		app.getLobbyServerConnection().close();
+    	InputManager inputManager = app.getInputManager();
     	inputManager.setCursorVisible(true);
 	}
 

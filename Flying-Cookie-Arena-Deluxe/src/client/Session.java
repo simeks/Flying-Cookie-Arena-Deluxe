@@ -6,12 +6,13 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Session {
 	
-	private enum State {
+	public enum State {
 		DISCONNECTED,
 		AWAITING_CONNECTION, // State while we're waiting for the master peer to acknowledge us.
 		CONNECTED
@@ -24,9 +25,10 @@ public class Session {
 	private NetWrite netWrite = null;
 	private int myPeerId = -1;
 	private int masterPeerId = -1;
-	private int nextPeerId = 0;
+	private int nextPeerId = 1;
 	
 	private Map<Integer, Peer> peers = new HashMap<Integer, Peer>();
+	private Map<Message.Type, MessageEffect> messageEffects = new EnumMap<Message.Type, MessageEffect>(Message.Type.class);
 	
 	/// @brief Creates a new empty session.
 	public void createSession(int myPort) throws Exception {
@@ -127,71 +129,80 @@ public class Session {
 		return (myPeerId == masterPeerId);
 	}
 	
+	public State getState()  {
+		return state;
+	}
+	
+	public void registerEffect(Message.Type type, MessageEffect effect) {
+		messageEffects.put(type, effect);
+	}
+	public void unregisterEffect(Message.Type type) {
+		messageEffects.remove(type);
+	}
+	
 	/// @brief Processes incoming packets.
 	private void processIncoming() {
 		if(state != State.DISCONNECTED) {
 			NetRead.ReceivedMessage recvMsg = null;
 			while((recvMsg = netRead.popMessage()) != null) {
-				switch(recvMsg.msg.type) {
-					case HELLO:
-					{
-						HelloMessage helloMsg = (HelloMessage)recvMsg.msg;
-						
-						// If the peer id is invalid (Not set) and we are the master, generate and send a new ID to the peer.
-						if(helloMsg.peer < 0 && isMaster()) {
-							System.out.println("New peer connected : " + recvMsg.senderAddr.getHostAddress() + ":" + recvMsg.senderPort);
-							
-							Peer peer = new Peer(nextPeerId++, netWrite, recvMsg.senderAddr, recvMsg.senderPort);
-							
-							PeerIdMessage idMsg = new PeerIdMessage(peer.getId());
-							peer.send(idMsg, true);
-							
-							// Send peer list
-							PeerListMessage listMsg = new PeerListMessage();
-							
-							for(Peer p : peers.values()) {
-								listMsg.peers.add(listMsg.new RawPeer(p.getId(), p.getDestAddr(), p.getDestPort()));
-							}
-							
-							peer.send(listMsg, true);
-							
-							peers.put(peer.getId(), peer);
-						}
-					}
-					break;
-					case PEER_ID:
-					{
-						// Update my peer id
-						myPeerId = ((PeerIdMessage)recvMsg.msg).peerId;
+				if(recvMsg.msg.type == Message.Type.HELLO) {
+					HelloMessage helloMsg = (HelloMessage)recvMsg.msg;
 					
-						System.out.println("Peer ID assigned : " + myPeerId);
+					// If the peer id is invalid (Not set) and we are the master, generate and send a new ID to the peer.
+					if(helloMsg.peer < 0 && isMaster()) {
+						System.out.println("New peer connected : " + recvMsg.senderAddr.getHostAddress() + ":" + recvMsg.senderPort);
 						
-						// Update master peer id if needed
-						if(masterPeerId != recvMsg.msg.peer && !isMaster()) {
-							Peer masterPeer = peers.get(masterPeerId);
-							peers.remove(masterPeerId);
-							
-							masterPeer.setId(recvMsg.msg.peer);
-							peers.put(masterPeer.getId(), masterPeer);
-							
-							masterPeerId = recvMsg.msg.peer;
+						Peer peer = new Peer(nextPeerId++, netWrite, recvMsg.senderAddr, recvMsg.senderPort);
+						
+						PeerIdMessage idMsg = new PeerIdMessage(peer.getId());
+						peer.send(idMsg, true);
+						
+						// Send peer list
+						PeerListMessage listMsg = new PeerListMessage();
+						
+						for(Peer p : peers.values()) {
+							listMsg.peers.add(listMsg.new RawPeer(p.getId(), p.getDestAddr(), p.getDestPort()));
 						}
+						
+						peer.send(listMsg, true);
+						
+						peers.put(peer.getId(), peer);
 					}
-					break;
-					case PEER_LIST:
-					{
-						System.out.println("Peer list:");
-						for(PeerListMessage.RawPeer p : ((PeerListMessage)recvMsg.msg).peers) {
-							Peer newPeer = new Peer(p.peerId, netWrite, p.addr, p.port);
-							peers.put(p.peerId, newPeer);
+				}
+				else if(recvMsg.msg.type == Message.Type.PEER_ID) {
+					// Update my peer id
+					myPeerId = ((PeerIdMessage)recvMsg.msg).peerId;
+				
+					System.out.println("Peer ID assigned : " + myPeerId);
+					
+					// Update master peer id if needed
+					if(masterPeerId != recvMsg.msg.peer && !isMaster()) {
+						Peer masterPeer = peers.get(masterPeerId);
+						peers.remove(masterPeerId);
+						
+						masterPeer.setId(recvMsg.msg.peer);
+						peers.put(masterPeer.getId(), masterPeer);
+						
+						masterPeerId = recvMsg.msg.peer;
+					}
+					
+				}
+				else if(recvMsg.msg.type == Message.Type.PEER_LIST) {
+					System.out.println("Peer list:");
+					for(PeerListMessage.RawPeer p : ((PeerListMessage)recvMsg.msg).peers) {
+						Peer newPeer = new Peer(p.peerId, netWrite, p.addr, p.port);
+						peers.put(p.peerId, newPeer);
 
-							System.out.println("Peer: " + p.addr.getHostAddress() + ":" + p.port);
-							
-							// Send hello to new peer
-						}
+						System.out.println("Peer: " + p.addr.getHostAddress() + ":" + p.port);
 						
+						// Send hello to new peer
 					}
-					break;
+					state = State.CONNECTED;
+				}
+				else {
+					if(messageEffects.containsKey(recvMsg.msg.type)) {
+						messageEffects.get(recvMsg.msg.type).execute(recvMsg.msg);
+					}
 				}
 
 			}
