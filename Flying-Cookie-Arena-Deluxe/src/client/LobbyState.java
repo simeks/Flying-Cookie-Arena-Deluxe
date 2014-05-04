@@ -43,9 +43,13 @@ public class LobbyState implements GameState {
 
 	/// @brief called when the screen is ready. 
 	public void onStartScreen() {
+		addPlayer("You");
+	}
+	
+	private void addPlayer(String name) {
 		Nifty nifty = niftyDisplay.getNifty();
-	    Chat chat = nifty.getCurrentScreen().findNiftyControl("LobbyChat", Chat.class);
-	    chat.addPlayer("You", nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
+		Chat chat = nifty.getCurrentScreen().findNiftyControl("LobbyChat", Chat.class);
+	    chat.addPlayer(name, nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
 	}
 
 	/// @brief called when message was sent. 
@@ -53,6 +57,14 @@ public class LobbyState implements GameState {
 		System.out.println(text);
 		Nifty nifty = niftyDisplay.getNifty();
 		chat.receivedChatLine(text, nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
+
+	    ChatMessage chatMsg = new ChatMessage(text);
+	    try {
+	    	Application.getInstance().getSession().sendToAll(chatMsg, true);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -68,6 +80,9 @@ public class LobbyState implements GameState {
 			
 			@Override
 			public void execute(Message m) {
+				Chat chat = niftyDisplay.getNifty().getCurrentScreen().findNiftyControl("LobbyChat", Chat.class);
+				Nifty nifty = niftyDisplay.getNifty();
+				chat.receivedChatLine(((ChatMessage)m).message, nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
 				System.out.println("Chat (Peer: " + m.peer + "): " + ((ChatMessage)m).message);
 			}
 		});

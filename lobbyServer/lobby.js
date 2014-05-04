@@ -156,7 +156,7 @@ function addNewServer(socket, json) {
     return sendFail(socket, "need max count in string/number, not "+(typeof json["m"]));
   }
   for (var id in hosts) {
-    if(hosts[id]["p"] === json["p"]+"") {
+    if(id.substring(0, id.indexOf(":")) === socket.remoteAddress && hosts[id]["p"] === json["p"]+"") {
       return sendFail(socket, "Your server alredy exists, change port");
     }
   }
