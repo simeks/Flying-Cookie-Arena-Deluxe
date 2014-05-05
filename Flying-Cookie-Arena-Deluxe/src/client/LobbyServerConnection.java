@@ -156,7 +156,6 @@ public class LobbyServerConnection implements Runnable {
 			e.printStackTrace();
 			return false;
 		}
-		System.out.println("Send message: "+m);
 		return true;
 	}
 	
@@ -165,7 +164,6 @@ public class LobbyServerConnection implements Runnable {
 			System.out.println("Callback is null. "+raw);
 			return ;
 		}
-		System.out.println(raw);
 		Map<String, String> map = new HashMap<String, String>();
 		String status = "";
 		
@@ -210,7 +208,6 @@ public class LobbyServerConnection implements Runnable {
 					    	}
 					    	
 					    	map.put(address, name+". "+count+"/"+maxCount);
-							System.out.println(address+", "+name+". "+count+"/"+maxCount);
 					    }
 				    }
 				    if(data.containsKey("t")) {
