@@ -174,7 +174,7 @@ public class MenuState implements GameState {
 	// @brief callback from direct connect button
 	public void directConnect() {
 		String ip = Application.getInstance().getNiftyDisplay().getNifty().
-				getCurrentScreen().findNiftyControl("ServerListServerDirectConnectField", TextField.class).getText();
+				getCurrentScreen().findNiftyControl("ServerListDirectConnectField", TextField.class).getText();
 		try {
 			Application.getInstance().getSession().connectToSession(InetAddress.getByName(ip), Application.GAME_PORT);
 		} catch (UnknownHostException e) {
