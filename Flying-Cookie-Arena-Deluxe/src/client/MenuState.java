@@ -186,8 +186,6 @@ public class MenuState implements GameState {
 			e.printStackTrace();
 			return;
 		}
-		Application.getInstance().getLobbyServerConnection().close();
-		Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
 	}
 
 	// @brief callback from quit button
