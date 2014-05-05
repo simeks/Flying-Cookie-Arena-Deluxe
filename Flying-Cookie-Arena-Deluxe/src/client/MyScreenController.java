@@ -20,7 +20,6 @@ public class MyScreenController implements ScreenController {
 	}
 	
 	public void joinGameLobby(String server) {
-		System.out.println("derp");
 		if(gs instanceof MenuState) {
 			((MenuState) gs).joinGameLobby(server);
 		}
