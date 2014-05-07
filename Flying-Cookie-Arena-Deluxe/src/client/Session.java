@@ -9,6 +9,8 @@ import java.net.InetAddress;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Session {
 	
@@ -27,6 +29,8 @@ public class Session {
 	private int masterPeerId = -1;
 	private int nextPeerId = 1;
 	private long readDelay = 0;
+	
+	private SessionReliableCallback connectCallback;
 	
 	private Map<Integer, Peer> peers = new HashMap<Integer, Peer>();
 	private Map<Message.Type, MessageEffect> messageEffects = new EnumMap<Message.Type, MessageEffect>(Message.Type.class);
@@ -51,13 +55,18 @@ public class Session {
 		}
 	}
 	
+	public void setConnectionCallback(SessionReliableCallback c) {
+		connectCallback = c;
+	}
+	
 	/// @brief Connects to an existing session.
 	/// @param destAddr Address to the master peer of the session.
 	/// @param destPort Port to the master peer of the session.
 	public void connectToSession(InetAddress destAddr, int destPort) throws Exception {
-		connectToSession(destAddr, destPort, NetPacket.DEFAULT_TTL, null);
+		connectToSession(destAddr, destPort, null);
 	}
-	public void connectToSession(InetAddress destAddr, int destPort, int TTL, SessionReliableCallback c) throws Exception {
+	public void connectToSession(InetAddress destAddr, int destPort, SessionReliableCallback c) throws Exception {
+		setConnectionCallback(c);
 		if(state == State.DISCONNECTED) {
 			socket = new DatagramSocket();
 			netWrite = new NetWrite(socket);
@@ -75,7 +84,7 @@ public class Session {
 			
 			// Send hello to master
 			HelloMessage msg = new HelloMessage();
-			masterPeer.send(msg, TTL, c);
+			masterPeer.send(msg, true);
 			
 		}
 		else {
@@ -109,12 +118,9 @@ public class Session {
 	
 	/// @brief Sends a message to all peers.
 	public void sendToAll(Message msg, boolean reliable) throws Exception {
-		sendToAll(msg, (reliable ? NetPacket.DEFAULT_TTL : -1), null);
-	}
-	public void sendToAll(Message msg, int TTL, SessionReliableCallback c) throws Exception {
 		if(state == State.CONNECTED) {
 			for(Peer peer : peers.values()) {
-				peer.send(msg, TTL, c);
+				peer.send(msg, true);
 			}
 		}
 		else {
@@ -123,16 +129,18 @@ public class Session {
 	}
 	
 	/// @brief Sends a message to the specified peer.
-	public void sentToPeer(Message msg, int peer, boolean reliable) throws Exception {
-		sentToPeer(msg, peer, (reliable ? NetPacket.DEFAULT_TTL : -1), null);
-	}
-	public void sentToPeer(Message msg, int peer, int TTL, SessionReliableCallback c) throws Exception {
+	public void sentToPeer(Message msg, int peer, boolean reliable, SessionReliableCallback c) throws Exception {
 		if(state == State.CONNECTED) {
-			peers.get(peer).send(msg, TTL, c);
+			peers.get(peer).send(msg,reliable);
+			addCallbackOnPeer(peer, c);
 		}
 		else {
 			throw new Exception("Session not initialized.");
 		}
+	}
+	
+	private void addCallbackOnPeer(int peer, SessionReliableCallback c) {
+		
 	}
 	
 	public void update() {
@@ -176,6 +184,13 @@ public class Session {
 						
 						Peer peer = new Peer(nextPeerId++, netWrite, recvMsg.senderAddr, recvMsg.senderPort);
 						
+						for(Peer p : peers.values()) {
+							if(p.equals(peer)) {
+								System.out.println("Host " + recvMsg.senderAddr.getHostAddress() + ":" + recvMsg.senderPort+" alredy exist!");
+								// TODO: send error message to client. peer.send(new ErrorMessage( ... ), true);
+								return;
+							}
+						}
 						PeerIdMessage idMsg = new PeerIdMessage(peer.getId());
 						peer.send(idMsg, true);
 						
@@ -185,7 +200,8 @@ public class Session {
 						for(Peer p : peers.values()) {
 							listMsg.peers.add(listMsg.new RawPeer(p.getId(), p.getDestAddr(), p.getDestPort()));
 						}
-						
+
+						// TODO: aggregate?
 						peer.send(listMsg, true);
 						
 						peers.put(peer.getId(), peer);
@@ -221,6 +237,7 @@ public class Session {
 						// Send hello to new peer
 					}
 					state = State.CONNECTED;
+					connectCallback.onSuccess();
 				}
 				else {
 					if(messageEffects.containsKey(recvMsg.msg.type)) {

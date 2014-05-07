@@ -24,12 +24,6 @@ public class NetWrite  {
 			this.packet = packet;
 			this.callback = null;
 		}
-		public OutgoingPacket(InetAddress addr, int port, NetPacket packet, SessionReliableCallback errorCallback) {
-			this.addr = addr;
-			this.port = port;
-			this.packet = packet;
-			this.callback = errorCallback;
-		}
 	}
 	
 	private DatagramSocket socket;
@@ -49,30 +43,16 @@ public class NetWrite  {
 		
 		// Check if any packets needs resending
 		for(OutgoingPacket packet : unackedPackets) {
-			if(packet.packet.hasExpired(currentTime)) {
-				if(packet.callback instanceof SessionReliableCallback) {
-					packet.callback.onExpire(currentTime - packet.packet.sentTimeFirst, packet.packet.getTTL());
-				}
-				stopTrackReliable(packet);
-			} else if((packet.packet.sentTime + threshold) < currentTime) {
-				if(packet.callback instanceof SessionReliableCallback) {
-					packet.callback.onRetry(currentTime - packet.packet.sentTimeFirst, packet.packet.getTTL());
-				}
+			if((packet.packet.sentTime + threshold) < currentTime) {
 				sendPacket(packet);
 			}
 		}
 	}
 	
 	public void send(InetAddress destAddr, int destPort, Message msg, boolean reliable) {
-		send(destAddr, destPort, msg, (reliable ? NetPacket.DEFAULT_TTL : -1), null);
-	}
-	public void send(InetAddress destAddr, int destPort, Message msg, int TTL) {
-		send(destAddr, destPort, msg, TTL, null);
-	}
-	public void send(InetAddress destAddr, int destPort, Message msg, int TTL, SessionReliableCallback callback) {
-		OutgoingPacket packet = new OutgoingPacket(destAddr, destPort, new MessagePacket(nextPacketId++, msg, TTL), callback);
+		OutgoingPacket packet = new OutgoingPacket(destAddr, destPort, new MessagePacket(nextPacketId++, msg));
 		sendPacket(packet);
-		if(-1 < TTL) {
+		if(reliable) {
 			unackedPackets.add(packet);
 		}
 	}
@@ -81,9 +61,6 @@ public class NetWrite  {
 	public void ackPacket(int packetId) {
 		for(OutgoingPacket packet : unackedPackets) {
 			if(packet.packet.id == packetId) {
-				if(packet.callback instanceof SessionReliableCallback) {
-					packet.callback.onAck(System.currentTimeMillis()-packet.packet.sentTimeFirst, packet.packet.getTTL());
-				}
 				stopTrackReliable(packet);
 				return;
 			}
@@ -116,7 +93,5 @@ public class NetWrite  {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	}	
-	
-	
+	}
 }
