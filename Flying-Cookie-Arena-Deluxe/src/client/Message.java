@@ -4,6 +4,8 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
+import com.jme3.math.Vector3f;
+
 public abstract class Message implements Serializable {
 	private static final long serialVersionUID = 8351610195856354822L;
 
@@ -11,7 +13,10 @@ public abstract class Message implements Serializable {
 		HELLO,
 		PEER_ID,
 		PEER_LIST,
-		CHAT_MSG
+		CHAT_MSG,
+		CREATE_ENTITY,
+		DESTROY_ENTITY,
+		ENTITY_STATE
 	};
 	
 	Type type;
@@ -75,3 +80,35 @@ class ChatMessage extends Message {
 		this.message = message;
 	}
 }
+
+class CreateEntityMessage extends Message {
+	public int entityId;
+	public Entity.Type entityType;
+	
+	CreateEntityMessage(int entityId, Entity.Type entityType) {
+		super(Type.CREATE_ENTITY);
+		this.entityId = entityId;
+		this.entityType = entityType;
+	}
+}
+
+class DestroyEntityMessage extends Message {
+	public int entityId;
+	
+	DestroyEntityMessage(int entityId) {
+		super(Type.DESTROY_ENTITY);
+		this.entityId = entityId;
+	}
+}
+
+class EntityStateMessage extends Message {
+	private static final long serialVersionUID = -6643225186660773294L;
+
+	public Vector3f position;
+	
+	EntityStateMessage(Vector3f position) {
+		super(Type.ENTITY_STATE);
+		this.position = position;
+	}
+}
+
