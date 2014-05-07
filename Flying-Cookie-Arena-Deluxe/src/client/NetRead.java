@@ -12,6 +12,11 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.sql.Array;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.NavigableSet;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.DelayQueue;
 import java.util.concurrent.Delayed;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -19,10 +24,10 @@ import java.util.concurrent.TimeUnit;
 
 public class NetRead implements Runnable {
 	public class ReceivedMessage implements Delayed {
+		final public static int MAX_TTL = 5000;
 		public InetAddress senderAddr;
 		public int senderPort;
 		public long timeReceived;
-		
 		public Message msg;
 		
 		ReceivedMessage(InetAddress senderAddr, int senderPort, Message msg) {
@@ -38,15 +43,19 @@ public class NetRead implements Runnable {
 		}
 
 		@Override
-		public long getDelay(TimeUnit arg0) {
+		public long getDelay(TimeUnit u) {
 			return getReadDelay()-(System.currentTimeMillis()-timeReceived);
 		}
 	}
 	
 	private DatagramSocket socket;
 	private NetWrite netWrite;
-	private DelayQueue<ReceivedMessage> incomingMessages = new DelayQueue<ReceivedMessage>(); 
-	private LinkedBlockingQueue<Integer> incomingAcks = new LinkedBlockingQueue<Integer>();
+	private DelayQueue<ReceivedMessage> incomingMessages = new DelayQueue<ReceivedMessage>();
+	
+	// all missed that is expected to come, based on packet.id. each string ip:port holds Int packet.id and 
+	// long time ms detected missing. the highest packet.id is latest received for that in:port. 
+	private ConcurrentHashMap<String, ConcurrentSkipListMap<Integer, Long>> latestReliables = 
+			new ConcurrentHashMap<String, ConcurrentSkipListMap<Integer, Long>>();
 	private volatile boolean quit = false;
 	private long readDelay = 0;
 	
@@ -90,10 +99,10 @@ public class NetRead implements Runnable {
 		quit = true;
 	}
 	
-	private void sendAck(InetAddress destAddr, int destPort, int packetId) {	
+	private void sendAck(InetAddress destAddr, int destPort, int packetId) {
+		AckPacket packet = new AckPacket(0, packetId);
+		
 		try {
-			AckPacket packet = new AckPacket(0, packetId);
-			
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(bos);
 			
@@ -128,11 +137,8 @@ public class NetRead implements Runnable {
 			e.printStackTrace();
 		}
 		
-
-		if(packet.type == NetPacket.RELIABLE_MESSAGE) {
-			if(isReliablePacketProcessed(packet)) {
-				return;
-			}
+		if(packet.type == NetPacket.RELIABLE_MESSAGE || packet.type == NetPacket.ACK) {
+			// TODO: hasBeenProcessed(packet, ip:port);
 		}
 		
 		if(packet.type == NetPacket.MESSAGE || packet.type == NetPacket.RELIABLE_MESSAGE) {
@@ -177,11 +183,27 @@ public class NetRead implements Runnable {
 		}
 	}
 	
-	private boolean isReliablePacketProcessed(NetPacket packet) {
-		if(packet.hasExpired(System.currentTimeMillis())) {
-			return true; // packet is no longer relevant. 
+	/// @brief checks if this packet already have been processed. 
+	private boolean hasBeenProcessed(NetPacket packet, String id) {
+		if(packet.type == NetPacket.RELIABLE_MESSAGE) {
+			if(latestReliables.contains(id) && latestReliables.get(id) instanceof ConcurrentSkipListMap) {
+				ConcurrentSkipListMap<Integer, Long> map = latestReliables.get(id);
+				map.floorKey(packet.id);
+				int lastRecieved = map.lastKey();
+				if(map.containsKey(packet.id)) {
+					map.remove(id);
+					return true; // the packet was missed!
+				}
+				long value = map.get(id);
+				int latestProcessed = map.floorKey(packet.id-1);
+			} else {
+				// have never received from this ip:port before.
+				ConcurrentSkipListMap<Integer, Long> map = new ConcurrentSkipListMap<Integer, Long>();
+				map.put(packet.id, packet.sentTimeFirst);
+				latestReliables.put(id, map); // fill with last recived. 
+				return false;
+			}
 		}
-		// TODO: check if packet is processed somehow... 
 		return false;
 	}
 }

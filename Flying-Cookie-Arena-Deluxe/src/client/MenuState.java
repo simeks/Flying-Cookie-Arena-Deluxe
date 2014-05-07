@@ -8,6 +8,8 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -25,6 +27,7 @@ import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.EffectBuilder;
 import de.lessvoid.nifty.builder.LayerBuilder;
 import de.lessvoid.nifty.builder.PanelBuilder;
+import de.lessvoid.nifty.builder.PopupBuilder;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 import de.lessvoid.nifty.builder.StyleBuilder;
 import de.lessvoid.nifty.builder.TextBuilder;
@@ -86,11 +89,11 @@ public class MenuState implements GameState {
 
 	@Override
 	public void update(float dt) {
-
+		/*
 		if(Application.getInstance().getSession().getState() == Session.State.CONNECTED) {
 	    	Application.getInstance().getLobbyServerConnection().close();
 			Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
-		}
+		}*/
 		
 	}
 	
@@ -142,14 +145,35 @@ public class MenuState implements GameState {
 	
 	// @brief callback from join button
 	public void joinGameLobby(String server) {
+		final Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
+		final Element popup = nifty.createPopup("loadingPopup");
+		nifty.showPopup(nifty.getCurrentScreen(), popup.getId(), null);
+		
+		SessionReliableCallback callback = new SessionReliableCallback() {
+			@Override
+			public void onSuccess() {
+				nifty.closePopup(popup.getId());
+		    	Application.getInstance().getLobbyServerConnection().close();
+				Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
+			}
+
+			@Override
+			public void onFailure(String error) {
+				popup.findNiftyControl("loadingPopupStatus", Label.class).setText("Failed to connect "+error+". ");
+				new Timer().schedule(new TimerTask() {          
+				    @Override
+				    public void run() {
+						nifty.closePopup(popup.getId()); 
+				    }
+				}, 2000);
+			}
+		};
 		try {
-			Application.getInstance().getSession().connectToSession(InetAddress.getByName("localhost"), Application.GAME_PORT);
+			Application.getInstance().getSession().connectToSession(InetAddress.getByName("localhost"), Application.GAME_PORT, callback);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
-		// TODO: Do some stuff here to indicate that we're trying to join a session...
 	}
 
 	// @brief callback from create button
@@ -171,29 +195,35 @@ public class MenuState implements GameState {
 
 	// @brief callback from direct connect button
 	public void directConnect() {
-		String ip = Application.getInstance().getNiftyDisplay().getNifty().
-				getCurrentScreen().findNiftyControl("ServerListDirectConnectField", TextField.class).getText();
+		final Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
+		String ip = nifty.getCurrentScreen().findNiftyControl("ServerListDirectConnectField", TextField.class).getText();
+		
+		final Element popup = nifty.createPopup("loadingPopup");
+		nifty.showPopup(nifty.getCurrentScreen(), popup.getId(), null);
 		
 		SessionReliableCallback callback = new SessionReliableCallback() {
 
 			@Override
-			public void onExpire(long timeDelayed, long TTL) {
-				System.out.println("fail! "+timeDelayed+">="+TTL);
+			public void onSuccess() {
+				nifty.closePopup(popup.getId()); 
+		    	Application.getInstance().getLobbyServerConnection().close();
+				Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
 			}
 
 			@Override
-			public void onAck(long timeDelayed, long TTL) {
-				System.out.println("ack! "+timeDelayed+"<"+TTL);
-			}
-
-			@Override
-			public void onRetry(long timeDelayed, long TTL) {
-				System.out.println("retry! "+timeDelayed+"<"+TTL);
+			public void onFailure(String error) {
+				popup.findNiftyControl("loadingPopupStatus", Label.class).setText("Failed to connect "+error+". ");
+				new Timer().schedule(new TimerTask() {          
+				    @Override
+				    public void run() {
+						nifty.closePopup(popup.getId()); 
+				    }
+				}, 2000);
 			}
 		};
 		Application.getInstance().getSession().setReadDelay(5000);
 		try {
-			Application.getInstance().getSession().connectToSession(InetAddress.getByName(ip), Application.GAME_PORT, 3000, callback);
+			Application.getInstance().getSession().connectToSession(InetAddress.getByName(ip), Application.GAME_PORT, callback);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -262,12 +292,28 @@ public class MenuState implements GameState {
 	    	height("0px");
 	    	width("0px");
     	}}.build(nifty);
+    	
+    	new PopupBuilder("loadingPopup") {{
+    		 childLayoutCenter();
+    		 backgroundColor("#000a");
+    		 control(new LabelBuilder("loadingPopupStatus") {{
+    			 childLayoutCenter();
+    			 text("Loading... ");
+    			 color("#fff");
+    			 font("Interface/Fonts/Default.fnt");
+    			 height("100%");
+    			 width("100%");
+    			 textHAlignCenter();
+    			 marginRight("10px");
+    			 textVAlignCenter();
+    			 wrap(true);
+	 		}});
+		}}.registerPopup(nifty);
 	    
 	    final MenuState state = this;
 	    nifty.addScreen("ServerListScreen", new ScreenBuilder("Nifty Screen") {{
 	    	
 	    	controller(new client.MyScreenController(state));
-	    	
 	    	
 	        layer(new LayerBuilder("ServerListLayer") {{
 	        	childLayoutVertical();
