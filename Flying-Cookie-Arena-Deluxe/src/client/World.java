@@ -23,27 +23,10 @@ public class World {
 	private AssetManager assetManager;
 	private Node rootNode; // Root scene node for this world and its content
 	private TerrainQuad terrain;
-
+	private int nextEntityId = 0;
+	
 	// List of all crates in the world
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
-
-	// Spawns a box at the specified world coordinates
-	public void spawnCampFire(Vector3f position) {
-		CampFire fire = new CampFire(this, position);
-		entities.add(fire);
-	}
-
-
-	// Spawns a box at the specified world coordinates
-	public void spawnBox(Vector3f position) {
-		Crate crate = new Crate(this, position);
-		entities.add(crate);
-	}
-	
-	public Node getRootNode()
-	{
-		return rootNode;
-	}
 
 	public World() {
 		this.bulletAppState = Application.getInstance().getBulletAppState();
@@ -115,5 +98,40 @@ public class World {
 		// Create the sky
 		rootNode.attachChild(SkyFactory.createSky(assetManager,
 				"Textures/Sky/Bright/BrightSky.dds", false));
+	}
+	
+	// Spawns a box at the specified world coordinates
+	public CampFire spawnCampFire(Vector3f position) {
+		CampFire fire = new CampFire(this, generateEntityID(),  position);
+		entities.add(fire);
+		return fire;
+	}
+
+
+	// Spawns a box at the specified world coordinates
+	public Crate spawnBox(Vector3f position) {
+		Crate crate = new Crate(this, generateEntityID(), position);
+		entities.add(crate);
+		return crate;
+	}
+	
+	public Character spawnCharacter(Vector3f position) {
+		Character character = new Character(this, generateEntityID(), position);
+		entities.add(character);
+		return character;
+	}	
+	
+	public Node getRootNode()
+	{
+		return rootNode;
+	}
+
+	/// @brief Generates a unique entity ID.
+	private int generateEntityID() {
+		// Combine the peer id with an entity id to generate an id that is unique over the network.
+		int peerId = Application.getInstance().getSession().getMyPeerId();
+		int entityId = ((nextEntityId++) & 0x0000FFFF) | ((peerId & 0x0000FFFF) << 16);
+		
+		return entityId;
 	}
 }

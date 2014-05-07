@@ -9,6 +9,7 @@ import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
@@ -155,7 +156,7 @@ public class MainState implements GameState {
 	
 	public MainState() {
     	world = new World();
-		character = new Character(world);
+		character = world.spawnCharacter(new Vector3f(0, 0, 0));
 		cameraNode = new Node();
     	cameraNode.setLocalTranslation(0, 2, 1);
 		character.getNode().attachChild(cameraNode);

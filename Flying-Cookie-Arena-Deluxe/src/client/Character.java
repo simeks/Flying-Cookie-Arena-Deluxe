@@ -16,6 +16,14 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 public class Character extends Entity {
+	public enum Movement
+	{
+		MOVE_FORWARD,
+		MOVE_BACKWARD,
+		MOVE_LEFT,
+		MOVE_RIGHT
+	};
+	
 	private AnimControl animControl;
 	private AnimChannel animChannelTop;
 	private AnimChannel animChannelBase;
@@ -25,23 +33,44 @@ public class Character extends Entity {
 	
 	private Vector3f velocity = new Vector3f(0,0,0);
 	private boolean sprint = false;
-	
 
+
+	public Character(World world, int entityId, Vector3f position)
+	{
+		super(world, entityId);
+		
+		AssetManager assetManager = Application.getInstance().getAssetManager();
+		BulletAppState bulletAppState = Application.getInstance().getBulletAppState();
+		
+		// Load the character model
+		node = assetManager.loadModel("Models/Sinbad/Sinbad.mesh.xml");
+		
+		// Create a controller for the character
+		// I guess BetterCharacterControl would be a better choice but I don't seem to get it working without the character bugging through the floor.
+		CapsuleCollisionShape shape = new CapsuleCollisionShape(3.0f, 4.0f, 1);
+		controller = new CharacterControl(shape, 0.05f);
+		node.addControl(controller);
+		bulletAppState.getPhysicsSpace().add(controller);
+		
+		controller.setPhysicsLocation(new Vector3f(0, 100, 0));
+		controller.setJumpSpeed(25.0f);
+
+		animControl = node.getControl(AnimControl.class);
+		animChannelTop = animControl.createChannel();
+		animChannelBase = animControl.createChannel();
+		
+		animChannelTop.setAnim("IdleTop");
+		animChannelBase.setAnim("IdleBase");
+
+		world.getRootNode().attachChild(node);
+		
+		setPosition(position);
+	}
 	
 	public Node getNode()
 	{
 		return (Node)node;
 	}
-
-	
-	public enum Movement
-	{
-		MOVE_FORWARD,
-		MOVE_BACKWARD,
-		MOVE_LEFT,
-		MOVE_RIGHT
-	};
-
 	
 	public void startMovement(Movement move)
 	{
@@ -170,34 +199,6 @@ public class Character extends Entity {
 		controller.setViewDirection(direction);
 	}
 	
-	public Character(World world)
-	{
-		super(world);
-		
-		AssetManager assetManager = Application.getInstance().getAssetManager();
-		BulletAppState bulletAppState = Application.getInstance().getBulletAppState();
-		
-		// Load the character model
-		node = assetManager.loadModel("Models/Sinbad/Sinbad.mesh.xml");
-		
-		// Create a controller for the character
-		// I guess BetterCharacterControl would be a better choice but I don't seem to get it working without the character bugging through the floor.
-		CapsuleCollisionShape shape = new CapsuleCollisionShape(3.0f, 4.0f, 1);
-		controller = new CharacterControl(shape, 0.05f);
-		node.addControl(controller);
-		bulletAppState.getPhysicsSpace().add(controller);
-		
-		controller.setPhysicsLocation(new Vector3f(0, 100, 0));
-		controller.setJumpSpeed(25.0f);
 
-		animControl = node.getControl(AnimControl.class);
-		animChannelTop = animControl.createChannel();
-		animChannelBase = animControl.createChannel();
-		
-		animChannelTop.setAnim("IdleTop");
-		animChannelBase.setAnim("IdleBase");
-
-		world.getRootNode().attachChild(node);
-	}
 	
 }

@@ -104,10 +104,12 @@ class DestroyEntityMessage extends Message {
 class EntityStateMessage extends Message {
 	private static final long serialVersionUID = -6643225186660773294L;
 
+	public int entityId;
 	public Vector3f position;
 	
-	EntityStateMessage(Vector3f position) {
+	EntityStateMessage(int entityId, Vector3f position) {
 		super(Type.ENTITY_STATE);
+		this.entityId = entityId;
 		this.position = position;
 	}
 }

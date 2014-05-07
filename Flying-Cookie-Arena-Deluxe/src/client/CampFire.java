@@ -4,7 +4,9 @@ import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.collision.CollisionResults;
+import com.jme3.effect.Particle;
 import com.jme3.effect.ParticleEmitter;
+import com.jme3.effect.ParticleMesh;
 import com.jme3.effect.ParticleMesh.Type;
 import com.jme3.light.PointLight;
 import com.jme3.material.Material;
@@ -35,9 +37,9 @@ public class CampFire extends Entity {
 		return node;
 	}
 	
-	public CampFire(World world, Vector3f position)
+	public CampFire(World world, int entityId, Vector3f position)
 	{
-		super(world);
+		super(world, entityId);
 				
 		node = new Node();
 		
@@ -52,7 +54,7 @@ public class CampFire extends Entity {
 		bounds.setMaterial(new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md"));
 		bounds.setCullHint(CullHint.Always);
 		
-		flame = new ParticleEmitter("flame", Type.Triangle, 30);
+		flame = new ParticleEmitter("flame", ParticleMesh.Type.Triangle, 30);
 	    Material flameMaterial = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
 	    
 	    flameMaterial.setTexture("Texture", assetManager.loadTexture("Effects/Explosion/flame.png"));
@@ -88,5 +90,12 @@ public class CampFire extends Entity {
 
 		world.getRootNode().attachChild(node);
     	
+	}
+
+	@Override
+	public void setPosition(Vector3f position) {
+    	pointLight.setPosition(position.add(new Vector3f(0,2,0)));
+		node.move(position);
+		
 	}
 }
