@@ -19,6 +19,9 @@ public class Peer {
 	public void send(Message msg, boolean reliable) {
 		netWrite.send(addr, port, msg, reliable);
 	}
+	public void send(Message msg, int TTL, SessionReliableCallback callback) {
+		netWrite.send(addr, port, msg, TTL, callback);
+	}
 	
 	public InetAddress getDestAddr() {
 		return addr;

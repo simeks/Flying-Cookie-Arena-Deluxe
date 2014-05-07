@@ -10,12 +10,18 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.sql.Array;
+import java.util.ArrayList;
+import java.util.concurrent.DelayQueue;
+import java.util.concurrent.Delayed;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 public class NetRead implements Runnable {
-	public class ReceivedMessage {
+	public class ReceivedMessage implements Delayed {
 		public InetAddress senderAddr;
 		public int senderPort;
+		public long timeReceived;
 		
 		public Message msg;
 		
@@ -23,14 +29,26 @@ public class NetRead implements Runnable {
 			this.senderAddr = senderAddr;
 			this.senderPort = senderPort;
 			this.msg = msg;
+			this.timeReceived = System.currentTimeMillis();
+		}
+
+		@Override
+		public int compareTo(Delayed d) {
+			return (int) (getDelay(TimeUnit.MILLISECONDS)-d.getDelay(TimeUnit.MILLISECONDS));
+		}
+
+		@Override
+		public long getDelay(TimeUnit arg0) {
+			return getReadDelay()-(System.currentTimeMillis()-timeReceived);
 		}
 	}
 	
 	private DatagramSocket socket;
 	private NetWrite netWrite;
-	private LinkedBlockingQueue<ReceivedMessage> incomingMessages = new LinkedBlockingQueue<ReceivedMessage>(); 
-	private LinkedBlockingQueue<Integer> incomingAcks = new LinkedBlockingQueue<Integer>(); 
+	private DelayQueue<ReceivedMessage> incomingMessages = new DelayQueue<ReceivedMessage>(); 
+	private LinkedBlockingQueue<Integer> incomingAcks = new LinkedBlockingQueue<Integer>();
 	private volatile boolean quit = false;
+	private long readDelay = 0;
 	
 	public NetRead(DatagramSocket socket, NetWrite netWrite) {
 		this.socket = socket;
@@ -54,6 +72,13 @@ public class NetRead implements Runnable {
 		finally {
 			socket.close();
 		}
+	}
+	
+	public long getReadDelay() {
+		return readDelay;
+	}
+	public void setReadDelay(long delay) {
+		this.readDelay = delay;
 	}
 	
 	/// @brief Pops a packet from the incoming packet queue
@@ -87,7 +112,7 @@ public class NetRead implements Runnable {
 		
 	}
 	
-	private void parsePacket(DatagramPacket udpPacket) {
+	private void parsePacket(final DatagramPacket udpPacket) {
 		NetPacket packet = null;
 		try {
 			ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(udpPacket.getData()));
@@ -103,15 +128,60 @@ public class NetRead implements Runnable {
 			e.printStackTrace();
 		}
 		
+
+		if(packet.type == NetPacket.RELIABLE_MESSAGE) {
+			if(isReliablePacketProcessed(packet)) {
+				return;
+			}
+		}
+		
 		if(packet.type == NetPacket.MESSAGE || packet.type == NetPacket.RELIABLE_MESSAGE) {
 			incomingMessages.add(new ReceivedMessage(udpPacket.getAddress(), udpPacket.getPort(), ((MessagePacket)packet).msg));
 		}
 		else if(packet.type == NetPacket.ACK) {
-			netWrite.ackPacket(((AckPacket)packet).ackId);
+			if(getReadDelay() > 0) {
+				final int ackId = ((AckPacket)packet).ackId;
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							TimeUnit.MILLISECONDS.sleep(getReadDelay());
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						netWrite.ackPacket(ackId);
+					}
+				}).start();
+			} else {
+				netWrite.ackPacket(((AckPacket)packet).ackId);
+			}
 		}
 		
 		if(packet.type == NetPacket.RELIABLE_MESSAGE) {
-			sendAck(udpPacket.getAddress(), udpPacket.getPort(), packet.id);
+			if(getReadDelay() > 0) {
+				final int packetId = packet.id;
+				new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							TimeUnit.MILLISECONDS.sleep(getReadDelay());
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						sendAck(udpPacket.getAddress(), udpPacket.getPort(), packetId);
+					}
+				}).start();
+			} else {
+				sendAck(udpPacket.getAddress(), udpPacket.getPort(), packet.id);
+			}
 		}
+	}
+	
+	private boolean isReliablePacketProcessed(NetPacket packet) {
+		if(packet.hasExpired(System.currentTimeMillis())) {
+			return true; // packet is no longer relevant. 
+		}
+		// TODO: check if packet is processed somehow... 
+		return false;
 	}
 }

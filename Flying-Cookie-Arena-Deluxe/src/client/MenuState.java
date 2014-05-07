@@ -31,6 +31,7 @@ import de.lessvoid.nifty.builder.TextBuilder;
 import de.lessvoid.nifty.controls.Label;
 import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.controls.button.builder.ButtonBuilder;
+import de.lessvoid.nifty.controls.console.builder.ConsoleBuilder;
 import de.lessvoid.nifty.controls.label.builder.LabelBuilder;
 import de.lessvoid.nifty.controls.scrollpanel.builder.ScrollPanelBuilder;
 import de.lessvoid.nifty.controls.textfield.builder.TextFieldBuilder;
@@ -141,9 +142,6 @@ public class MenuState implements GameState {
 	
 	// @brief callback from join button
 	public void joinGameLobby(String server) {
-		String peer = server;
-		//Application.getSession().addPeer(peer);
-
 		try {
 			Application.getInstance().getSession().connectToSession(InetAddress.getByName("localhost"), Application.GAME_PORT);
 		} catch (Exception e) {
@@ -175,8 +173,27 @@ public class MenuState implements GameState {
 	public void directConnect() {
 		String ip = Application.getInstance().getNiftyDisplay().getNifty().
 				getCurrentScreen().findNiftyControl("ServerListDirectConnectField", TextField.class).getText();
+		
+		SessionReliableCallback callback = new SessionReliableCallback() {
+
+			@Override
+			public void onExpire(long timeDelayed, long TTL) {
+				System.out.println("fail! "+timeDelayed+">="+TTL);
+			}
+
+			@Override
+			public void onAck(long timeDelayed, long TTL) {
+				System.out.println("ack! "+timeDelayed+"<"+TTL);
+			}
+
+			@Override
+			public void onRetry(long timeDelayed, long TTL) {
+				System.out.println("retry! "+timeDelayed+"<"+TTL);
+			}
+		};
+		Application.getInstance().getSession().setReadDelay(5000);
 		try {
-			Application.getInstance().getSession().connectToSession(InetAddress.getByName(ip), Application.GAME_PORT);
+			Application.getInstance().getSession().connectToSession(InetAddress.getByName(ip), Application.GAME_PORT, 3000, callback);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -250,6 +267,7 @@ public class MenuState implements GameState {
 	    nifty.addScreen("ServerListScreen", new ScreenBuilder("Nifty Screen") {{
 	    	
 	    	controller(new client.MyScreenController(state));
+	    	
 	    	
 	        layer(new LayerBuilder("ServerListLayer") {{
 	        	childLayoutVertical();

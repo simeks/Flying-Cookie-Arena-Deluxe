@@ -26,6 +26,7 @@ public class Session {
 	private int myPeerId = -1;
 	private int masterPeerId = -1;
 	private int nextPeerId = 1;
+	private long readDelay = 0;
 	
 	private Map<Integer, Peer> peers = new HashMap<Integer, Peer>();
 	private Map<Message.Type, MessageEffect> messageEffects = new EnumMap<Message.Type, MessageEffect>(Message.Type.class);
@@ -36,6 +37,7 @@ public class Session {
 			socket = new DatagramSocket(myPort);
 			netWrite = new NetWrite(socket);
 			netRead = new NetRead(socket, netWrite);
+			netRead.setReadDelay(readDelay);
 			new Thread(netRead).start();
 			
 			myPeerId = 0;
@@ -53,10 +55,14 @@ public class Session {
 	/// @param destAddr Address to the master peer of the session.
 	/// @param destPort Port to the master peer of the session.
 	public void connectToSession(InetAddress destAddr, int destPort) throws Exception {
+		connectToSession(destAddr, destPort, NetPacket.DEFAULT_TTL, null);
+	}
+	public void connectToSession(InetAddress destAddr, int destPort, int TTL, SessionReliableCallback c) throws Exception {
 		if(state == State.DISCONNECTED) {
 			socket = new DatagramSocket();
 			netWrite = new NetWrite(socket);
 			netRead = new NetRead(socket, netWrite);
+			netRead.setReadDelay(readDelay);
 			new Thread(netRead).start();
 			
 			state = State.AWAITING_CONNECTION;
@@ -69,7 +75,7 @@ public class Session {
 			
 			// Send hello to master
 			HelloMessage msg = new HelloMessage();
-			masterPeer.send(msg, true);
+			masterPeer.send(msg, TTL, c);
 			
 		}
 		else {
@@ -84,6 +90,7 @@ public class Session {
 			socket.close();
 			netRead.stop();
 			netRead = null;
+			netWrite = null;
 			peers.clear();
 			myPeerId = -1;
 			state = State.DISCONNECTED;
@@ -91,12 +98,23 @@ public class Session {
 		
 	}
 	
+	/// @brief for debuging and testing, sets read delay in ms on alla packets read from socket. 
+	public void setReadDelay(long delay) {
+		readDelay = delay;
+		if(state != State.DISCONNECTED) {
+			netRead.setReadDelay(delay);
+		}
+	}
+	
 	
 	/// @brief Sends a message to all peers.
 	public void sendToAll(Message msg, boolean reliable) throws Exception {
+		sendToAll(msg, (reliable ? NetPacket.DEFAULT_TTL : -1), null);
+	}
+	public void sendToAll(Message msg, int TTL, SessionReliableCallback c) throws Exception {
 		if(state == State.CONNECTED) {
 			for(Peer peer : peers.values()) {
-				peer.send(msg, reliable);	
+				peer.send(msg, TTL, c);
 			}
 		}
 		else {
@@ -106,8 +124,11 @@ public class Session {
 	
 	/// @brief Sends a message to the specified peer.
 	public void sentToPeer(Message msg, int peer, boolean reliable) throws Exception {
+		sentToPeer(msg, peer, (reliable ? NetPacket.DEFAULT_TTL : -1), null);
+	}
+	public void sentToPeer(Message msg, int peer, int TTL, SessionReliableCallback c) throws Exception {
 		if(state == State.CONNECTED) {
-			peers.get(peer).send(msg, reliable);
+			peers.get(peer).send(msg, TTL, c);
 		}
 		else {
 			throw new Exception("Session not initialized.");
@@ -116,6 +137,7 @@ public class Session {
 	
 	public void update() {
 		if(state != State.DISCONNECTED) {
+			netWrite.update();
 			processIncoming();
 		}
 	}
@@ -168,6 +190,7 @@ public class Session {
 						
 						peers.put(peer.getId(), peer);
 					}
+					
 				}
 				else if(recvMsg.msg.type == Message.Type.PEER_ID) {
 					// Update my peer id
