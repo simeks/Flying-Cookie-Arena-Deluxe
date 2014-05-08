@@ -106,6 +106,29 @@ public class MainState implements GameState {
 
 	@Override
 	public void enterState() {
+		Session session = Application.getInstance().getSession();
+		session.registerEffect(Message.Type.CREATE_ENTITY, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				world.processCreateEntity((CreateEntityMessage)m);
+			}
+		});
+		session.registerEffect(Message.Type.DESTROY_ENTITY, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				world.processDestroyEntity((DestroyEntityMessage)m);
+			}
+		});
+		session.registerEffect(Message.Type.ENTITY_STATE, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				world.processEntityState((EntityStateMessage)m);
+			}
+		});
+		
 		Application.getInstance().getRootNode().attachChild(world.getRootNode());
 
     	InputManager inputManager = Application.getInstance().getInputManager();
@@ -136,6 +159,11 @@ public class MainState implements GameState {
     	inputManager.setCursorVisible(true);
     	
     	cameraNode.detachChildNamed("camera");
+    	
+		Session session = Application.getInstance().getSession();
+		session.unregisterEffect(Message.Type.CREATE_ENTITY);
+		session.unregisterEffect(Message.Type.DESTROY_ENTITY);
+		session.unregisterEffect(Message.Type.ENTITY_STATE);
 	}
 
 	@Override

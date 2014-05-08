@@ -37,7 +37,7 @@ public class Character extends Entity {
 
 	public Character(World world, int entityId, Vector3f position)
 	{
-		super(world, entityId);
+		super(world, entityId, Type.CHARACTER);
 		
 		AssetManager assetManager = Application.getInstance().getAssetManager();
 		BulletAppState bulletAppState = Application.getInstance().getBulletAppState();

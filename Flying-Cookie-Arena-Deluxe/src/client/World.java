@@ -74,12 +74,7 @@ public class World {
 
 			bulletAppState.getPhysicsSpace().add(rigidBodyControl);
 		}
-
-		// Spawn some boxes
-		for (int i = 0; i < 8; ++i) {
-			spawnBox(new Vector3f(-50, 100 + i * 5, 150));
-		}
-
+		
 		// Setup ambient light source
 		AmbientLight ambientLight = new AmbientLight();
 		ambientLight.setColor(ColorRGBA.White.mult(0.2f));
@@ -90,20 +85,92 @@ public class World {
 		directionalLight.setColor(ColorRGBA.White.mult(0.4f));
 		directionalLight.setDirection(new Vector3f(-0.5f, -0.55f, 0.5f)
 				.normalizeLocal());
+		
 		rootNode.addLight(directionalLight);
-
-		// Spawn some initial camp fires
-		spawnCampFire(new Vector3f(10, 79, 80));
 
 		// Create the sky
 		rootNode.attachChild(SkyFactory.createSky(assetManager,
 				"Textures/Sky/Bright/BrightSky.dds", false));
 	}
 	
+	/// Broadcasts the current state of all entities owned by this peer to all other peers.
+	/// This is used for frequent state regeneration and is meant to be called frequently 
+	///		during the session. All messages will be sent unreliably as we don't care if we
+	///		drop a few packets as the content will get outdated really quickly. 
+	public void broadcastWorldState() {
+		Session session = Application.getInstance().getSession();
+		for(Entity entity : entities) {
+			if(entity.getOwner() == session.getMyPeerId()) {
+				try {
+					session.sendToAll(entity.buildStateMessage(), false);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
+	/// @brief Broadcasts the creation of the world, sending CREATE_ENTITY messages for all entities.
+	/// This is meant to be sent to newly connected peers as they have no spawned entities.
+	public void broadcastWorldCreation() {
+		Session session = Application.getInstance().getSession();
+		for(Entity entity : entities) {
+			if(entity.getOwner() == session.getMyPeerId()) {
+				try {
+					CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType());
+					session.sendToAll(msg, true);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	/// @brief Processes the specified state message.
+	public void processEntityState(EntityStateMessage msg) {
+		Entity entity = getEntity(msg.entityId);
+		if(entity != null) {
+			entity.processStateMessage(msg);
+		}
+	}
+	
+	/// @brief Processes an incoming entity creation message.
+	public void processCreateEntity(CreateEntityMessage msg) {
+		Entity entity = null;
+		switch(msg.entityType) {
+		case CAMP_FIRE:
+			entity = new CampFire(this, msg.entityId, msg.position);
+			break;
+		case CHARACTER:
+			entity = new Character(this, msg.entityId, msg.position);
+			break;
+		case CRATE:
+			entity = new Crate(this, msg.entityId, msg.position);
+			break;
+		}
+		if(entity != null) {
+			entity.setOwner(msg.peer);
+		}
+	}
+	
+	/// @brief Processes an incoming entity destroy message
+	public void processDestroyEntity(DestroyEntityMessage msg) {
+		Entity entity = getEntity(msg.entityId);
+		if(entity != null) {
+			entities.remove(entity);
+		}
+	}
+	
 	// Spawns a box at the specified world coordinates
 	public CampFire spawnCampFire(Vector3f position) {
 		CampFire fire = new CampFire(this, generateEntityID(),  position);
+		fire.setOwner(Application.getInstance().getSession().getMyPeerId());
 		entities.add(fire);
+
+		broadcastNewEntity(fire);
+		
 		return fire;
 	}
 
@@ -111,19 +178,64 @@ public class World {
 	// Spawns a box at the specified world coordinates
 	public Crate spawnBox(Vector3f position) {
 		Crate crate = new Crate(this, generateEntityID(), position);
+		crate.setOwner(Application.getInstance().getSession().getMyPeerId());
 		entities.add(crate);
+
+		broadcastNewEntity(crate);
+		
 		return crate;
 	}
 	
 	public Character spawnCharacter(Vector3f position) {
 		Character character = new Character(this, generateEntityID(), position);
+		character.setOwner(Application.getInstance().getSession().getMyPeerId());
 		entities.add(character);
+		
+		broadcastNewEntity(character);
+		
 		return character;
-	}	
+	}
+	
+	public void destroyEntity(Entity entity) {
+		entities.remove(entity);
+		broadcastDestroyEntity(entity);
+	}
 	
 	public Node getRootNode()
 	{
 		return rootNode;
+	}
+
+	/// @brief Returns the entity with the specified ID.
+	public Entity getEntity(int id) {
+		for(Entity entity : entities) {
+			if(entity.getId() == id) {
+				return entity;
+			}
+		}
+		return null;
+	}
+	
+	/// @brief Broadcast that we created a new entity.
+	private void broadcastNewEntity(Entity entity) {
+		CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType());
+		try {
+			Application.getInstance().getSession().sendToAll(msg, true);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	/// @brief Broadcast that we are destroying an entity owned by this peer.
+	private void broadcastDestroyEntity(Entity entity) {
+		DestroyEntityMessage msg = new DestroyEntityMessage(entity.getId());
+		try {
+			Application.getInstance().getSession().sendToAll(msg, true);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/// @brief Generates a unique entity ID.

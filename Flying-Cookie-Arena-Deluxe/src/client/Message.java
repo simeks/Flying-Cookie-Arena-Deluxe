@@ -84,6 +84,7 @@ class ChatMessage extends Message {
 class CreateEntityMessage extends Message {
 	public int entityId;
 	public Entity.Type entityType;
+	public Vector3f position;
 	
 	CreateEntityMessage(int entityId, Entity.Type entityType) {
 		super(Type.CREATE_ENTITY);

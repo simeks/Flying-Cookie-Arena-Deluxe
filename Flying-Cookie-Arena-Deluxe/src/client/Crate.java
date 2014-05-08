@@ -35,7 +35,7 @@ public class Crate extends Entity {
 	// Constructor: Creates a crate at the specified position and attaches it to
 	// the specified scene node.
 	public Crate(World world, int entityId, Vector3f position) {
-		super(world, entityId);
+		super(world, entityId, Type.CRATE);
 
 		// Create a new node with a new instance of the shared box mesh created
 		// earlier.
