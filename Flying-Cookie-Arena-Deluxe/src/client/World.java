@@ -185,17 +185,16 @@ public class World {
 		Entity entity = null;
 		switch(msg.entityType) {
 		case CAMP_FIRE:
-			entity = new CampFire(this, msg.entityId, msg.position);
+			entity = new CampFire(msg.peer, this, msg.entityId, msg.position);
 			break;
 		case CHARACTER:
-			entity = new Character(this, msg.entityId, msg.position);
+			entity = new Character(msg.peer, this, msg.entityId, msg.position);
 			break;
 		case CRATE:
-			entity = new Crate(this, msg.entityId, msg.position);
+			entity = new Crate(msg.peer, this, msg.entityId, msg.position);
 			break;
 		}
 		if(entity != null) {
-			entity.setOwner(msg.peer);
 			entities.add(entity);
 		}
 	}
@@ -210,8 +209,8 @@ public class World {
 	
 	// Spawns a box at the specified world coordinates
 	public CampFire spawnCampFire(Vector3f position) {
-		CampFire fire = new CampFire(this, generateEntityID(),  position);
-		fire.setOwner(Application.getInstance().getSession().getMyPeerId());
+		CampFire fire = new CampFire(Application.getInstance().getSession().getMyPeerId(), 
+				this, generateEntityID(),  position);
 		entities.add(fire);
 
 		broadcastNewEntity(fire, position);
@@ -222,8 +221,8 @@ public class World {
 
 	// Spawns a box at the specified world coordinates
 	public Crate spawnBox(Vector3f position) {
-		Crate crate = new Crate(this, generateEntityID(), position);
-		crate.setOwner(Application.getInstance().getSession().getMyPeerId());
+		Crate crate = new Crate(Application.getInstance().getSession().getMyPeerId(), 
+				this, generateEntityID(), position);
 		entities.add(crate);
 
 		broadcastNewEntity(crate, position);
@@ -232,8 +231,8 @@ public class World {
 	}
 	
 	public Character spawnCharacter(Vector3f position) {
-		Character character = new Character(this, generateEntityID(), position);
-		character.setOwner(Application.getInstance().getSession().getMyPeerId());
+		Character character = new Character(Application.getInstance().getSession().getMyPeerId(), 
+				this, generateEntityID(), position);
 		entities.add(character);
 		
 		broadcastNewEntity(character, position);

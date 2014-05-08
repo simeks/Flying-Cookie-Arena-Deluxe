@@ -35,9 +35,9 @@ public class Character extends Entity {
 	private boolean sprint = false;
 
 
-	public Character(World world, int entityId, Vector3f position)
+	public Character(int ownerId, World world, int entityId, Vector3f position)
 	{
-		super(world, entityId, Type.CHARACTER);
+		super(ownerId, world, entityId, Type.CHARACTER);
 		
 		AssetManager assetManager = Application.getInstance().getAssetManager();
 		BulletAppState bulletAppState = Application.getInstance().getBulletAppState();
@@ -50,7 +50,6 @@ public class Character extends Entity {
 		CapsuleCollisionShape shape = new CapsuleCollisionShape(3.0f, 4.0f, 1);
 		controller = new CharacterControl(shape, 0.05f);
 		node.addControl(controller);
-		bulletAppState.getPhysicsSpace().add(controller);
 		
 		controller.setJumpSpeed(25.0f);
 
@@ -62,6 +61,11 @@ public class Character extends Entity {
 		animChannelBase.setAnim("IdleBase");
 
 		world.getRootNode().attachChild(node);
+		
+		// Only the owner peer is responsible for simulating the physics for the character entity.
+		if(isOwner()) {
+			bulletAppState.getPhysicsSpace().add(controller);
+		}
 		
 		if(position != null) {
 			setPosition(position);

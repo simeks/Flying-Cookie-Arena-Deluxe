@@ -38,9 +38,9 @@ public class CampFire extends Entity {
 		return node;
 	}
 	
-	public CampFire(World world, int entityId, Vector3f position)
+	public CampFire(int ownerId, World world, int entityId, Vector3f position)
 	{
-		super(world, entityId, Type.CAMP_FIRE);
+		super(ownerId, world, entityId, Type.CAMP_FIRE);
 				
 		node = new Node();
 		

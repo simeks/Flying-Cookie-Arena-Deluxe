@@ -30,7 +30,7 @@ import com.jme3.util.SkyFactory;
 // Our main class
 public class Application extends SimpleApplication {
 	static final int GAME_PORT = 23456; // TODO: Allow the user to change this in the application.
-	static final int NET_RATE = 30; // Number of times to broadcast the world state per second.
+	static final int NET_RATE = 10; // Number of times to broadcast the world state per second.
 	
 	static private Application sInstance = null;
 	private NiftyJmeDisplay niftyDisplay = null;

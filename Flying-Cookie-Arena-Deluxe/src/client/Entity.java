@@ -15,11 +15,11 @@ public abstract class Entity {
 	protected Type entityType;
 	protected World world;
 	
-	public Entity(World world, int entityId, Type entityType) {
+	public Entity(int ownerId, World world, int entityId, Type entityType) {
+		this.ownerPeer = ownerId;
 		this.world = world;
 		this.entityId = entityId;
 		this.entityType = entityType;
-		this.ownerPeer = -1;
 	}
 
 	public abstract void update(float tpf);
@@ -51,5 +51,11 @@ public abstract class Entity {
 	
 	public void setOwner(int peerId) {
 		ownerPeer = peerId;
+	}
+	
+	/// @brief Returns true if the current peer owns this entity.
+	public boolean isOwner() {
+		System.out.println("E " + ownerPeer + "; S " + Application.getInstance().getSession().getMyPeerId());
+		return (ownerPeer == Application.getInstance().getSession().getMyPeerId());
 	}
 }
