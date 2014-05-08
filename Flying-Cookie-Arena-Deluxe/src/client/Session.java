@@ -127,6 +127,16 @@ public class Session {
 			throw new Exception("Session not initialized.");
 		}
 	}
+
+	/// @brief Sends a message to the specified peer.
+	public void sentToPeer(Message msg, int peer, boolean reliable) throws Exception {
+		if(state == State.CONNECTED) {
+			peers.get(peer).send(msg,reliable);
+		}
+		else {
+			throw new Exception("Session not initialized.");
+		}
+	}
 	
 	/// @brief Sends a message to the specified peer.
 	public void sentToPeer(Message msg, int peer, boolean reliable, SessionReliableCallback c) throws Exception {
@@ -206,6 +216,12 @@ public class Session {
 						
 						peers.put(peer.getId(), peer);
 					}
+					else {
+						// Otherwise we just put the new peer into our peer list
+						if(helloMsg.peer >= 0 && !peers.containsKey(helloMsg.peer)) {
+							peers.put(helloMsg.peer, new Peer(helloMsg.peer, netWrite, recvMsg.senderAddr, recvMsg.senderPort));
+						}
+					}
 					
 				}
 				else if(recvMsg.msg.type == Message.Type.PEER_ID) {
@@ -235,6 +251,12 @@ public class Session {
 						System.out.println("Peer: " + p.addr.getHostAddress() + ":" + p.port);
 						
 						// Send hello to new peer
+						try {
+							sentToPeer(new HelloMessage(), p.peerId, true, null);
+						} catch (Exception e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
 					}
 					state = State.CONNECTED;
 					connectCallback.onSuccess();
