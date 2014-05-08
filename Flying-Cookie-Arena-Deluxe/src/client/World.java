@@ -107,13 +107,13 @@ public class World {
 		
 		// Setup ambient light source
 		AmbientLight ambientLight = new AmbientLight();
-		ambientLight.setColor(ColorRGBA.White.mult(0.2f));
+		ambientLight.setColor(ColorRGBA.White.mult(0.3f));
 		rootNode.addLight(ambientLight);
 
 		// Setup directional light source
 		DirectionalLight directionalLight = new DirectionalLight();
-		directionalLight.setColor(ColorRGBA.White.mult(0.4f));
-		directionalLight.setDirection(new Vector3f(-0.5f, -0.55f, 0.5f)
+		directionalLight.setColor(ColorRGBA.White.mult(0.7f));
+		directionalLight.setDirection(new Vector3f(-0.5f, -0.85f, 0.5f)
 				.normalizeLocal());
 		
 		rootNode.addLight(directionalLight);
@@ -148,7 +148,7 @@ public class World {
 		for(Entity entity : entities) {
 			if(entity.getOwner() == session.getMyPeerId()) {
 				try {
-					CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType());
+					CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType(), entity.getPosition());
 					session.sendToAll(msg, true);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -187,6 +187,7 @@ public class World {
 		}
 		if(entity != null) {
 			entity.setOwner(msg.peer);
+			entities.add(entity);
 		}
 	}
 	
@@ -204,7 +205,7 @@ public class World {
 		fire.setOwner(Application.getInstance().getSession().getMyPeerId());
 		entities.add(fire);
 
-		broadcastNewEntity(fire);
+		broadcastNewEntity(fire, position);
 		
 		return fire;
 	}
@@ -216,7 +217,7 @@ public class World {
 		crate.setOwner(Application.getInstance().getSession().getMyPeerId());
 		entities.add(crate);
 
-		broadcastNewEntity(crate);
+		broadcastNewEntity(crate, position);
 		
 		return crate;
 	}
@@ -226,7 +227,7 @@ public class World {
 		character.setOwner(Application.getInstance().getSession().getMyPeerId());
 		entities.add(character);
 		
-		broadcastNewEntity(character);
+		broadcastNewEntity(character, position);
 		
 		return character;
 	}
@@ -252,8 +253,8 @@ public class World {
 	}
 	
 	/// @brief Broadcast that we created a new entity.
-	private void broadcastNewEntity(Entity entity) {
-		CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType());
+	private void broadcastNewEntity(Entity entity, Vector3f position) {
+		CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType(), position);
 		try {
 			if(Application.getInstance().getSession().getState() == Session.State.CONNECTED) {
 				Application.getInstance().getSession().sendToAll(msg, true);

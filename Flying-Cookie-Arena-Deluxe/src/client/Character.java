@@ -29,7 +29,6 @@ public class Character extends Entity {
 	private AnimChannel animChannelBase;
 	private CharacterControl  controller;
 	private Spatial node;
-	private World level;
 	
 	private Vector3f velocity = new Vector3f(0,0,0);
 	private boolean sprint = false;
@@ -52,7 +51,6 @@ public class Character extends Entity {
 		node.addControl(controller);
 		bulletAppState.getPhysicsSpace().add(controller);
 		
-		controller.setPhysicsLocation(new Vector3f(0, 100, 0));
 		controller.setJumpSpeed(25.0f);
 
 		animControl = node.getControl(AnimControl.class);
@@ -64,7 +62,9 @@ public class Character extends Entity {
 
 		world.getRootNode().attachChild(node);
 		
-		setPosition(position);
+		if(position != null) {
+			setPosition(position);
+		}
 	}
 	
 	public Node getNode()

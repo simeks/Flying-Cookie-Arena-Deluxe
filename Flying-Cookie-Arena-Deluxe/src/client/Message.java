@@ -86,10 +86,11 @@ class CreateEntityMessage extends Message {
 	public Entity.Type entityType;
 	public Vector3f position;
 	
-	CreateEntityMessage(int entityId, Entity.Type entityType) {
+	CreateEntityMessage(int entityId, Entity.Type entityType, Vector3f position) {
 		super(Type.CREATE_ENTITY);
 		this.entityId = entityId;
 		this.entityType = entityType;
+		this.position = position;
 	}
 }
 

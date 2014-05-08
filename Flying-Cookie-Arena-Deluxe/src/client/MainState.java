@@ -134,7 +134,7 @@ public class MainState implements GameState {
     	
 		Application.getInstance().getNiftyDisplay().getNifty().gotoScreen("hud");
 
-		character = world.spawnCharacter(new Vector3f(0, 0, 0));
+		character = world.spawnCharacter(new Vector3f(0, 50, 0));
 		cameraNode = new Node();
     	cameraNode.setLocalTranslation(0, 2, 1);
 		character.getNode().attachChild(cameraNode);
