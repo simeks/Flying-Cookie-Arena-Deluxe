@@ -112,13 +112,15 @@ class EntityStateMessage extends Message {
 	public int entityId;
 	public Vector3f position;
 	public Quaternion rotation;
+	public Vector3f velocity;
 	
 	
-	EntityStateMessage(int entityId, Vector3f position, Quaternion rotation) {
+	EntityStateMessage(int entityId, Vector3f position, Quaternion rotation, Vector3f velocity) {
 		super(Type.ENTITY_STATE);
 		this.entityId = entityId;
 		this.position = position;
 		this.rotation = rotation;
+		this.velocity = velocity;
 	}
 }
 

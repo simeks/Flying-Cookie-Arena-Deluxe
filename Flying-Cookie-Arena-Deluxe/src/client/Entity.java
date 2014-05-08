@@ -31,12 +31,16 @@ public abstract class Entity {
 	public abstract Quaternion getRotation();
 	public abstract void setRotation(Quaternion rotation);
 	
+	public abstract Vector3f getVelocity();
+	public abstract void setVelocity(Vector3f velocity);
+	
 	public void processStateMessage(EntityStateMessage msg) {
 		setPosition(msg.position);
 		setRotation(msg.rotation);
+		setVelocity(msg.velocity);
 	}
 	public EntityStateMessage buildStateMessage() {
-		return new EntityStateMessage(entityId, getPosition(), getRotation());
+		return new EntityStateMessage(entityId, getPosition(), getRotation(), getVelocity());
 	}
 	
 	public int getId() {
@@ -55,7 +59,6 @@ public abstract class Entity {
 	
 	/// @brief Returns true if the current peer owns this entity.
 	public boolean isOwner() {
-		System.out.println("E " + ownerPeer + "; S " + Application.getInstance().getSession().getMyPeerId());
 		return (ownerPeer == Application.getInstance().getSession().getMyPeerId());
 	}
 }

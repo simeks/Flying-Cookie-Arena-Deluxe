@@ -108,6 +108,17 @@ public class Crate extends Entity {
 	}
 
 	@Override
+	public Vector3f getVelocity()
+	{
+		return null;
+	}
+	
+	@Override
+	public void setVelocity(Vector3f velocity)
+	{
+	}
+	
+	@Override
 	public void update(float tpf) {
 		// TODO Auto-generated method stub
 		

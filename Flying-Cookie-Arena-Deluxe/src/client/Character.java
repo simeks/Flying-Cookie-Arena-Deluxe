@@ -23,6 +23,12 @@ public class Character extends Entity {
 		MOVE_LEFT,
 		MOVE_RIGHT
 	};
+	public enum AnimationState
+	{
+		IDLE,
+		RUNNING
+	};
+	private AnimationState animState = AnimationState.IDLE;
 	
 	private AnimControl animControl;
 	private AnimChannel animChannelTop;
@@ -81,37 +87,22 @@ public class Character extends Entity {
 	{
 		if(move == Movement.MOVE_FORWARD)
 		{
-			animChannelTop.setAnim("RunTop");
-			animChannelBase.setAnim("RunBase");
-
 			velocity = velocity.add(new Vector3f(0,0,35.0f));
-			
 		}
 		else if(move == Movement.MOVE_BACKWARD)
 		{
-			animChannelTop.setAnim("RunTop");
-			animChannelBase.setAnim("RunBase");
 			velocity = velocity.add(new Vector3f(0,0,-35.0f));
 			
 		}
 		else if(move == Movement.MOVE_LEFT)
 		{
-			animChannelTop.setAnim("RunTop");
-			animChannelBase.setAnim("RunBase");
 			velocity = velocity.add(new Vector3f(25.0f,0,0));
 			
 		}
 		else if(move == Movement.MOVE_RIGHT)
 		{
-			animChannelTop.setAnim("RunTop");
-			animChannelBase.setAnim("RunBase");
 			velocity = velocity.add(new Vector3f(-25.0f,0,0));
 			
-		}
-		// Set to idle animation if character stopped
-		if(velocity.length() == 0)
-		{
-	    	idle();
 		}
 	}
 	
@@ -119,48 +110,22 @@ public class Character extends Entity {
 	{
 		if(move == Movement.MOVE_FORWARD)
 		{
-			animChannelTop.setAnim("RunTop");
-			animChannelBase.setAnim("RunBase");
 			velocity = velocity.add(new Vector3f(0,0,-35.0f));
-			
 		}
 		else if(move == Movement.MOVE_BACKWARD)
 		{
-			animChannelTop.setAnim("RunTop");
-			animChannelBase.setAnim("RunBase");
 			velocity = velocity.add(new Vector3f(0,0,35.0f));
-			
 		}
 		else if(move == Movement.MOVE_LEFT)
 		{
-			animChannelTop.setAnim("RunTop");
-			animChannelBase.setAnim("RunBase");
 			velocity = velocity.add(new Vector3f(-25.0f,0,0));
 			
 		}
 		else if(move == Movement.MOVE_RIGHT)
 		{
-			animChannelTop.setAnim("RunTop");
-			animChannelBase.setAnim("RunBase");
 			velocity = velocity.add(new Vector3f(25.0f,0,0));
 			
 		}
-		// Set to idle animation if character stopped
-		if(velocity.length() == 0)
-		{
-	    	idle();
-		}
-	}	
-	
-	// Sets the character to the idle animation
-	public void idle()
-	{
-		animChannelTop.setAnim("IdleTop");
-		animChannelBase.setAnim("IdleBase");
-		animChannelTop.setLoopMode(LoopMode.Loop);
-		animChannelBase.setLoopMode(LoopMode.Loop);
-		
-    	velocity = new Vector3f(0,0,0);
 	}	
 	
 	
@@ -195,22 +160,61 @@ public class Character extends Entity {
 	{
 		roty = rotation;
 	}
-    
+	
 	@Override
-	public void update(float tpf)
+	public Vector3f getVelocity()
 	{
-		Vector3f relVelocity = node.getLocalRotation().mult(velocity).mult(tpf);
 		if(sprint)
-			relVelocity.multLocal(2.0f);
-		controller.setPhysicsLocation(controller.getPhysicsLocation().add(relVelocity));	
-		controller.setViewDirection(roty.mult(new Vector3f(0,0,1)));	
+			return velocity.mult(2.0f);
+		else
+			return velocity;
 	}
 	
+	@Override
+	public void setVelocity(Vector3f velocity)
+	{
+		this.velocity = velocity;
+	}
+
 	public void setPosition(Vector3f position)
 	{
 		controller.setPhysicsLocation(position);
 	}
 	
+    
+	@Override
+	public void update(float tpf)
+	{
+		Vector3f relVelocity = node.getLocalRotation().mult(getVelocity()).mult(tpf);
+
+		controller.setPhysicsLocation(controller.getPhysicsLocation().add(relVelocity));	
+		controller.setViewDirection(roty.mult(new Vector3f(0,0,1)));
+		
+		updateAnimation();
+	}
+	
+	/// @brief Updates the current animation state depending on the characters velocity.
+	private void updateAnimation() {
+		if(animState == AnimationState.IDLE) // Is the character currently in the idling animation?
+		{
+			if(getVelocity().length() >= 20.0f) { // Moving 
+				animChannelTop.setAnim("RunTop");
+				animChannelBase.setAnim("RunBase");
+				animChannelTop.setLoopMode(LoopMode.Loop);
+				animChannelBase.setLoopMode(LoopMode.Loop);
+				animState = AnimationState.RUNNING;
+			}
+		}
+		else if (getVelocity().length() <= 1.0f) { // Standing still
+			animChannelTop.setAnim("IdleTop");
+			animChannelBase.setAnim("IdleBase");
+			animChannelTop.setLoopMode(LoopMode.Loop);
+			animChannelBase.setLoopMode(LoopMode.Loop);
+
+			animState = AnimationState.IDLE;
+		}
+				
+	}
 
 	
 }
