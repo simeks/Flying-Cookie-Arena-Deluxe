@@ -86,17 +86,8 @@ public class LobbyState implements GameState {
 				System.out.println("Chat (Peer: " + m.peer + "): " + ((ChatMessage)m).message);
 			}
 		});
-	    
-	    ChatMessage chatMsg = new ChatMessage("Hello!");
-	    try {
-			app.getSession().sendToAll(chatMsg, true);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	    
-	    //nifty.registerMusic("mymusic", "Interface/xyz.ogg");
-	    
+	 
+	    app.getWorld().clear();
 	}
 
 	@Override

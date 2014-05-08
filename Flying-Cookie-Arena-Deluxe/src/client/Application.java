@@ -35,6 +35,7 @@ public class Application extends SimpleApplication {
 	private NiftyJmeDisplay niftyDisplay = null;
 	private BulletAppState bulletAppState;
 	private Session session = new Session();
+	private World world = null;
 	private LobbyServerConnection lobbyServer = new LobbyServerConnection("130.240.202.79", 5000);
 
 	private Map<GameState.GameStateId, GameState> gameStates = 
@@ -85,6 +86,8 @@ public class Application extends SimpleApplication {
 
     	cam.setFrustumFar(2000.0f);
 
+    	world = new World();
+    	
     	// init nifty for gui.
     	niftyDisplay = new NiftyJmeDisplay(
 			getAssetManager(), 
@@ -100,10 +103,35 @@ public class Application extends SimpleApplication {
 		
 		currentState = GameState.GameStateId.MENU_STATE;
 		gameStates.get(currentState).enterState();
-
+		
+		session.registerEffect(Message.Type.CREATE_ENTITY, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				world.processCreateEntity((CreateEntityMessage)m);
+			}
+		});
+		session.registerEffect(Message.Type.DESTROY_ENTITY, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				world.processDestroyEntity((DestroyEntityMessage)m);
+			}
+		});
+		session.registerEffect(Message.Type.ENTITY_STATE, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				world.processEntityState((EntityStateMessage)m);
+			}
+		});
     }
 	@Override
 	public void destroy() { 
+		session.unregisterEffect(Message.Type.CREATE_ENTITY);
+		session.unregisterEffect(Message.Type.DESTROY_ENTITY);
+		session.unregisterEffect(Message.Type.ENTITY_STATE);
+		
 		lobbyServer.close();
 		session.disconnect();
 		super.destroy();
@@ -119,6 +147,10 @@ public class Application extends SimpleApplication {
 	
 	public Session getSession() {
 		return session;
+	}
+
+	public World getWorld() {
+		return world;
 	}
 	
 	public LobbyServerConnection getLobbyServerConnection() {

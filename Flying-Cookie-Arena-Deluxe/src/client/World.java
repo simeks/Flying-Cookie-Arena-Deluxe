@@ -166,6 +166,11 @@ public class World {
 		}
 	}
 	
+	/// @brief Destroys any spawned objects.
+	public void clear() {
+		entities.clear();
+	}
+	
 	/// @brief Processes an incoming entity creation message.
 	public void processCreateEntity(CreateEntityMessage msg) {
 		Entity entity = null;
@@ -250,7 +255,9 @@ public class World {
 	private void broadcastNewEntity(Entity entity) {
 		CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType());
 		try {
-			Application.getInstance().getSession().sendToAll(msg, true);
+			if(Application.getInstance().getSession().getState() == Session.State.CONNECTED) {
+				Application.getInstance().getSession().sendToAll(msg, true);
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -261,7 +268,9 @@ public class World {
 	private void broadcastDestroyEntity(Entity entity) {
 		DestroyEntityMessage msg = new DestroyEntityMessage(entity.getId());
 		try {
-			Application.getInstance().getSession().sendToAll(msg, true);
+			if(Application.getInstance().getSession().getState() == Session.State.CONNECTED) {
+				Application.getInstance().getSession().sendToAll(msg, true);
+			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

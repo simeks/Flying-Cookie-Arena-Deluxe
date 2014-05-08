@@ -85,6 +85,21 @@ public class MainState implements GameState {
 		}
 	};
 
+	public MainState() {
+    	world = new World();
+
+		Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
+	    nifty.loadStyleFile("nifty-default-styles.xml");
+	    nifty.loadControlFile("nifty-default-controls.xml");
+	    
+		final GameState state = this;
+		nifty.addScreen("hud", new ScreenBuilder("Nifty Screen") {{
+			controller(new client.MyScreenController(state));
+		}}.build(nifty));
+		
+		initInput();
+	}
+	
     // Initializes input, essentially starting to listen for user input.
     private void initInput() {
     	InputManager inputManager = Application.getInstance().getInputManager();
@@ -106,29 +121,6 @@ public class MainState implements GameState {
 
 	@Override
 	public void enterState() {
-		Session session = Application.getInstance().getSession();
-		session.registerEffect(Message.Type.CREATE_ENTITY, new MessageEffect() {
-			
-			@Override
-			public void execute(Message m) {
-				world.processCreateEntity((CreateEntityMessage)m);
-			}
-		});
-		session.registerEffect(Message.Type.DESTROY_ENTITY, new MessageEffect() {
-			
-			@Override
-			public void execute(Message m) {
-				world.processDestroyEntity((DestroyEntityMessage)m);
-			}
-		});
-		session.registerEffect(Message.Type.ENTITY_STATE, new MessageEffect() {
-			
-			@Override
-			public void execute(Message m) {
-				world.processEntityState((EntityStateMessage)m);
-			}
-		});
-		
 		Application.getInstance().getRootNode().attachChild(world.getRootNode());
 
     	InputManager inputManager = Application.getInstance().getInputManager();
@@ -142,6 +134,11 @@ public class MainState implements GameState {
     	
 		Application.getInstance().getNiftyDisplay().getNifty().gotoScreen("hud");
 
+		character = world.spawnCharacter(new Vector3f(0, 0, 0));
+		cameraNode = new Node();
+    	cameraNode.setLocalTranslation(0, 2, 1);
+		character.getNode().attachChild(cameraNode);
+		
 		Camera camera = Application.getInstance().getCamera();
 		cameraNode.attachChild(new CameraNode("camera", camera));
 		
@@ -149,6 +146,11 @@ public class MainState implements GameState {
 
 	@Override
 	public void exitState() {
+		character.getNode().detachAllChildren();
+		world.destroyEntity(character);
+
+    	cameraNode.detachChildNamed("camera");
+    	
 		Application.getInstance().getRootNode().detachChild(world.getRootNode());
 
 		// Unregister input
@@ -158,12 +160,7 @@ public class MainState implements GameState {
 
     	inputManager.setCursorVisible(true);
     	
-    	cameraNode.detachChildNamed("camera");
     	
-		Session session = Application.getInstance().getSession();
-		session.unregisterEffect(Message.Type.CREATE_ENTITY);
-		session.unregisterEffect(Message.Type.DESTROY_ENTITY);
-		session.unregisterEffect(Message.Type.ENTITY_STATE);
 	}
 
 	@Override
@@ -182,23 +179,5 @@ public class MainState implements GameState {
 
 	}
 	
-	public MainState() {
-    	world = new World();
-		character = world.spawnCharacter(new Vector3f(0, 0, 0));
-		cameraNode = new Node();
-    	cameraNode.setLocalTranslation(0, 2, 1);
-		character.getNode().attachChild(cameraNode);
-
-		Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
-	    nifty.loadStyleFile("nifty-default-styles.xml");
-	    nifty.loadControlFile("nifty-default-controls.xml");
-	    
-		final GameState state = this;
-		nifty.addScreen("hud", new ScreenBuilder("Nifty Screen") {{
-			controller(new client.MyScreenController(state));
-		}}.build(nifty));
-		
-		initInput();
-	}
 
 }
