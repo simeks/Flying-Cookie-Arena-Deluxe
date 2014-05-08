@@ -239,10 +239,10 @@ public class Session {
 					state = State.CONNECTED;
 					connectCallback.onSuccess();
 				}
-				else {
-					if(messageEffects.containsKey(recvMsg.msg.type)) {
-						messageEffects.get(recvMsg.msg.type).execute(recvMsg.msg);
-					}
+				
+				
+				if(messageEffects.containsKey(recvMsg.msg.type)) {
+					messageEffects.get(recvMsg.msg.type).execute(recvMsg.msg);
 				}
 
 			}
