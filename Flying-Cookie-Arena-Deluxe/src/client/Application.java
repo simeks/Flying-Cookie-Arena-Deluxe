@@ -30,6 +30,7 @@ import com.jme3.util.SkyFactory;
 // Our main class
 public class Application extends SimpleApplication {
 	static final int GAME_PORT = 23456; // TODO: Allow the user to change this in the application.
+	static final int NET_RATE = 30; // Number of times to broadcast the world state per second.
 	
 	static private Application sInstance = null;
 	private NiftyJmeDisplay niftyDisplay = null;
@@ -63,13 +64,23 @@ public class Application extends SimpleApplication {
     	}
     }
     
+    private float timeElapsed = 0.0f; // Time elapsed since last tick (in seconds)
     
     @Override
 	public void simpleUpdate(float tpf) {
+    	timeElapsed += tpf;
+    	
 		gameStates.get(currentState).update(tpf);
-
 		session.update();
 		super.simpleUpdate(tpf);
+		
+		if(timeElapsed >= (1.0f/(float)NET_RATE)) {
+
+			if(session.getState() == Session.State.CONNECTED) {
+				world.broadcastWorldState();
+			}
+			timeElapsed = 0.0f;
+		}
 	}
 
 	@Override

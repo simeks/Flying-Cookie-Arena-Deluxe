@@ -18,7 +18,6 @@ import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.ScreenBuilder;
 
 public class MainState implements GameState {
-	private World world;
 	private Node cameraNode;
 	private Character character;
 	
@@ -86,8 +85,6 @@ public class MainState implements GameState {
 	};
 
 	public MainState() {
-    	world = new World();
-
 		Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
 	    nifty.loadStyleFile("nifty-default-styles.xml");
 	    nifty.loadControlFile("nifty-default-controls.xml");
@@ -121,6 +118,8 @@ public class MainState implements GameState {
 
 	@Override
 	public void enterState() {
+		World world = Application.getInstance().getWorld();
+		
 		Application.getInstance().getRootNode().attachChild(world.getRootNode());
 
     	InputManager inputManager = Application.getInstance().getInputManager();
@@ -146,6 +145,8 @@ public class MainState implements GameState {
 
 	@Override
 	public void exitState() {
+		World world = Application.getInstance().getWorld();
+		
 		character.getNode().detachAllChildren();
 		world.destroyEntity(character);
 

@@ -143,7 +143,8 @@ public class World {
 
 	/// @brief Broadcasts the creation of the world, sending CREATE_ENTITY messages for all entities.
 	/// This is meant to be sent to newly connected peers as they have no spawned entities.
-	public void broadcastWorldCreation() {
+	/// @param peer The peer that should receive the messages.
+	public void broadcastWorldCreation(int peer) {
 		Session session = Application.getInstance().getSession();
 		for(Entity entity : entities) {
 			if(entity.getOwner() == session.getMyPeerId()) {
