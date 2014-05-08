@@ -96,4 +96,20 @@ public class Crate extends Entity {
 		return geometry.getWorldTranslation();
 	}
 
+	@Override
+	public Quaternion getRotation() 
+	{
+		return geometry.getLocalRotation();
+	}
+	@Override
+	public void setRotation(Quaternion rotation)
+	{
+		geometry.setLocalRotation(rotation);
+	}
+
+	@Override
+	public void update(float tpf) {
+		// TODO Auto-generated method stub
+		
+	}
 }

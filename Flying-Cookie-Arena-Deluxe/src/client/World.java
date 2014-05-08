@@ -123,6 +123,13 @@ public class World {
 				"Textures/Sky/Bright/BrightSky.dds", false));
 	}
 	
+	/// @brief Updates all entities in the world.
+	public void update(float tpf) {
+		for(Entity entity : entities) {
+			entity.update(tpf);
+		}
+	}
+	
 	/// Broadcasts the current state of all entities owned by this peer to all other peers.
 	/// This is used for frequent state regeneration and is meant to be called frequently 
 	///		during the session. All messages will be sent unreliably as we don't care if we
@@ -149,7 +156,8 @@ public class World {
 		for(Entity entity : entities) {
 			if(entity.getOwner() == session.getMyPeerId()) {
 				try {
-					CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType(), entity.getPosition());
+					CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType(), 
+							entity.getPosition(), entity.getRotation());
 					session.sendToAll(msg, true);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -255,7 +263,7 @@ public class World {
 	
 	/// @brief Broadcast that we created a new entity.
 	private void broadcastNewEntity(Entity entity, Vector3f position) {
-		CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType(), position);
+		CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType(), position, entity.getRotation());
 		try {
 			if(Application.getInstance().getSession().getState() == Session.State.CONNECTED) {
 				Application.getInstance().getSession().sendToAll(msg, true);

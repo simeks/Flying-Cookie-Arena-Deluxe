@@ -11,6 +11,7 @@ import com.jme3.effect.ParticleMesh.Type;
 import com.jme3.light.PointLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
@@ -96,6 +97,22 @@ public class CampFire extends Entity {
 	public void setPosition(Vector3f position) {
     	pointLight.setPosition(position.add(new Vector3f(0,2,0)));
 		node.move(position);
+	}
+
+	@Override
+	public Quaternion getRotation() 
+	{
+		return node.getLocalRotation();
+	}
+	@Override
+	public void setRotation(Quaternion rotation)
+	{
+		node.setLocalRotation(rotation);
+	}
+
+	@Override
+	public void update(float tpf) {
+		// TODO Auto-generated method stub
 		
 	}
 }

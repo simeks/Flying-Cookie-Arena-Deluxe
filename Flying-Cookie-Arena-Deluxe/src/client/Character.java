@@ -29,6 +29,7 @@ public class Character extends Entity {
 	private AnimChannel animChannelBase;
 	private CharacterControl  controller;
 	private Spatial node;
+	private Quaternion roty = new Quaternion();
 	
 	private Vector3f velocity = new Vector3f(0,0,0);
 	private boolean sprint = false;
@@ -172,31 +173,38 @@ public class Character extends Entity {
 	// Rotates the character the specified number of degrees on the y-axis.
 	public void rotate(float angle)
 	{
-		Quaternion roty = new Quaternion(new float[] {0.0f, angle * FastMath.DEG_TO_RAD, 0.0f});
-		controller.setViewDirection(roty.mult(controller.getViewDirection()));
+		roty = roty.mult(new Quaternion(new float[] {0.0f, angle * FastMath.DEG_TO_RAD, 0.0f}));
 	}
 
+	@Override
     public Vector3f getPosition()
     {
     	return node.getWorldTranslation();
     }
+	@Override
+	public Quaternion getRotation() 
+	{
+		return roty;
+	}
+	@Override
+	public void setRotation(Quaternion rotation)
+	{
+		roty = rotation;
+	}
     
+	@Override
 	public void update(float tpf)
 	{
 		Vector3f relVelocity = node.getLocalRotation().mult(velocity).mult(tpf);
 		if(sprint)
 			relVelocity.multLocal(2.0f);
-		controller.setPhysicsLocation(controller.getPhysicsLocation().add(relVelocity));		
+		controller.setPhysicsLocation(controller.getPhysicsLocation().add(relVelocity));	
+		controller.setViewDirection(roty.mult(new Vector3f(0,0,1)));	
 	}
 	
 	public void setPosition(Vector3f position)
 	{
 		controller.setPhysicsLocation(position);
-	}
-	
-	public void setDirection(Vector3f direction)
-	{
-		controller.setViewDirection(direction);
 	}
 	
 

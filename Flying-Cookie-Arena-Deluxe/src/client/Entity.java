@@ -1,5 +1,6 @@
 package client;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 public abstract class Entity {
@@ -20,16 +21,22 @@ public abstract class Entity {
 		this.entityType = entityType;
 		this.ownerPeer = -1;
 	}
+
+	public abstract void update(float tpf);
 	
 	// Returns the position of the object
 	public abstract Vector3f getPosition();
 	public abstract void setPosition(Vector3f position);
 	
+	public abstract Quaternion getRotation();
+	public abstract void setRotation(Quaternion rotation);
+	
 	public void processStateMessage(EntityStateMessage msg) {
 		setPosition(msg.position);
+		setRotation(msg.rotation);
 	}
 	public EntityStateMessage buildStateMessage() {
-		return new EntityStateMessage(entityId, getPosition());
+		return new EntityStateMessage(entityId, getPosition(), getRotation());
 	}
 	
 	public int getId() {

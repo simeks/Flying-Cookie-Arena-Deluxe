@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.ArrayList;
 
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 
 public abstract class Message implements Serializable {
@@ -85,12 +86,14 @@ class CreateEntityMessage extends Message {
 	public int entityId;
 	public Entity.Type entityType;
 	public Vector3f position;
+	public Quaternion rotation;
 	
-	CreateEntityMessage(int entityId, Entity.Type entityType, Vector3f position) {
+	CreateEntityMessage(int entityId, Entity.Type entityType, Vector3f position, Quaternion rotation) {
 		super(Type.CREATE_ENTITY);
 		this.entityId = entityId;
 		this.entityType = entityType;
 		this.position = position;
+		this.rotation = rotation;
 	}
 }
 
@@ -108,11 +111,14 @@ class EntityStateMessage extends Message {
 
 	public int entityId;
 	public Vector3f position;
+	public Quaternion rotation;
 	
-	EntityStateMessage(int entityId, Vector3f position) {
+	
+	EntityStateMessage(int entityId, Vector3f position, Quaternion rotation) {
 		super(Type.ENTITY_STATE);
 		this.entityId = entityId;
 		this.position = position;
+		this.rotation = rotation;
 	}
 }
 
