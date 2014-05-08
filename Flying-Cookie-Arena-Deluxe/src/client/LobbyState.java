@@ -1,6 +1,7 @@
 package client;
 
 import java.util.Properties;
+import java.util.Random;
 
 import com.jme3.input.InputManager;
 import com.jme3.niftygui.NiftyJmeDisplay;
@@ -84,6 +85,26 @@ public class LobbyState implements GameState {
 				Nifty nifty = niftyDisplay.getNifty();
 				chat.receivedChatLine(((ChatMessage)m).message, nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
 				System.out.println("Chat (Peer: " + m.peer + "): " + ((ChatMessage)m).message);
+			}
+		});
+	    
+	    app.getSession().registerEffect(Message.Type.HELLO, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				addPlayer("Not you");
+				
+			}
+		});
+	    app.getSession().registerEffect(Message.Type.PEER_LIST, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				PeerListMessage msg = (PeerListMessage)m;
+				for(PeerListMessage.RawPeer peer : msg.peers) {
+					//addPlayer("Not you : " + peer.peerId);
+				}
+				
 			}
 		});
 	 

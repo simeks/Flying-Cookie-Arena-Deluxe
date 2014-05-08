@@ -222,6 +222,8 @@ public class Session {
 							listMsg.peers.add(listMsg.new RawPeer(p.getId(), p
 									.getDestAddr(), p.getDestPort()));
 						}
+						// We also addd ourself (the master peer) to the end of the list.
+						listMsg.peers.add(listMsg.new RawPeer(getMyPeerId(), null, -1));
 
 						// TODO: aggregate?
 						peer.send(listMsg, true);
@@ -256,7 +258,13 @@ public class Session {
 
 				} else if (recvMsg.msg.type == Message.Type.PEER_LIST) {
 					System.out.println("Peer list:");
+					state = State.CONNECTED;
 					for (PeerListMessage.RawPeer p : ((PeerListMessage) recvMsg.msg).peers) {
+						// Skip the master peer as we have already added that peer to the list
+						if(p.peerId == masterPeerId || p.addr == null) {
+							continue;
+						}
+						
 						Peer newPeer = new Peer(p.peerId, netWrite, p.addr,
 								p.port);
 						peers.put(p.peerId, newPeer);
@@ -272,7 +280,6 @@ public class Session {
 							e.printStackTrace();
 						}
 					}
-					state = State.CONNECTED;
 					connectCallback.onSuccess();
 				}
 
