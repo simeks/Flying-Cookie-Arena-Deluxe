@@ -28,6 +28,36 @@ public class World {
 	// List of all crates in the world
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 
+    
+    /* pause game physics */
+    public void pausePhysics(){
+        
+            try {this.bulletAppState.setEnabled(false);
+                
+            } catch (Exception e){
+                e.printStackTrace();
+                System.out.println("Failed to pause game physics...");
+            }
+        }
+    
+    /* unpause game physics */
+    public void unpausePhysics(){
+        
+            try {this.bulletAppState.setEnabled(true);
+                
+            } catch (Exception e){
+                e.printStackTrace();
+                System.out.println("Failed to unpause game physics...");
+            }
+        }
+    
+    
+    public void resetPhysics(){
+        
+    }
+    
+    
+
 	public World() {
 		this.bulletAppState = Application.getInstance().getBulletAppState();
 		this.assetManager = Application.getInstance().getAssetManager();
