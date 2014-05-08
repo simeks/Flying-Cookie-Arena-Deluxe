@@ -172,11 +172,10 @@ public class MainState implements GameState {
 			cameraNode.setLocalRotation(rotx);
 		}		
 		
-		character.update(tpf);
-		
     	InputManager inputManager = Application.getInstance().getInputManager();
     	inputManager.setCursorVisible(false);
 
+    	Application.getInstance().getWorld().update(tpf);
 
 	}
 	
