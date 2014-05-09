@@ -89,11 +89,6 @@ public class MenuState implements GameState {
 
 	@Override
 	public void update(float dt) {
-		/*
-		if(Application.getInstance().getSession().getState() == Session.State.CONNECTED) {
-	    	Application.getInstance().getLobbyServerConnection().close();
-			Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
-		}*/
 		
 	}
 	
@@ -397,7 +392,7 @@ public class MenuState implements GameState {
 	                control(new TextFieldBuilder("ServerListDirectConnectField"){{
 	       				font("Interface/Fonts/Default.fnt");
 	               		color("#fff");
-	               		text("");
+	               		text("127.0.0.1");
 	                    alignLeft();
 	                    valignBottom();
 	                    height("20%");

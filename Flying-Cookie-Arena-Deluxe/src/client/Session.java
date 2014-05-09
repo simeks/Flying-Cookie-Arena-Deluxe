@@ -130,29 +130,24 @@ public class Session {
 		}
 	}
 
+	/// @deprecated use (@ling sendToPeer)
+	@Deprecated
+	public void sentToPeer(Message msg, int peer, boolean reliable, SessionReliableCallback c) throws Exception {
+		sendToPeer(msg, peer, reliable);
+	}
+	/// @deprecated use (@ling sendToPeer)
+	@Deprecated
+	public void sentToPeer(Message msg, int peer, boolean reliable) throws Exception {
+		sendToPeer(msg, peer, reliable);
+	}
 	// / @brief Sends a message to the specified peer.
-	public void sentToPeer(Message msg, int peer, boolean reliable)
+	public void sendToPeer(Message msg, int peer, boolean reliable)
 			throws Exception {
 		if (state == State.CONNECTED) {
 			peers.get(peer).send(msg, reliable);
 		} else {
 			throw new Exception("Session not initialized.");
 		}
-	}
-
-	// / @brief Sends a message to the specified peer.
-	public void sentToPeer(Message msg, int peer, boolean reliable,
-			SessionReliableCallback c) throws Exception {
-		if (state == State.CONNECTED) {
-			peers.get(peer).send(msg, reliable);
-			addCallbackOnPeer(peer, c);
-		} else {
-			throw new Exception("Session not initialized.");
-		}
-	}
-
-	private void addCallbackOnPeer(int peer, SessionReliableCallback c) {
-
 	}
 
 	public void update() {
@@ -274,7 +269,7 @@ public class Session {
 
 						// Send hello to new peer
 						try {
-							sentToPeer(new HelloMessage(), p.peerId, true, null);
+							sendToPeer(new HelloMessage(), p.peerId, true);
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

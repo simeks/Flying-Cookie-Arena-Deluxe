@@ -11,7 +11,6 @@ public class NetPacket implements Serializable {
 	public static final int MESSAGE = 0;
 	public static final int RELIABLE_MESSAGE = 1; // Reliable messages requires an acknowledgement from the receiver.
 	public static final int ACK = 2;
-	public static final int DEFAULT_TTL = 5000;
 	
 	public int id;
 	public int type;

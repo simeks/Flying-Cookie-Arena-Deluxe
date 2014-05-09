@@ -1,5 +1,6 @@
 package client;
 
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.Random;
 
@@ -30,6 +31,7 @@ import de.lessvoid.xml.xpp3.Attributes;
 public class LobbyState implements GameState {
 
 	private NiftyJmeDisplay niftyDisplay;
+	private ArrayList<String> playerNames = new ArrayList<>();
 
 	/// @brief called when exit is clicked. 
 	public void exitLobbyState() {
@@ -45,12 +47,21 @@ public class LobbyState implements GameState {
 	/// @brief called when the screen is ready. 
 	public void onStartScreen() {
 		addPlayer("You");
+		for(String player : playerNames) {
+			addPlayer(player);
+		}
+		playerNames = new ArrayList<>();
 	}
 	
 	private void addPlayer(String name) {
 		Nifty nifty = niftyDisplay.getNifty();
+		
 		Chat chat = nifty.getCurrentScreen().findNiftyControl("LobbyChat", Chat.class);
-	    chat.addPlayer(name, nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
+		if(chat instanceof Chat) {
+			chat.addPlayer(name, nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
+		} else {
+			playerNames.add(name);
+		}
 	}
 
 	/// @brief called when message was sent. 
@@ -102,7 +113,7 @@ public class LobbyState implements GameState {
 			public void execute(Message m) {
 				PeerListMessage msg = (PeerListMessage)m;
 				for(PeerListMessage.RawPeer peer : msg.peers) {
-					//addPlayer("Not you : " + peer.peerId);
+					addPlayer("Not you : " + peer.peerId);
 				}
 				
 			}
