@@ -21,6 +21,7 @@ import java.util.NavigableSet;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.DelayQueue;
@@ -60,10 +61,10 @@ public class NetRead implements Runnable {
 	
 	// all missed that is expected to come, based on packet.id. each string ip:port holds Int packet.id and 
 	// long time ms detected missing. the highest packet.id is latest received for that in:port. 
-	private ConcurrentHashMap<String, ConcurrentSkipListMap<Integer, Long>> latestReliables = 
+	private ConcurrentHashMap<String, ConcurrentLinkedDeque<Integer>> latestReliables = 
+			new ConcurrentHashMap<String, ConcurrentLinkedDeque<Integer>>();
+	private ConcurrentHashMap<String, ConcurrentSkipListMap<Integer, Long>> latestReliablesTimes = 
 			new ConcurrentHashMap<String, ConcurrentSkipListMap<Integer, Long>>();
-	private ConcurrentHashMap<String, ConcurrentSkipListMap<Long, ArrayList<Integer>>> latestReliablesFlipped = 
-			new ConcurrentHashMap<String, ConcurrentSkipListMap<Long, ArrayList<Integer>>>(); // for optimization
 	private long timestampLatestClared = 0;
 	private volatile boolean quit = false;
 	private long readDelay = 0; // for testing and debugging
@@ -192,90 +193,48 @@ public class NetRead implements Runnable {
 	
 	/// @brief checks if this packet already have been processed. 
 	private boolean hasBeenProcessed(NetPacket packet, String id, long timeStamp) {
-		//timeStamp = timeStamp*1000; // room for 999 packets each ms from this peer
-		
-		ArrayList<Integer> arr = new ArrayList<Integer>();
-		
 		if(latestReliables.containsKey(id)) {
-			ConcurrentSkipListMap<Integer, Long> map = latestReliables.get(id);
-			ConcurrentSkipListMap<Long, ArrayList<Integer>> mapFlipped = latestReliablesFlipped.get(id);
-			int lastRecievedId = map.lastKey();
-			long lastRecievedTime = map.get(lastRecievedId);
+			ConcurrentLinkedDeque<Integer> list = latestReliables.get(id);
+			ConcurrentSkipListMap<Integer, Long> timesMap = latestReliablesTimes.get(id);
 			
-			// if packet is next in order
-			if(lastRecievedId+1 == packet.id) {
-				map.remove(lastRecievedId);
-				mapFlipped.remove(lastRecievedTime);
-				
-			// if packet was processed last
-			} else  if(lastRecievedId == packet.id) {
-				return true;
-			
-			// if they between lastRecivedId and this was missed
-			} else  if(lastRecievedId < packet.id) {
-				
-				map.remove(lastRecievedId);
-				mapFlipped.remove(lastRecievedTime);
-
-				
-				for(int i = lastRecievedId+1; i < packet.id; i++) {
-					map.put(i, lastRecievedTime);
-					arr.add(i);
-				}
-				mapFlipped.put(lastRecievedTime, arr);
-				arr = new ArrayList<Integer>();
-				
-			// if packet was missed
-			} else if(map.containsKey(packet.id)) { 
-				map.remove(id);
-				mapFlipped.remove(id);
-				return false; // is not the latest
-				
-			// if packet was processed a long time ago
-			} else { 
+			if(list.contains(packet.id)) {
 				return true;
 			}
-
-
-			if(lastRecievedTime > timeStamp) {
-				timeStamp = lastRecievedTime+1;
-			}
-
-			arr.add(packet.id);
-			map.put(packet.id, timeStamp);
-			mapFlipped.put(timeStamp, arr);
-			latestReliables.put(id, map);
-			latestReliablesFlipped.put(id, mapFlipped);
+			list.addLast(packet.id);
+			timesMap.put(packet.id, packet.sentTimeFirst);
+			latestReliablesTimes.put(id, timesMap);
+			latestReliables.put(id, list);
 			return false;
 		}
-		
-		// have never received from this ip:port recently.
-		ConcurrentSkipListMap<Integer, Long> map = new ConcurrentSkipListMap<Integer, Long>();
-		map.put(packet.id, timeStamp);
-		latestReliables.put(id, map); // fill with last received. 
-		
-		ConcurrentSkipListMap<Long, ArrayList<Integer>> mapFlipped = new ConcurrentSkipListMap<Long, ArrayList<Integer>>();
-		arr.add(packet.id);
-		mapFlipped.put(timeStamp, arr);
-		latestReliablesFlipped.put(id, mapFlipped);
+		ConcurrentLinkedDeque<Integer> list = new ConcurrentLinkedDeque<Integer>();
+		list.push(packet.id);
+		latestReliables.put(id, list);
+
+		ConcurrentSkipListMap<Integer, Long> timesMap = new ConcurrentSkipListMap<Integer, Long>();
+		timesMap.put(packet.id, packet.sentTimeFirst);
+		latestReliablesTimes.put(id, timesMap);
 		return false;
 	}
-	/// @brief removes still tracking reliable packets.
+	/// @brief removes old still tracking reliable packets.
 	private void cleanReliable(long timeStamp) {
-		for (Map.Entry<String, ConcurrentSkipListMap<Integer, Long>> e : latestReliables.entrySet()) {
-		    ConcurrentSkipListMap<Integer, Long> map = e.getValue();
-		    if(map.size() < 1) {
-			    ConcurrentSkipListMap<Long, ArrayList<Integer>> mapFlipped = latestReliablesFlipped.get(e.getKey());
-			    ConcurrentNavigableMap<Long, ArrayList<Integer>> old = mapFlipped.headMap(timeStamp);
-				for (Entry<Long, ArrayList<Integer>> oldEntety : old.entrySet()) {
-					for (Integer s : oldEntety.getValue()) {
-						map.remove(oldEntety.getValue());
-					}
-					mapFlipped.remove(oldEntety.getKey());
+		for (Entry<String, ConcurrentLinkedDeque<Integer>> e : latestReliables.entrySet()) {
+		    ConcurrentLinkedDeque<Integer> list = e.getValue();
+			ConcurrentSkipListMap<Integer, Long> timesMap = latestReliablesTimes.get(e.getKey());
+		    
+			Iterator<Integer> it = list.iterator();
+			while (it.hasNext()) {
+				int id = it.next();
+				if(timesMap.get(id) < timeStamp) {
+					it.remove();
+					timesMap.remove(id);
+				} else {
+					latestReliables.put(e.getKey(), list);
+					latestReliablesTimes.put(e.getKey(), timesMap);
+					return;
 				}
-				latestReliables.get(e.getKey()).putAll(map);
-				latestReliablesFlipped.get(e.getKey()).putAll(mapFlipped);
-		    }
+			}
+			latestReliables.put(e.getKey(), list);
+			latestReliablesTimes.put(e.getKey(), timesMap);
 		}
 	}
 }
