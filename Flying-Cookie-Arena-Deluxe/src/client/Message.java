@@ -14,6 +14,12 @@ public abstract class Message implements Serializable {
 		HELLO,
 		PEER_ID,
 		PEER_LIST,
+		
+		PING,
+		PONG,
+		PEER_TIMED_OUT, // Notify all other peers about a lost peer
+		KICKED, // Sent to a kicked peer
+		
 		CHAT_MSG,
 		CREATE_ENTITY,
 		DESTROY_ENTITY,
@@ -72,6 +78,40 @@ class PeerListMessage extends Message {
 	}
 }
 
+class PingMessage extends Message {
+	private static final long serialVersionUID = -1182365839943998551L;
+
+	public PingMessage() {
+		super(Type.PING);
+	}
+}
+
+class PongMessage extends Message {
+	private static final long serialVersionUID = 5844168245440896356L;
+
+	public PongMessage() {
+		super(Type.PONG);
+	}
+}
+
+class PeerTimeOutMessage extends Message {
+	private static final long serialVersionUID = 3688046389297696524L;
+	public int timedOutPeerId;
+	public PeerTimeOutMessage(int timedOutPeerId) {
+		super(Type.PEER_TIMED_OUT);
+		this.timedOutPeerId = timedOutPeerId;
+	}
+}
+
+class KickedMessage extends Message {
+	private static final long serialVersionUID = 1217488624618728877L;
+	public String reason;
+	public KickedMessage(String reason) {
+		super(Type.KICKED);
+		this.reason = reason;
+	}
+}
+
 class ChatMessage extends Message {
 	private static final long serialVersionUID = 4685526243305385459L;
 	public String message;
@@ -83,6 +123,7 @@ class ChatMessage extends Message {
 }
 
 class CreateEntityMessage extends Message {
+	private static final long serialVersionUID = 2358686921269512335L;
 	public int entityId;
 	public Entity.Type entityType;
 	public Vector3f position;
@@ -98,6 +139,7 @@ class CreateEntityMessage extends Message {
 }
 
 class DestroyEntityMessage extends Message {
+	private static final long serialVersionUID = -662257788394323903L;
 	public int entityId;
 	
 	DestroyEntityMessage(int entityId) {

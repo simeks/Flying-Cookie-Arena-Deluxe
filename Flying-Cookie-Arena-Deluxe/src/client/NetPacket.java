@@ -66,4 +66,3 @@ class AckPacket extends NetPacket {
 	
 }
 
-

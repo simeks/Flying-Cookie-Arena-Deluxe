@@ -8,12 +8,17 @@ public class Peer {
 	private InetAddress addr;
 	private int port;
 	
+	private long lastHeartbeat; // When did we last communicate with this peer?
+	private long lastPing = -1; // When did we last send a ping to this peer.
 	
 	public Peer(int id, NetWrite netWrite, InetAddress addr, int port) {
 		this.id = id;
 		this.netWrite = netWrite;
 		this.addr = addr;
 		this.port = port;
+		
+		lastHeartbeat = System.currentTimeMillis();
+		lastPing = 0;
 	}
 	
 	public void send(Message msg, boolean reliable) {
@@ -47,5 +52,21 @@ public class Peer {
 		}
 		return false;
 	}
+	
+	public void heartbeat() {
+		lastHeartbeat = System.currentTimeMillis();
+	}
+	
+	public long getLastHeartbeat() {
+		return lastHeartbeat;
+	}
+	
+	public void setLastPing(long lastPing) {
+		this.lastPing = lastPing;
+	}
+	public long getLastPing() {
+		return lastPing;
+	}
+	
 	
 }

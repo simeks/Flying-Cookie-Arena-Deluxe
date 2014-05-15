@@ -16,7 +16,7 @@ public class NetWrite  {
 		public InetAddress addr;
 		public int port;
 		public NetPacket packet;
-		public SessionReliableCallback callback;
+		public SessionCallback callback;
 
 		public OutgoingPacket(InetAddress addr, int port, NetPacket packet) {
 			this.addr = addr;
