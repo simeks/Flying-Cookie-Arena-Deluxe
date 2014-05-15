@@ -123,4 +123,9 @@ public class Crate extends Entity {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public void destroy() {
+		world.getRootNode().detachChild(geometry);
+	}
 }

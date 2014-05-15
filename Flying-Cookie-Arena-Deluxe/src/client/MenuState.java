@@ -165,6 +165,8 @@ public class MenuState implements GameState {
 
 			@Override
 			public void onPeerDisconnect(int peerId, String reason) {
+				Application.getInstance().getWorld().removeEntities(peerId);
+				
 				System.out.println("Peer " + peerId + " disconnected: " + reason);
 				
 			}
@@ -185,8 +187,34 @@ public class MenuState implements GameState {
 
 	// @brief callback from create button
 	public void createGameLobby() {
+		
+		SessionCallback callback = new SessionCallback() {
+
+			@Override
+			public void onSuccess() {
+			}
+
+			@Override
+			public void onFailure(String error) {
+			}
+			
+			@Override
+			public void onPeerDisconnect(int peerId, String reason) {
+				Application.getInstance().getWorld().removeEntities(peerId);
+				
+				System.out.println("Peer " + peerId + " disconnected: " + reason);
+				
+			}
+
+			@Override
+			public void onDisconnect(String reason) {
+				System.out.println("You got disconnected: " + reason);
+				
+			}
+		};	
+		
 		try {
-			Application.getInstance().getSession().createSession(Application.GAME_PORT);
+			Application.getInstance().getSession().createSession(Application.GAME_PORT, callback);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -229,6 +257,8 @@ public class MenuState implements GameState {
 			}
 			@Override
 			public void onPeerDisconnect(int peerId, String reason) {
+				Application.getInstance().getWorld().removeEntities(peerId);
+				
 				System.out.println("Peer " + peerId + " disconnected: " + reason);
 				
 			}

@@ -126,4 +126,10 @@ public class CampFire extends Entity {
 		// TODO Auto-generated method stub
 		
 	}
+	
+
+	@Override
+	public void destroy() {
+		world.getRootNode().detachChild(node);
+	}	
 }

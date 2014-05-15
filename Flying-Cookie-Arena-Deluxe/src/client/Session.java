@@ -14,7 +14,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Session {
-	static final private int PEER_TIMEOUT = 30000; // Number of milliseconds without activity before we timeout a peer
+	static final private int PEER_TIMEOUT = 15000; // Number of milliseconds without activity before we timeout a peer
 
 	public enum State {
 		DISCONNECTED, 
@@ -40,7 +40,7 @@ public class Session {
 	
 
 	// / @brief Creates a new empty session.
-	public void createSession(int myPort) throws Exception {
+	public void createSession(int myPort, SessionCallback c) throws Exception {
 		if (state == State.DISCONNECTED) {
 			socket = new DatagramSocket(myPort);
 			netWrite = new NetWrite(socket);
@@ -53,6 +53,7 @@ public class Session {
 			nextPeerId = myPeerId + 1;
 
 			state = State.CONNECTED;
+			sessionCallback = c;
 			
 		} else {
 			// Already initialized
@@ -170,7 +171,7 @@ public class Session {
 				}
 				else if((currentTime - p.getLastHeartbeat()) > 5000) { // No activity for 5 seconds, ping to make sure peer is alive
 					// Make sure not to spam a ping every frame
-					if((currentTime - p.getLastPing()) > 2000) {
+					if((currentTime - p.getLastPing()) > 5000) {
 						sendPing(p.getId());
 						p.setLastPing(currentTime);
 					}

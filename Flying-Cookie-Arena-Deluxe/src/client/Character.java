@@ -216,5 +216,9 @@ public class Character extends Entity {
 				
 	}
 
-	
+
+	@Override
+	public void destroy() {
+		world.getRootNode().detachChild(node);
+	}
 }
