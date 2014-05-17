@@ -79,14 +79,16 @@ public class Session {
 			final SessionCallback c) throws Exception {
 		setConnectionCallback(c);
 		
-		new Timer().schedule(new TimerTask() {          
-		    @Override
-		    public void run() {
-		    	if(state != State.CONNECTED) {
-		    		c.onFailure("Timed out");
-		    	}
-		    }
-		}, 5000);
+		if(c != null) {
+			new Timer().schedule(new TimerTask() {          
+			    @Override
+			    public void run() {
+			    	if(state != State.CONNECTED) {
+			    		c.onFailure("Timed out");
+			    	}
+			    }
+			}, 5000);
+		}
 		
 		if (state == State.DISCONNECTED) {
 			socket = new DatagramSocket();
