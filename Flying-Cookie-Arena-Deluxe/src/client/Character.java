@@ -220,10 +220,6 @@ public class Character extends Entity {
 
 			animState = AnimationState.IDLE;
 		}
-				
-<<<<<<< HEAD
-	}	
-=======
 	}
 
 
@@ -231,5 +227,4 @@ public class Character extends Entity {
 	public void destroy() {
 		world.getRootNode().detachChild(node);
 	}
->>>>>>> 1cd4ceaf55e0c39518da1b73df731efd63910c14
 }

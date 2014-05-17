@@ -76,11 +76,7 @@ public class Session {
 	}
 
 	public void connectToSession(InetAddress destAddr, int destPort,
-<<<<<<< HEAD
-			final SessionReliableCallback c) throws Exception {
-=======
-			SessionCallback c) throws Exception {
->>>>>>> 1cd4ceaf55e0c39518da1b73df731efd63910c14
+			final SessionCallback c) throws Exception {
 		setConnectionCallback(c);
 		
 		new Timer().schedule(new TimerTask() {          
