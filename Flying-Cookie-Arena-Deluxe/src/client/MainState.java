@@ -44,10 +44,16 @@ public class MainState implements GameState {
 			} else {
 				return;
 			}
+			Entity OtherSpatial = null;
+			if(other.getUserData("id") != null) {
+				OtherSpatial = Application.getInstance().getWorld().getEntity((int)other.getUserData("id"));
+			}
 			if(other.getName().substring(0, 4).equals("flag")) {
 				
 				System.out.println("Give me that flag");
-				
+				if(OtherSpatial instanceof Flag) {
+					// ((Flag)OtherSpatial).pickupFlag(myCharacter);
+				}
 			}
 		}
 	};
@@ -175,7 +181,7 @@ public class MainState implements GameState {
 		Camera camera = Application.getInstance().getCamera();
 		cameraNode.attachChild(new CameraNode("camera", camera));
 		Flag flag = world.spawnFlag(new Vector3f((id-count/2)*20+2, 50, (id-count/2)*20));
-		flag.getNode().setName("myFlag");
+		flag.getSpatial().setName("myFlag");
 		
 		Node characterNode = character.getNode();
 		

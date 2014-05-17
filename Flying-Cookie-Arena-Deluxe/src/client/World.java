@@ -218,6 +218,7 @@ public class World {
 			break;
 		}
 		if(entity != null) {
+			entity.getSpatial().setUserData("id", msg.entityId);
 			entities.add(entity);
 		}
 	}
@@ -232,10 +233,12 @@ public class World {
 	
 	// Spawns a box at the specified world coordinates
 	public CampFire spawnCampFire(Vector3f position) {
+		int id = generateEntityID();
 		CampFire fire = new CampFire(Application.getInstance().getSession().getMyPeerId(), 
-				this, generateEntityID(),  position);
+				this, id,  position);
 		entities.add(fire);
 		fire.setCollisionGroup(COLLISION_GROUP_CAMP_FIRE);
+		fire.getSpatial().setUserData("id", id);
 
 		broadcastNewEntity(fire, position);
 		
@@ -245,10 +248,12 @@ public class World {
 
 	// Spawns a box at the specified world coordinates
 	public Crate spawnBox(Vector3f position) {
+		int id = generateEntityID();
 		Crate crate = new Crate(Application.getInstance().getSession().getMyPeerId(), 
-				this, generateEntityID(), position);
+				this, id, position);
 		entities.add(crate);
 		crate.setCollisionGroup(COLLISION_GROUP_CRATE);
+		crate.getSpatial().setUserData("id", id);
 
 		broadcastNewEntity(crate, position);
 		
@@ -256,10 +261,12 @@ public class World {
 	}
 	
 	public Character spawnCharacter(Vector3f position) {
+		int id = generateEntityID();
 		Character character = new Character(Application.getInstance().getSession().getMyPeerId(), 
-				this, generateEntityID(), position);
+				this, id, position);
 		entities.add(character);
 		character.setCollisionGroup(COLLISION_GROUP_CHARACTER);
+		character.getSpatial().setUserData("id", id);
 		
 		broadcastNewEntity(character, position);
 		
@@ -267,10 +274,12 @@ public class World {
 	}
 
 	public Flag spawnFlag(Vector3f position) {
+		int id = generateEntityID();
 		Flag flag = new Flag(Application.getInstance().getSession().getMyPeerId(), 
-				this, generateEntityID(), position);
+				this, id, position);
 		entities.add(flag);
 		flag.setCollisionGroup(COLLISION_GROUP_FLAG);
+		flag.getSpatial().setUserData("id", id);
 		
 		broadcastNewEntity(flag, position);
 		

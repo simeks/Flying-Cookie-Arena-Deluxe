@@ -42,6 +42,7 @@ public abstract class Entity {
 	public abstract void setVelocity(Vector3f velocity);
 
 	public abstract void setCollisionGroup(int group);
+	public abstract Spatial getSpatial();
 	
 	public void processStateMessage(EntityStateMessage msg) {
 		setPosition(msg.position);

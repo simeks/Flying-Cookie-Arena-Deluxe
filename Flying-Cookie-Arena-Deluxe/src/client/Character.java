@@ -222,6 +222,10 @@ public class Character extends Entity {
 		}
 	}
 
+	@Override
+	public Spatial getSpatial() {
+		return node;
+	}
 
 	@Override
 	public void destroy() {

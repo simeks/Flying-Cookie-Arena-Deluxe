@@ -13,6 +13,7 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.texture.Texture;
 
@@ -127,6 +128,11 @@ public class Crate extends Entity {
 	public void update(float tpf) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public Spatial getSpatial() {
+		return geometry;
 	}
 	
 	@Override

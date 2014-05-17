@@ -136,5 +136,10 @@ public class CampFire extends Entity {
 	@Override
 	public void destroy() {
 		world.getRootNode().detachChild(node);
-	}	
+	}
+
+	@Override
+	public Spatial getSpatial() {
+		return node;
+	}
 }

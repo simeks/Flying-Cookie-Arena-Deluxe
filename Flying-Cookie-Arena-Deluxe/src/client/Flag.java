@@ -128,8 +128,8 @@ public class Flag extends Entity {
 		node.getControl(GhostControl.class).setCollisionGroup(group);
 	}
 
-
-	public Node getNode() {
+	@Override
+	public Spatial getSpatial() {
 		return node;
 	}
 
