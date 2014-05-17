@@ -319,7 +319,9 @@ public class Session {
 							e.printStackTrace();
 						}
 					}
-					sessionCallback.onSuccess();
+					if(sessionCallback != null) {
+						sessionCallback.onSuccess();
+					}
 					
 				} else if (recvMsg.msg.type == Message.Type.PING) {
 					System.out.println("PING from peer " + recvMsg.msg.peer);
