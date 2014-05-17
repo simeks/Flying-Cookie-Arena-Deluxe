@@ -1,5 +1,10 @@
 package client;
 
+import com.jme3.bullet.collision.PhysicsCollisionEvent;
+import com.jme3.bullet.collision.PhysicsCollisionListener;
+import com.jme3.bullet.collision.PhysicsCollisionObject;
+import com.jme3.bullet.control.CharacterControl;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
 import com.jme3.input.MouseInput;
@@ -13,6 +18,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.builder.ScreenBuilder;
@@ -22,7 +28,29 @@ public class MainState implements GameState {
 	private Character character;
 	
 	private float cameraAngle = 0.0f; // We don't rotate the character on the x-axis, only the camera, so this is handled here separately.
-	
+
+	PhysicsCollisionListener collisionListener = new PhysicsCollisionListener() {
+		
+		@Override
+		public void collision(PhysicsCollisionEvent event) {
+			Spatial myCharacter;
+			Spatial other;
+			if(event.getNodeA().getName().equals("myCharacter")) {
+				myCharacter = event.getNodeA();
+				other = event.getNodeB();
+			} else if(event.getNodeB().getName().equals("myCharacter")) {
+				myCharacter = event.getNodeB();
+				other = event.getNodeA();
+			} else {
+				return;
+			}
+			if(other.getName().substring(0, 4).equals("flag")) {
+				
+				System.out.println("Give me that flag");
+				
+			}
+		}
+	};
 
 	// Action listener for handling user interaction.
 	private ActionListener actionListener = new ActionListener() {
@@ -122,6 +150,11 @@ public class MainState implements GameState {
 		
 		Application.getInstance().getRootNode().attachChild(world.getRootNode());
 
+		int id = Application.getInstance().getSession().getMyPeerId();
+		int count = Application.getInstance().getSession().getPeerCount();
+		// add character before inputlisteners.
+		character = world.spawnCharacter(new Vector3f((id-count/2)*20, 50, (id-count/2)*20));
+		
     	InputManager inputManager = Application.getInstance().getInputManager();
     	inputManager.deleteMapping(Application.INPUT_MAPPING_EXIT);
         inputManager.addListener(actionListener, "Jump", "MoveLeft", "MoveRight", "MoveForward", 
@@ -133,19 +166,30 @@ public class MainState implements GameState {
     	
 		Application.getInstance().getNiftyDisplay().getNifty().gotoScreen("hud");
 
-		character = world.spawnCharacter(new Vector3f(0, 50, 0));
+
+		
 		cameraNode = new Node();
     	cameraNode.setLocalTranslation(0, 2, 1);
 		character.getNode().attachChild(cameraNode);
 		
 		Camera camera = Application.getInstance().getCamera();
 		cameraNode.attachChild(new CameraNode("camera", camera));
+		Flag flag = world.spawnFlag(new Vector3f((id-count/2)*20+2, 50, (id-count/2)*20));
+		flag.getNode().setName("myFlag");
 		
+		Node characterNode = character.getNode();
+		
+		characterNode.getControl(CharacterControl.class).setCollideWithGroups(World.COLLISION_GROUP_FLAG);
+		characterNode.setName("myCharacter");
+		
+		Application.getInstance().getBulletAppState().getPhysicsSpace().addCollisionListener(collisionListener);
 	}
 
 	@Override
 	public void exitState() {
 		World world = Application.getInstance().getWorld();
+		
+		Application.getInstance().getBulletAppState().getPhysicsSpace().removeCollisionListener(collisionListener);
 		
 		character.getNode().detachAllChildren();
 		world.destroyEntity(character);

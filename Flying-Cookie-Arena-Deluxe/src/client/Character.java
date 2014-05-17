@@ -5,8 +5,10 @@ import com.jme3.animation.AnimControl;
 import com.jme3.animation.LoopMode;
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
@@ -58,6 +60,7 @@ public class Character extends Entity {
 		node.addControl(controller);
 		
 		controller.setJumpSpeed(25.0f);
+		controller.addCollideWithGroup(World.COLLISION_GROUP_TERRAIN);
 
 		animControl = node.getControl(AnimControl.class);
 		animChannelTop = animControl.createChannel();
@@ -144,7 +147,7 @@ public class Character extends Entity {
 	{
 		roty = roty.mult(new Quaternion(new float[] {0.0f, angle * FastMath.DEG_TO_RAD, 0.0f}));
 	}
-
+	
 	@Override
     public Vector3f getPosition()
     {
@@ -181,6 +184,10 @@ public class Character extends Entity {
 		controller.setPhysicsLocation(position);
 	}
 	
+	@Override
+	public void setCollisionGroup(int group) {
+		//node.getControl(CharacterControl.class).setCollisionGroup(group);
+	}
     
 	@Override
 	public void update(float tpf)
@@ -214,7 +221,5 @@ public class Character extends Entity {
 			animState = AnimationState.IDLE;
 		}
 				
-	}
-
-	
+	}	
 }

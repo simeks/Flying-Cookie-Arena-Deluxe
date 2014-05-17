@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import client.LobbyServerConnection.STATUS;
+
 public class Session {
 
 	public enum State {
@@ -68,8 +70,18 @@ public class Session {
 	}
 
 	public void connectToSession(InetAddress destAddr, int destPort,
-			SessionReliableCallback c) throws Exception {
+			final SessionReliableCallback c) throws Exception {
 		setConnectionCallback(c);
+		
+		new Timer().schedule(new TimerTask() {          
+		    @Override
+		    public void run() {
+		    	if(state != State.CONNECTED) {
+		    		c.onFailure("Timed out");
+		    	}
+		    }
+		}, 5000);
+		
 		if (state == State.DISCONNECTED) {
 			socket = new DatagramSocket();
 			netWrite = new NetWrite(socket);
@@ -130,16 +142,6 @@ public class Session {
 		}
 	}
 
-	/// @deprecated use (@ling sendToPeer)
-	@Deprecated
-	public void sentToPeer(Message msg, int peer, boolean reliable, SessionReliableCallback c) throws Exception {
-		sendToPeer(msg, peer, reliable);
-	}
-	/// @deprecated use (@ling sendToPeer)
-	@Deprecated
-	public void sentToPeer(Message msg, int peer, boolean reliable) throws Exception {
-		sendToPeer(msg, peer, reliable);
-	}
 	// / @brief Sends a message to the specified peer.
 	public void sendToPeer(Message msg, int peer, boolean reliable)
 			throws Exception {
@@ -159,6 +161,10 @@ public class Session {
 
 	public int getMyPeerId() {
 		return myPeerId;
+	}
+
+	public int getPeerCount() {
+		return peers.size();
 	}
 
 	// / @brief Returns true if the local peer is the master of this session.

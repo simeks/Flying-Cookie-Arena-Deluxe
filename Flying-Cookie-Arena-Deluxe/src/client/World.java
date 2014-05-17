@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
+import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
@@ -24,6 +25,14 @@ public class World {
 	private Node rootNode; // Root scene node for this world and its content
 	private TerrainQuad terrain;
 	private int nextEntityId = 0;
+	
+
+	public static final int COLLISION_GROUP_CRATE = PhysicsCollisionObject.COLLISION_GROUP_01;
+	public static final int COLLISION_GROUP_CHARACTER = PhysicsCollisionObject.COLLISION_GROUP_02;
+	public static final int COLLISION_GROUP_FLAG = PhysicsCollisionObject.COLLISION_GROUP_03;
+	public static final int COLLISION_GROUP_CAMP_FIRE = PhysicsCollisionObject.COLLISION_GROUP_04;
+	public static final int COLLISION_GROUP_TERRAIN = PhysicsCollisionObject.COLLISION_GROUP_05;
+	public static final int COLLISION_GROUP_NOTHING = PhysicsCollisionObject.COLLISION_GROUP_16;
 	
 	// List of all crates in the world
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
@@ -67,6 +76,9 @@ public class World {
 		rootNode = new Node("room");
 		Application.getInstance().getRootNode().attachChild(rootNode);
 
+		// debug collisions
+		bulletAppState.getPhysicsSpace().enableDebug(assetManager);
+		
 		// Terrain
 		{
 			Material terrainMaterial = new Material(assetManager,
@@ -101,6 +113,8 @@ public class World {
 
 			RigidBodyControl rigidBodyControl = new RigidBodyControl(0.0f);
 			terrain.addControl(rigidBodyControl);
+
+			rigidBodyControl.setCollisionGroup(COLLISION_GROUP_TERRAIN);
 
 			bulletAppState.getPhysicsSpace().add(rigidBodyControl);
 		}
@@ -186,12 +200,19 @@ public class World {
 		switch(msg.entityType) {
 		case CAMP_FIRE:
 			entity = new CampFire(msg.peer, this, msg.entityId, msg.position);
+			entity.setCollisionGroup(COLLISION_GROUP_CAMP_FIRE);
 			break;
 		case CHARACTER:
 			entity = new Character(msg.peer, this, msg.entityId, msg.position);
+			entity.setCollisionGroup(COLLISION_GROUP_CHARACTER);
 			break;
 		case CRATE:
 			entity = new Crate(msg.peer, this, msg.entityId, msg.position);
+			entity.setCollisionGroup(COLLISION_GROUP_CRATE);
+			break;
+		case FLAG:
+			entity = new Flag(msg.peer, this, msg.entityId, msg.position);
+			entity.setCollisionGroup(COLLISION_GROUP_FLAG);
 			break;
 		}
 		if(entity != null) {
@@ -212,6 +233,7 @@ public class World {
 		CampFire fire = new CampFire(Application.getInstance().getSession().getMyPeerId(), 
 				this, generateEntityID(),  position);
 		entities.add(fire);
+		fire.setCollisionGroup(COLLISION_GROUP_CAMP_FIRE);
 
 		broadcastNewEntity(fire, position);
 		
@@ -224,6 +246,7 @@ public class World {
 		Crate crate = new Crate(Application.getInstance().getSession().getMyPeerId(), 
 				this, generateEntityID(), position);
 		entities.add(crate);
+		crate.setCollisionGroup(COLLISION_GROUP_CRATE);
 
 		broadcastNewEntity(crate, position);
 		
@@ -234,10 +257,22 @@ public class World {
 		Character character = new Character(Application.getInstance().getSession().getMyPeerId(), 
 				this, generateEntityID(), position);
 		entities.add(character);
+		character.setCollisionGroup(COLLISION_GROUP_CHARACTER);
 		
 		broadcastNewEntity(character, position);
 		
 		return character;
+	}
+
+	public Flag spawnFlag(Vector3f position) {
+		Flag flag = new Flag(Application.getInstance().getSession().getMyPeerId(), 
+				this, generateEntityID(), position);
+		entities.add(flag);
+		flag.setCollisionGroup(COLLISION_GROUP_FLAG);
+		
+		broadcastNewEntity(flag, position);
+		
+		return flag;
 	}
 	
 	public void destroyEntity(Entity entity) {

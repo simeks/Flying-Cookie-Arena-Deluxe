@@ -122,6 +122,11 @@ public class CampFire extends Entity {
 	}
 	
 	@Override
+	public void setCollisionGroup(int group) {
+		node.getControl(RigidBodyControl.class).setCollisionGroup(group);
+	}
+	
+	@Override
 	public void update(float tpf) {
 		// TODO Auto-generated method stub
 		

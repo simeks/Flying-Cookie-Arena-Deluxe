@@ -119,6 +119,11 @@ public class Crate extends Entity {
 	}
 	
 	@Override
+	public void setCollisionGroup(int group) {
+		geometry.getControl(RigidBodyControl.class).setCollisionGroup(group);
+	}
+	
+	@Override
 	public void update(float tpf) {
 		// TODO Auto-generated method stub
 		

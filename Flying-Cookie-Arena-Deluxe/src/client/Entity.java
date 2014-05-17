@@ -1,14 +1,19 @@
 package client;
 
+import com.jme3.bullet.collision.PhysicsCollisionObject;
+import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Spatial;
 
 public abstract class Entity {
 	public enum Type {
 		CRATE,
 		CHARACTER,
+		FLAG,
 		CAMP_FIRE
-	};
+	}
+
 	
 	protected int ownerPeer;
 	protected int entityId;
@@ -33,6 +38,8 @@ public abstract class Entity {
 	
 	public abstract Vector3f getVelocity();
 	public abstract void setVelocity(Vector3f velocity);
+
+	public abstract void setCollisionGroup(int group);
 	
 	public void processStateMessage(EntityStateMessage msg) {
 		setPosition(msg.position);
@@ -61,4 +68,6 @@ public abstract class Entity {
 	public boolean isOwner() {
 		return (ownerPeer == Application.getInstance().getSession().getMyPeerId());
 	}
+
+
 }
