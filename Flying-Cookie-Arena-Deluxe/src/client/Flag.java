@@ -133,4 +133,9 @@ public class Flag extends Entity {
 		return node;
 	}
 
+	@Override
+	public void destroy() {
+		world.getRootNode().detachChild(node);
+	}
+
 }

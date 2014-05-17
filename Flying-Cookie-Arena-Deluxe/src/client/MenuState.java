@@ -144,7 +144,7 @@ public class MenuState implements GameState {
 		final Element popup = nifty.createPopup("loadingPopup");
 		nifty.showPopup(nifty.getCurrentScreen(), popup.getId(), null);
 		
-		SessionReliableCallback callback = new SessionReliableCallback() {
+		SessionCallback callback = new SessionCallback() {
 			@Override
 			public void onSuccess() {
 				nifty.closePopup(popup.getId());
@@ -162,6 +162,20 @@ public class MenuState implements GameState {
 				    }
 				}, 2000);
 			}
+
+			@Override
+			public void onPeerDisconnect(int peerId, String reason) {
+				Application.getInstance().getWorld().removeEntities(peerId);
+				
+				System.out.println("Peer " + peerId + " disconnected: " + reason);
+				
+			}
+
+			@Override
+			public void onDisconnect(String reason) {
+				System.out.println("You got disconnected: " + reason);
+				
+			}
 		};
 		try {
 			Application.getInstance().getSession().connectToSession(InetAddress.getByName("localhost"), Application.GAME_PORT, callback);
@@ -173,8 +187,34 @@ public class MenuState implements GameState {
 
 	// @brief callback from create button
 	public void createGameLobby() {
+		
+		SessionCallback callback = new SessionCallback() {
+
+			@Override
+			public void onSuccess() {
+			}
+
+			@Override
+			public void onFailure(String error) {
+			}
+			
+			@Override
+			public void onPeerDisconnect(int peerId, String reason) {
+				Application.getInstance().getWorld().removeEntities(peerId);
+				
+				System.out.println("Peer " + peerId + " disconnected: " + reason);
+				
+			}
+
+			@Override
+			public void onDisconnect(String reason) {
+				System.out.println("You got disconnected: " + reason);
+				
+			}
+		};	
+		
 		try {
-			Application.getInstance().getSession().createSession(Application.GAME_PORT);
+			Application.getInstance().getSession().createSession(Application.GAME_PORT, callback);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -196,7 +236,7 @@ public class MenuState implements GameState {
 		final Element popup = nifty.createPopup("loadingPopup");
 		nifty.showPopup(nifty.getCurrentScreen(), popup.getId(), null);
 		
-		SessionReliableCallback callback = new SessionReliableCallback() {
+		SessionCallback callback = new SessionCallback() {
 
 			@Override
 			public void onSuccess() {
@@ -214,6 +254,19 @@ public class MenuState implements GameState {
 						nifty.closePopup(popup.getId()); 
 				    }
 				}, 2000);
+			}
+			@Override
+			public void onPeerDisconnect(int peerId, String reason) {
+				Application.getInstance().getWorld().removeEntities(peerId);
+				
+				System.out.println("Peer " + peerId + " disconnected: " + reason);
+				
+			}
+
+			@Override
+			public void onDisconnect(String reason) {
+				System.out.println("You got disconnected: " + reason);
+				
 			}
 		};
 		Application.getInstance().getSession().setReadDelay(5000);

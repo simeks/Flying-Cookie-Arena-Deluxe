@@ -1,6 +1,8 @@
 package client;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
@@ -277,7 +279,21 @@ public class World {
 	
 	public void destroyEntity(Entity entity) {
 		entities.remove(entity);
+		entity.destroy();
 		broadcastDestroyEntity(entity);
+	}
+	
+	/// @brief Removes all entities owned by the specified peer.
+	public void removeEntities(int peer) {
+		Iterator<Entity> it = entities.iterator();
+		while(it.hasNext()) {
+			Entity entity = it.next();
+
+			if(entity.getOwner() == peer) {
+				entity.destroy();
+				it.remove();
+			}
+		}		
 	}
 	
 	public Node getRootNode()

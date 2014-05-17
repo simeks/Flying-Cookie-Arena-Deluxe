@@ -29,6 +29,8 @@ public abstract class Entity {
 
 	public abstract void update(float tpf);
 	
+	public abstract void destroy();
+	
 	// Returns the position of the object
 	public abstract Vector3f getPosition();
 	public abstract void setPosition(Vector3f position);
