@@ -44,15 +44,18 @@ public class MainState implements GameState {
 			} else {
 				return;
 			}
-			Entity OtherSpatial = null;
+			if(other.getName().equals("Terrain")) {
+				return;
+			}
+			Entity OtherEntity = null;
 			if(other.getUserData("id") != null) {
-				OtherSpatial = Application.getInstance().getWorld().getEntity((int)other.getUserData("id"));
+				OtherEntity = Application.getInstance().getWorld().getEntity((int)other.getUserData("id"));
 			}
 			if(other.getName().substring(0, 4).equals("flag")) {
 				
 				System.out.println("Give me that flag");
-				if(OtherSpatial instanceof Flag) {
-					// ((Flag)OtherSpatial).pickupFlag(myCharacter);
+				if(OtherEntity instanceof Flag) {
+					((Flag)OtherEntity).pickupFlag(character.getNode());
 				}
 			}
 		}

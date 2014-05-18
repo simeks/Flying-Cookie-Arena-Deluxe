@@ -20,6 +20,8 @@ import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
 import com.jme3.texture.Texture;
 
+import de.lessvoid.nifty.effects.impl.Move;
+
 
 public class Flag extends Entity {
 
@@ -32,12 +34,15 @@ public class Flag extends Entity {
 	
 	private boolean isPickable = true;
 	private Node node;
+	private GhostControl ghostControl;
+	private Vector3f originalPosition;
 	
 	public Flag(int ownerId, World world, int entityId, Vector3f position) {
 		super(ownerId, world, entityId, Type.FLAG);
 
 		node = new Node("flag"+entityId);
-
+		originalPosition = position;
+		
 		AssetManager assetManager = Application.getInstance().getAssetManager();
 
 		
@@ -69,7 +74,7 @@ public class Flag extends Entity {
 		BoxCollisionShape shape = new BoxCollisionShape(new Vector3f(radius+5, poleHeight/2, radius+5));
 		
 		// for custom events (like pick up the flag)
-        GhostControl ghostControl = new GhostControl(shape);
+        ghostControl = new GhostControl(shape);
         ghostControl.setCollideWithGroups(World.COLLISION_GROUP_NOTHING);
         node.addControl(ghostControl);
 	    bulletAppState.getPhysicsSpace().add(ghostControl);
@@ -84,6 +89,34 @@ public class Flag extends Entity {
 		ghostControl.setPhysicsRotation(poleRotation);
 		
 		world.getRootNode().attachChild(node);
+	}
+	
+	public boolean pickupFlag(Node attachHere) {
+		if(!isPickable) {
+			return false;
+		};
+
+		node.getControl(GhostControl.class).setEnabled(false);
+		node.getControl(RigidBodyControl.class).setEnabled(false);
+		world.getRootNode().detachChild(node);
+		setPosition(new Vector3f(0,0,0));
+		attachHere.attachChild(node);
+		isPickable = false;
+		return true;
+	}
+	
+	public boolean dropFlag(Vector3f position) {
+		if(isPickable) {
+			return false;
+		};
+
+		node.getControl(GhostControl.class).setEnabled(true);
+		node.getControl(RigidBodyControl.class).setEnabled(true);
+		node.getParent().detachChild(node);
+		node.move(position);
+		world.getRootNode().attachChild(node);
+		isPickable = true;
+		return true;
 	}
 	
 	@Override
