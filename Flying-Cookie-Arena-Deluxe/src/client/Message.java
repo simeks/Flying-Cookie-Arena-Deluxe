@@ -3,6 +3,9 @@ package client;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Map;
+
+import javax.naming.directory.BasicAttributes;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -128,6 +131,9 @@ class CreateEntityMessage extends Message {
 	public Entity.Type entityType;
 	public Vector3f position;
 	public Quaternion rotation;
+	public Serializable customData;
+	
+	/// TODO public EntityStateMessage state;
 	
 	CreateEntityMessage(int entityId, Entity.Type entityType, Vector3f position, Quaternion rotation) {
 		super(Type.CREATE_ENTITY);
@@ -155,7 +161,7 @@ class EntityStateMessage extends Message {
 	public Vector3f position;
 	public Quaternion rotation;
 	public Vector3f velocity;
-	
+	public Serializable customData;
 	
 	EntityStateMessage(int entityId, Vector3f position, Quaternion rotation, Vector3f velocity) {
 		super(Type.ENTITY_STATE);
@@ -164,5 +170,12 @@ class EntityStateMessage extends Message {
 		this.rotation = rotation;
 		this.velocity = velocity;
 	}
+	EntityStateMessage(int entityId, Vector3f position, Quaternion rotation, Vector3f velocity, Serializable customData) {
+		super(Type.ENTITY_STATE);
+		this.entityId = entityId;
+		this.position = position;
+		this.rotation = rotation;
+		this.velocity = velocity;
+		this.customData = customData;
+	}
 }
-

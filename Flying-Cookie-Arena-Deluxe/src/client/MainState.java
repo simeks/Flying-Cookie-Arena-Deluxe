@@ -52,8 +52,6 @@ public class MainState implements GameState {
 				OtherEntity = Application.getInstance().getWorld().getEntity((int)other.getUserData("id"));
 			}
 			if(other.getName().substring(0, 4).equals("flag")) {
-				
-				System.out.println("Give me that flag");
 				if(OtherEntity instanceof Flag) {
 					((Flag)OtherEntity).pickupFlag(character.getNode());
 				}

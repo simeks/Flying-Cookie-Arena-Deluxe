@@ -154,11 +154,14 @@ public class World {
 		Session session = Application.getInstance().getSession();
 		for(Entity entity : entities) {
 			if(entity.getOwner() == session.getMyPeerId()) {
-				try {
-					session.sendToAll(entity.buildStateMessage(), false);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				EntityStateMessage msg = entity.buildStateMessage();
+				if(msg != null) {
+					try {
+						session.sendToAll(msg, false);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
 			}
 		}

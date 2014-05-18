@@ -1,6 +1,16 @@
 package client;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
+
+import javax.naming.directory.Attribute;
+import javax.naming.directory.BasicAttribute;
+import javax.naming.directory.BasicAttributes;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
@@ -24,7 +34,13 @@ import de.lessvoid.nifty.effects.impl.Move;
 
 
 public class Flag extends Entity {
-
+	
+    public static final int CARRYD = 0;
+    public static final int DROPPED = 1;
+    public static final int SPAWN = 2;
+	private int state = SPAWN;
+	private int latestState = SPAWN;
+    
 	static final float poleHeight = 200.0f;
 	static final float flagHeight = 5.0f;
 	static final float radius = 0.5f;
@@ -32,7 +48,6 @@ public class Flag extends Entity {
 	static final private Cylinder c = new Cylinder(samples, samples, radius, poleHeight, true);
 	static final private Box b = new Box(0.1f, flagHeight/2, flagHeight/2);
 	
-	private boolean isPickable = true;
 	private Node node;
 	private GhostControl ghostControl;
 	private Vector3f originalPosition;
@@ -92,7 +107,7 @@ public class Flag extends Entity {
 	}
 	
 	public boolean pickupFlag(Node attachHere) {
-		if(!isPickable) {
+		if(state == CARRYD) {
 			return false;
 		};
 
@@ -101,12 +116,12 @@ public class Flag extends Entity {
 		world.getRootNode().detachChild(node);
 		setPosition(new Vector3f(0,0,0));
 		attachHere.attachChild(node);
-		isPickable = false;
+		state = CARRYD;
 		return true;
 	}
 	
 	public boolean dropFlag(Vector3f position) {
-		if(isPickable) {
+		if(state != CARRYD) {
 			return false;
 		};
 
@@ -115,8 +130,62 @@ public class Flag extends Entity {
 		node.getParent().detachChild(node);
 		node.move(position);
 		world.getRootNode().attachChild(node);
-		isPickable = true;
+		state = DROPPED;
 		return true;
+	}
+	
+	public boolean returnFlag() {
+		if(state == SPAWN) {
+			return false;
+		};
+
+		node.getControl(GhostControl.class).setEnabled(true);
+		node.getControl(RigidBodyControl.class).setEnabled(true);
+		node.getParent().detachChild(node);
+		node.move(originalPosition);
+		world.getRootNode().attachChild(node);
+		state = SPAWN;
+		return true;
+	}
+	
+
+	@Override
+	protected void processCustomStateMessage(Serializable data) {
+		if(data instanceof Map<?, ?>) {
+			Map<String, Object> map = (Map<String, Object>) data;
+			if(map.containsKey("state")) {
+				int ownsersState = (int) map.get("state");
+				if(ownsersState == SPAWN) {
+					returnFlag();
+					latestState = SPAWN;
+				} else if(ownsersState == CARRYD && map.containsKey("attachHereEntityId")) {
+					pickupFlag((Node) world.getEntity((int) map.get("attachHereEntityId")).getSpatial());
+					latestState = CARRYD;
+				} else if(ownsersState == DROPPED && map.containsKey("dropFlagPosition")) {
+					dropFlag((Vector3f) map.get("dropFlagPosition"));
+					latestState = DROPPED;
+				}
+			}
+		}
+	}
+	
+	@Override
+	protected Serializable getCustomData() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("state", state);
+		if(state == CARRYD) {
+			map.put("attachHereEntityId", node.getParent().getUserData("id"));
+		} else if(state == DROPPED) {
+			map.put("dropFlagPosition", getPosition());
+		} else if(state == SPAWN) {
+			
+		}
+		return (Serializable) map;
+	}
+
+	@Override
+	protected boolean hasCustomStateChanged() {
+		return !(state == latestState);
 	}
 	
 	@Override
@@ -148,7 +217,7 @@ public class Flag extends Entity {
 	@Override
 	public Vector3f getVelocity()
 	{
-		return null;
+		return new Vector3f();
 	}
 
 	@Override
@@ -168,6 +237,8 @@ public class Flag extends Entity {
 
 	@Override
 	public void destroy() {
+	    Application.getInstance().getBulletAppState().getPhysicsSpace().add(ghostControl);
+	    Application.getInstance().getBulletAppState().getPhysicsSpace().add(node.getControl(RigidBodyControl.class));
 		world.getRootNode().detachChild(node);
 	}
 
