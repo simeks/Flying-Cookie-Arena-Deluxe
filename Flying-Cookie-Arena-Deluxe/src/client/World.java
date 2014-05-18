@@ -79,7 +79,7 @@ public class World {
 		Application.getInstance().getRootNode().attachChild(rootNode);
 
 		// debug collisions
-		bulletAppState.getPhysicsSpace().enableDebug(assetManager);
+		//bulletAppState.getPhysicsSpace().enableDebug(assetManager);
 		
 		// Terrain
 		{

@@ -16,7 +16,7 @@ import java.util.TimerTask;
 import client.LobbyServerConnection.STATUS;
 
 public class Session {
-	static final private int PEER_TIMEOUT = 15000; // Number of milliseconds without activity before we timeout a peer
+	static final private int PEER_TIMEOUT = 999999999; // need more time in debug mkay? 15000; // Number of milliseconds without activity before we timeout a peer
 
 	public enum State {
 		DISCONNECTED, 

@@ -1,21 +1,11 @@
 package client;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Random;
-
-import javax.naming.directory.Attribute;
-import javax.naming.directory.BasicAttribute;
-import javax.naming.directory.BasicAttributes;
-
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
-import com.jme3.bullet.collision.shapes.CylinderCollisionShape;
 import com.jme3.bullet.control.GhostControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.material.Material;
@@ -28,18 +18,15 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Cylinder;
-import com.jme3.texture.Texture;
-
-import de.lessvoid.nifty.effects.impl.Move;
 
 
 public class Flag extends Entity {
 	
-    public static final int CARRYD = 0;
-    public static final int DROPPED = 1;
-    public static final int SPAWN = 2;
-	private int state = SPAWN;
-	private int latestState = SPAWN;
+    public final int CARRYD = 0;
+    public final int DROPPED = 1;
+    public final int SPAWN = 2;
+	private int state;
+	private int latestState;
     
 	static final float poleHeight = 200.0f;
 	static final float flagHeight = 5.0f;
@@ -54,7 +41,10 @@ public class Flag extends Entity {
 	
 	public Flag(int ownerId, World world, int entityId, Vector3f position) {
 		super(ownerId, world, entityId, Type.FLAG);
-
+		
+		setState(SPAWN);
+		setLatestState(SPAWN);
+		
 		node = new Node("flag"+entityId);
 		originalPosition = position;
 		
@@ -107,7 +97,7 @@ public class Flag extends Entity {
 	}
 	
 	public boolean pickupFlag(Node attachHere) {
-		if(state == CARRYD) {
+		if(stateIs(CARRYD)) {
 			return false;
 		};
 
@@ -116,12 +106,12 @@ public class Flag extends Entity {
 		world.getRootNode().detachChild(node);
 		setPosition(new Vector3f(0,0,0));
 		attachHere.attachChild(node);
-		state = CARRYD;
+		setState(CARRYD);
 		return true;
 	}
 	
 	public boolean dropFlag(Vector3f position) {
-		if(state != CARRYD) {
+		if(stateIs(CARRYD)) {
 			return false;
 		};
 
@@ -130,12 +120,12 @@ public class Flag extends Entity {
 		node.getParent().detachChild(node);
 		node.move(position);
 		world.getRootNode().attachChild(node);
-		state = DROPPED;
+		setState(DROPPED);
 		return true;
 	}
 	
 	public boolean returnFlag() {
-		if(state == SPAWN) {
+		if(stateIs(SPAWN)) {
 			return false;
 		};
 
@@ -144,7 +134,7 @@ public class Flag extends Entity {
 		node.getParent().detachChild(node);
 		node.move(originalPosition);
 		world.getRootNode().attachChild(node);
-		state = SPAWN;
+		setState(SPAWN);
 		return true;
 	}
 	
@@ -157,13 +147,13 @@ public class Flag extends Entity {
 				int ownsersState = (int) map.get("state");
 				if(ownsersState == SPAWN) {
 					returnFlag();
-					latestState = SPAWN;
+					setLatestState(SPAWN);
 				} else if(ownsersState == CARRYD && map.containsKey("attachHereEntityId")) {
 					pickupFlag((Node) world.getEntity((int) map.get("attachHereEntityId")).getSpatial());
-					latestState = CARRYD;
+					setLatestState(CARRYD);
 				} else if(ownsersState == DROPPED && map.containsKey("dropFlagPosition")) {
 					dropFlag((Vector3f) map.get("dropFlagPosition"));
-					latestState = DROPPED;
+					setLatestState(DROPPED);
 				}
 			}
 		}
@@ -173,19 +163,30 @@ public class Flag extends Entity {
 	protected Serializable getCustomData() {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("state", state);
-		if(state == CARRYD) {
+		if(stateIs(CARRYD)) {
 			map.put("attachHereEntityId", node.getParent().getUserData("id"));
-		} else if(state == DROPPED) {
+		} else if(stateIs(DROPPED)) {
 			map.put("dropFlagPosition", getPosition());
-		} else if(state == SPAWN) {
+		} else if(stateIs(SPAWN)) {
 			
 		}
 		return (Serializable) map;
 	}
+	
+	private void setState(int state) {
+		System.out.println(getId()+". state="+state);
+		this.state = state;
+	}
+	private void setLatestState(int state) {
+		this.latestState = state;
+	}
+	private boolean stateIs(int state) {
+		return (this.state == state)? true : false;
+	}
 
 	@Override
 	protected boolean hasCustomStateChanged() {
-		return !(state == latestState);
+ 		return !(stateIs(latestState));
 	}
 	
 	@Override

@@ -151,8 +151,7 @@ public class Character extends Entity {
 	@Override
     public Vector3f getPosition()
     {
-		//return controller.getPhysicsLocation();
-    	return node.getWorldTranslation();
+		return controller.getPhysicsLocation();
     }
 	@Override
 	public Quaternion getRotation() 

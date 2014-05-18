@@ -71,12 +71,12 @@ public abstract class Entity {
 	}
 	
 	public final EntityStateMessage buildStateMessage() {
-		if(!hasStateChanged() && !hasCustomStateChanged()) {
+		if(!hasMovementStateChanged() && !hasCustomStateChanged()) {
 			return null;
 		}
-		latestPosition = getPosition();
-		latestRotation= getRotation();
-		latestVelocity = getVelocity();
+		latestPosition = getPosition().clone();
+		latestRotation= getRotation().clone();
+		latestVelocity = getVelocity().clone();
 		Serializable data = null;
 		if(hasCustomStateChanged()) {
 			data = getCustomData();
@@ -84,10 +84,10 @@ public abstract class Entity {
 		return new EntityStateMessage(entityId, getPosition(), getRotation(), getVelocity(), data);
 	}
 	
-	protected final boolean hasStateChanged() {
-		return !(getPosition().equals(latestPosition) 
-				&& getRotation().equals(latestRotation) 
-				&& getVelocity().equals(latestVelocity));
+	protected final boolean hasMovementStateChanged() {
+		return (!getPosition().equals(latestPosition)
+				|| !getRotation().equals(latestRotation)
+				|| !getVelocity().equals(latestVelocity));
 	}
 	
 	public int getId() {
