@@ -149,9 +149,12 @@ public class Flag extends Entity {
 					returnFlag();
 					setLatestState(SPAWN);
 				} else if(ownsersState == CARRYD && map.containsKey("attachHereEntityId")) {
-					pickupFlag((Node) world.getEntity((int) map.get("attachHereEntityId")).getSpatial());
+					Entity s = world.getEntity((int) map.get("attachHereEntityId"));
+					if(s != null && s.getSpatial() instanceof Node) {
+						pickupFlag(((Node) s.getSpatial()));
+					}
 					setLatestState(CARRYD);
-				} else if(ownsersState == DROPPED && map.containsKey("dropFlagPosition")) {
+				} else if(ownsersState == DROPPED && map.containsKey("dropFlagPosition") && map.get("dropFlagPosition") instanceof Vector3f) {
 					dropFlag((Vector3f) map.get("dropFlagPosition"));
 					setLatestState(DROPPED);
 				}
@@ -163,7 +166,7 @@ public class Flag extends Entity {
 	protected Serializable getCustomData() {
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("state", state);
-		if(stateIs(CARRYD)) {
+		if(stateIs(CARRYD) && node.getParent().getUserData("id") != null) {
 			map.put("attachHereEntityId", node.getParent().getUserData("id"));
 		} else if(stateIs(DROPPED)) {
 			map.put("dropFlagPosition", getPosition());
@@ -174,7 +177,6 @@ public class Flag extends Entity {
 	}
 	
 	private void setState(int state) {
-		System.out.println(getId()+". state="+state);
 		this.state = state;
 	}
 	private void setLatestState(int state) {
