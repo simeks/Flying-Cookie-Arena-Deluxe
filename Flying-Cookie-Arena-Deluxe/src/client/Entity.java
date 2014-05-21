@@ -68,14 +68,14 @@ public abstract class Entity {
 		EntityRequestOwnerMessage msg = new EntityRequestOwnerMessage(entityId);
 	}
 
-	/// @brief called when the state have changed and a message to the other peers is being built. 
+	/// @brief called when the state have changed and a message to the other peers is being built. Overwrite me! 
 	protected Serializable getCustomData() {
 		return null;
 	}
 	/// @brief called when the peer owner have new customData. Is processed before basic movement. 
 	protected void processCustomStateMessage(Serializable data) { }
 	
-	public final void processStateMessage(EntityStateMessage msg) {
+	public void processStateMessage(EntityStateMessage msg) {
 		if(msg.customData != null) processCustomStateMessage(msg.customData);
 		setPosition(msg.position);
 		setRotation(msg.rotation);

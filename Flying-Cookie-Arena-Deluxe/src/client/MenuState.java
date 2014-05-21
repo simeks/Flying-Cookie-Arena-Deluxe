@@ -266,7 +266,13 @@ public class MenuState implements GameState {
 			@Override
 			public void onDisconnect(String reason) {
 				System.out.println("You got disconnected: " + reason);
-				
+				popup.findNiftyControl("loadingPopupStatus", Label.class).setText("Failed to connect "+reason+". ");
+				new Timer().schedule(new TimerTask() {          
+				    @Override
+				    public void run() {
+						nifty.closePopup(popup.getId()); 
+				    }
+				}, 2000);
 			}
 		};
 		Application.getInstance().getSession().setReadDelay(5000);

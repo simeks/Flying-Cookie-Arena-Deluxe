@@ -35,6 +35,7 @@ public class LobbyState implements GameState {
 
 	/// @brief called when exit is clicked. 
 	public void exitLobbyState() {
+		Application.getInstance().getLobbyServerConnection().close();
 		Application.getInstance().getSession().disconnect();
 		Application.getInstance().changeState(GameState.GameStateId.MENU_STATE);
 	}
@@ -46,11 +47,19 @@ public class LobbyState implements GameState {
 
 	/// @brief called when the screen is ready. 
 	public void onStartScreen() {
-		addPlayer("You");
+		Nifty nifty = niftyDisplay.getNifty();
+		Chat chat = nifty.getCurrentScreen().findNiftyControl("LobbyChat", Chat.class);
+
 		for(String player : playerNames) {
-			addPlayer(player);
+			chat.removePlayer(player);
 		}
-		playerNames = new ArrayList<>();
+		
+		if(!playerNames.contains("You")) {
+			playerNames.add("You");
+		}
+		for(String player : playerNames) {
+			chat.addPlayer(player, nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
+		}
 	}
 	
 	private void addPlayer(String name) {
@@ -103,8 +112,8 @@ public class LobbyState implements GameState {
 			
 			@Override
 			public void execute(Message m) {
-				addPlayer("Not you");
-				
+				addPlayer("Not you : " + m.peer);
+				Application.getInstance().getWorld().broadcastWorldCreation(m.peer);
 			}
 		});
 	    app.getSession().registerEffect(Message.Type.PEER_LIST, new MessageEffect() {
@@ -127,7 +136,6 @@ public class LobbyState implements GameState {
 		Application app = Application.getInstance();
 		app.getSession().unregisterEffect(Message.Type.CHAT_MSG);
 		
-		app.getLobbyServerConnection().close();
     	InputManager inputManager = app.getInputManager();
     	inputManager.setCursorVisible(true);
 	}

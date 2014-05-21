@@ -42,7 +42,8 @@ public abstract class Message implements Serializable {
 	}
 }
 
-/// Message sent from a new peer to the master peer when connecting.
+/// Message sent from a new peer to the master peer when connecting. 
+/// And when the new peer is accepted it send this to all other.
 class HelloMessage extends Message {
 	
 	private static final long serialVersionUID = -2521784129383032208L;
@@ -63,6 +64,7 @@ class PeerIdMessage extends Message {
 	}
 }
 
+/// Sent from the master peer to a new connecting peer.
 class PeerListMessage extends Message {
 	private static final long serialVersionUID = -3905149137955891510L;
 
@@ -166,6 +168,7 @@ class EntityStateMessage extends Message {
 	public Quaternion rotation;
 	public Vector3f velocity;
 	public Serializable customData;
+	public long timestamp;
 	
 	EntityStateMessage(int entityId, Vector3f position, Quaternion rotation, Vector3f velocity) {
 		super(Type.ENTITY_STATE);
@@ -173,6 +176,7 @@ class EntityStateMessage extends Message {
 		this.position = position;
 		this.rotation = rotation;
 		this.velocity = velocity;
+		this.timestamp = System.currentTimeMillis();
 	}
 	EntityStateMessage(int entityId, Vector3f position, Quaternion rotation, Vector3f velocity, Serializable customData) {
 		super(Type.ENTITY_STATE);
@@ -181,6 +185,7 @@ class EntityStateMessage extends Message {
 		this.rotation = rotation;
 		this.velocity = velocity;
 		this.customData = customData;
+		this.timestamp = System.currentTimeMillis();
 	}
 }
 
@@ -194,7 +199,6 @@ class EntityEventMessage extends Message {
 		this.customData = customData;
 		this.entityId = entityId;
 	}
-	
 }
 
 class EntityRequestOwnerMessage extends Message{

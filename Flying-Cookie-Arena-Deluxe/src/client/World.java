@@ -177,7 +177,7 @@ public class World {
 				try {
 					CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType(), 
 							entity.getPosition(), entity.getRotation());
-					session.sendToAll(msg, true);
+					session.sendToPeer(msg, peer, true);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
