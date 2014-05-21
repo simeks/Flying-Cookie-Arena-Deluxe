@@ -52,6 +52,7 @@ public class MenuState implements GameState {
 	
 	@Override
 	public void enterState() {
+		Application.getInstance().getWorld().clear();
 		Nifty nifty = niftyDisplay.getNifty();
 		Application.getInstance().getFlyByCamera().setDragToRotate(true);
 	    nifty.gotoScreen("ServerListScreen"); // start the screen

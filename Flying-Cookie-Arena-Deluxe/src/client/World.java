@@ -203,6 +203,9 @@ public class World {
 	
 	/// @brief Destroys any spawned objects.
 	public void clear() {
+		for(Entity entity : entities) {
+			entity.destroy();
+		}
 		entities.clear();
 	}
 	
@@ -238,6 +241,7 @@ public class World {
 		Entity entity = getEntity(msg.entityId);
 		if(entity != null) {
 			entities.remove(entity);
+			entity.destroy();
 		}
 	}
 	
@@ -296,23 +300,33 @@ public class World {
 		return flag;
 	}
 	
+	public void destroyAllOwnedEntitys() {
+		removeEntities(Application.getInstance().getSession().getMyPeerId(), true);
+	}
+	
 	public void destroyEntity(Entity entity) {
 		entities.remove(entity);
 		entity.destroy();
-		broadcastDestroyEntity(entity);
+		if(entity.ownerPeer == Application.getInstance().getSession().getMyPeerId()) {
+			broadcastDestroyEntity(entity);
+		}
 	}
 	
 	/// @brief Removes all entities owned by the specified peer.
 	public void removeEntities(int peer) {
+		removeEntities(peer, false);
+	}
+	private void removeEntities(int peer, boolean broadcast) {
 		Iterator<Entity> it = entities.iterator();
 		while(it.hasNext()) {
 			Entity entity = it.next();
 
 			if(entity.getOwner() == peer) {
+				if(broadcast) broadcastDestroyEntity(entity);
 				entity.destroy();
 				it.remove();
 			}
-		}		
+		}
 	}
 	
 	public Node getRootNode()

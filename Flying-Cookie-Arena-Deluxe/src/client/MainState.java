@@ -94,7 +94,6 @@ public class MainState implements GameState {
 				character.setSprint(keyPressed);
 			}
 			else if (name.equals("Quit")) {
-				exitState();
 				Application.getInstance().changeState(GameStateId.LOBBY_STATE);
 			}
 		}
@@ -200,7 +199,8 @@ public class MainState implements GameState {
 		Application.getInstance().getBulletAppState().getPhysicsSpace().removeCollisionListener(collisionListener);
 		
 		character.getNode().detachAllChildren();
-		world.destroyEntity(character);
+		
+		world.destroyAllOwnedEntitys();
 
     	cameraNode.detachChildNamed("camera");
     	
