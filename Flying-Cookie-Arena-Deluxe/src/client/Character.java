@@ -44,7 +44,11 @@ public class Character extends Entity {
 	private Quaternion roty = new Quaternion();
 	
 	private Vector3f targetPosition = new Vector3f(0,0,0);
-	private long targetPositionTimestamp = 0;
+	private Quaternion targetRotation = new Quaternion();
+	
+	private long targetStateTimestamp = 0;
+	
+	
 	
 	private Vector3f velocity = new Vector3f(0,0,0);
 	private boolean sprint = false;
@@ -197,18 +201,18 @@ public class Character extends Entity {
 		controller.setPhysicsLocation(position);
 	}
 	
-	public void setTargetPosition(Vector3f targetPosition, long targetPositionTimestamp)
+	public void setTargetState(Vector3f targetPosition, Quaternion targetRotation, long targetStateTimestamp)
 	{
 		this.targetPosition = targetPosition;
-		this.targetPositionTimestamp = targetPositionTimestamp;
+		this.targetRotation = targetRotation;
+		this.targetStateTimestamp = targetStateTimestamp;
 	}
 	
 	
 	@Override
 	public void processStateMessage(EntityStateMessage msg) {
 		if(msg.customData != null) processCustomStateMessage(msg.customData);
-		setTargetPosition(msg.position, System.currentTimeMillis());
-		setRotation(msg.rotation);
+		setTargetState(msg.position, msg.rotation, System.currentTimeMillis());
 		setVelocity(msg.velocity);
 	}
 
@@ -225,14 +229,19 @@ public class Character extends Entity {
 		if(!isOwner()) {
 			// Convergence: We want to reach the target position in (MOVEMENT_DELAY - timestamp) milliseconds.
 			long currentTime = System.currentTimeMillis();
-			if(currentTime < (targetPositionTimestamp + MOVEMENT_DELAY)) {
+			if(currentTime < (targetStateTimestamp + MOVEMENT_DELAY)) {
+				float scalar = Math.min(1.0f, (float)(currentTime - targetStateTimestamp) / (float)MOVEMENT_DELAY);
+				
 				Vector3f currentPosition = getPosition();
 				Vector3f direction = targetPosition.subtract(currentPosition);
-
-				
-				float scalar = Math.min(1.0f, (float)(currentTime - targetPositionTimestamp) / (float)MOVEMENT_DELAY);
 				Vector3f newPos = currentPosition.add(direction.mult(scalar));
 				setPosition(newPos);
+				
+				Quaternion currentRotation = getRotation();
+				Quaternion newRotation = currentRotation;
+				newRotation.slerp(targetRotation, scalar);
+				setRotation(newRotation);
+				
 			}
 			
 			if(NET_DEBUG) {
@@ -246,6 +255,7 @@ public class Character extends Entity {
 		}
 		
 		controller.setViewDirection(roty.mult(new Vector3f(0,0,1)));
+		
 		
 		updateAnimation();
 	}
