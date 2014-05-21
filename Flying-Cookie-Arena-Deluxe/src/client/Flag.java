@@ -3,6 +3,7 @@ package client;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.shapes.BoxCollisionShape;
@@ -96,52 +97,38 @@ public class Flag extends Entity {
 		world.getRootNode().attachChild(node);
 	}
 	
-	public boolean pickupFlag(Node attachHere) {
-		if(stateIs(CARRYD)) {
-			return false;
-		};
-
+	public void pickupFlag(Node attachHere) {
 		node.getControl(GhostControl.class).setEnabled(false);
 		node.getControl(RigidBodyControl.class).setEnabled(false);
 		world.getRootNode().detachChild(node);
 		setPosition(new Vector3f(0,0,0));
 		attachHere.attachChild(node);
 		setState(CARRYD);
-		return true;
 	}
 	
-	public boolean dropFlag(Vector3f position) {
-		if(stateIs(CARRYD)) {
-			return false;
-		};
-
+	public void dropFlag(Vector3f position) {
 		node.getControl(GhostControl.class).setEnabled(true);
 		node.getControl(RigidBodyControl.class).setEnabled(true);
 		node.getParent().detachChild(node);
 		node.move(position);
 		world.getRootNode().attachChild(node);
 		setState(DROPPED);
-		return true;
 	}
 	
-	public boolean returnFlag() {
-		if(stateIs(SPAWN)) {
-			return false;
-		};
-
+	public void returnFlag() {
 		node.getControl(GhostControl.class).setEnabled(true);
 		node.getControl(RigidBodyControl.class).setEnabled(true);
 		node.getParent().detachChild(node);
 		node.move(originalPosition);
 		world.getRootNode().attachChild(node);
 		setState(SPAWN);
-		return true;
 	}
 	
 
 	@Override
 	protected void processCustomStateMessage(Serializable data) {
 		if(data instanceof Map<?, ?>) {
+			@SuppressWarnings("unchecked")
 			Map<String, Object> map = (Map<String, Object>) data;
 			if(map.containsKey("state")) {
 				int ownsersState = (int) map.get("state");
@@ -170,8 +157,6 @@ public class Flag extends Entity {
 			map.put("attachHereEntityId", node.getParent().getUserData("id"));
 		} else if(stateIs(DROPPED)) {
 			map.put("dropFlagPosition", getPosition());
-		} else if(stateIs(SPAWN)) {
-			
 		}
 		return (Serializable) map;
 	}
@@ -203,6 +188,9 @@ public class Flag extends Entity {
 
 	@Override
 	public Vector3f getPosition() {
+		if(state == CARRYD) {
+			return node.getLocalTranslation();
+		}
 		return node.getWorldTranslation();
 	}
 

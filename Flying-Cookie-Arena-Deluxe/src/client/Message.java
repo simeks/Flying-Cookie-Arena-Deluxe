@@ -191,13 +191,13 @@ class EntityStateMessage extends Message {
 
 class EntityEventMessage extends Message {
 	private static final long serialVersionUID = -7263225364667973224L;
-	public Serializable customData;
+	public EntityStateMessage state;
 	public int entityId;
 	
-	public EntityEventMessage(int entityId, Serializable customData) {
+	public EntityEventMessage(EntityStateMessage state) {
 		super(Type.ENTITY_EVENT);
-		this.customData = customData;
-		this.entityId = entityId;
+		this.state = state;
+		this.entityId = state.entityId;
 	}
 }
 
@@ -221,10 +221,7 @@ class EntityNewOwnerMessage extends Message{
 	public EntityNewOwnerMessage(int newOwnerId, int entityId) {
 		super(Type.ENTITY_OWNER_CHANGE);
 		this.ownerId = newOwnerId;
-		this.ownerId = entityId;
+		this.entityId = entityId;
 	}
 
 }
-
-
-/// TODO EntityEventMessage 

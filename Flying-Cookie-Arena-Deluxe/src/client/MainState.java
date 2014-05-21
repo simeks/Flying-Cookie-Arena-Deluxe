@@ -53,7 +53,9 @@ public class MainState implements GameState {
 			}
 			if(other.getName().substring(0, 4).equals("flag")) {
 				if(OtherEntity instanceof Flag) {
-					((Flag)OtherEntity).pickupFlag(character.getNode());
+					Flag flag = ((Flag)OtherEntity);
+					flag.editEntity();
+					flag.pickupFlag(character.getNode());
 				}
 			}
 		}

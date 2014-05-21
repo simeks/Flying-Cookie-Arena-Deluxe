@@ -378,4 +378,11 @@ public class World {
 		
 		return entityId;
 	}
+
+	public void processEntityOwnerChange(EntityNewOwnerMessage m) {
+		Entity entity = getEntity(m.entityId);
+		if(entity != null) {
+			entity.setOwner(m.ownerId);
+		}
+	}
 }

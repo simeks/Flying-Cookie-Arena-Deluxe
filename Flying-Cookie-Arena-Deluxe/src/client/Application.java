@@ -149,20 +149,33 @@ public class Application extends SimpleApplication {
 			}
 		});
 		/**
-		 *  broadcast new entityOwnerShip to all peers
+		 *  broadcast new entityOwnership to all peers
 		 */
 		session.registerEffect(Message.Type.ENTITY_REQ_OWN_CHANGE, new MessageEffect() {
 			
 			@Override
 			public void execute(Message m) {
 				EntityRequestOwnerMessage msg = (EntityRequestOwnerMessage)m;
+				if(world.getEntity(msg.entityId) == null) {
+					return;
+				}
+				if(world.getEntity(msg.entityId).getOwner() != session.getMyPeerId()) {
+					return;
+				}
 				try {
 					session.sendToAll(new EntityNewOwnerMessage(m.peer, msg.entityId), true);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+				world.getEntity(msg.entityId).setOwner(msg.peer);
+			}
+		});
+		session.registerEffect(Message.Type.ENTITY_OWNER_CHANGE, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				world.processEntityOwnerChange((EntityNewOwnerMessage)m);
 			}
 		});
     }

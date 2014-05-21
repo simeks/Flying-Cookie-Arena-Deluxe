@@ -1,6 +1,11 @@
 package client;
 
+import java.awt.Event;
 import java.io.Serializable;
+import java.util.Timer;
+import java.util.TimerTask;
+
+import client.Session.State;
 
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -27,6 +32,8 @@ public abstract class Entity {
 	private Quaternion latestRotation = new Quaternion();
 	private long latestStateBuild;
 	private final static long MAX_STATE_SILINCE = 1000; 
+	
+	private EntityCallback callback = null;
 	
 	
 	public Entity(int ownerId, World world, int entityId, Type entityType) {
@@ -59,13 +66,62 @@ public abstract class Entity {
 		return false;
 	}
 	
-	/**
-	 * TODO 
-	 * @param ownerPeer
-	 * @param entityId
-	 */
-	protected void requestOwnerShip(int entityId){
+	public final boolean editEntity() {
+		return editEntity(null);
+	}
+	public final boolean editEntity(EntityCallback c) {
+		if(c == null) {
+			
+			// build default callback that sends what we probably edited to the other peers. 
+			c = new EntityCallback() {
+				
+				@Override
+				public void onFailedEdit(String reason) { }
+				
+				@Override
+				public void onCanEdit() {
+					sendEventMessage();
+				}
+				
+				@Override
+				public int getTimeout() { return 0; }
+			};
+		}
+		if(isOwner()) {
+			c.onCanEdit();
+			return true;
+		}
+		
 		EntityRequestOwnerMessage msg = new EntityRequestOwnerMessage(entityId);
+		
+		try {
+			Application.getInstance().getSession().sendToPeer(msg, getOwner(), true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			c.onFailedEdit("Failed send message");
+			return false;
+		}
+		
+		setCallback(c);
+		if(c.getTimeout() > 0) {
+			final EntityCallback finalCallback = c;
+			new Timer().schedule(new TimerTask() {          
+			    @Override
+			    public void run() {
+			    	if(!isOwner()) {
+			    		finalCallback.onFailedEdit("Timed out");
+			    	}
+			    }
+			}, c.getTimeout());
+		}
+		return true;
+	}
+	
+	private synchronized EntityCallback getCallback() {
+		return callback;
+	}
+	private synchronized void setCallback(EntityCallback c) {
+		callback = c;
 	}
 
 	/// @brief called when the state have changed and a message to the other peers is being built. Overwrite me! 
@@ -83,17 +139,19 @@ public abstract class Entity {
 	}
 	
 	public final EntityStateMessage buildStateMessage() {
-		if(System.currentTimeMillis() < latestStateBuild+MAX_STATE_SILINCE
-				|| (!hasMovementStateChanged() && !hasCustomStateChanged())) {
+		long timestamp = System.currentTimeMillis();
+		boolean updateState = (latestStateBuild+MAX_STATE_SILINCE < timestamp);
+		if(!updateState && !hasMovementStateChanged() && !hasCustomStateChanged()) {
 			return null;
 		}
 		latestPosition = getPosition().clone();
 		latestRotation= getRotation().clone();
 		latestVelocity = getVelocity().clone();
 		Serializable data = null;
-		if(hasCustomStateChanged()) {
+		if(updateState || hasCustomStateChanged()) {
 			data = getCustomData();
 		}
+		latestStateBuild = timestamp;
 		return new EntityStateMessage(entityId, getPosition(), getRotation(), getVelocity(), data);
 	}
 	
@@ -104,10 +162,12 @@ public abstract class Entity {
 	}
 
 	public final void processEventMessage(EntityEventMessage e) {
-		processCustomStateMessage(e.customData);
+		processCustomStateMessage(e.state.customData);
 	}
 	public final boolean sendEventMessage() {
-		EntityEventMessage msg = new EntityEventMessage(entityId, getCustomData());
+		EntityEventMessage msg = new EntityEventMessage(
+			new EntityStateMessage(entityId, getPosition(), getRotation(), getVelocity(), getCustomData())
+		);
 		Session session = Application.getInstance().getSession();
 		try {
 			session.sendToAll(msg, true);
@@ -130,12 +190,21 @@ public abstract class Entity {
 	
 	public void setOwner(int peerId) {
 		ownerPeer = peerId;
+		
+		EntityCallback c = getCallback();
+		if(isOwner() && c != null) {
+			c.onCanEdit();
+		}
 	}
 	
 	/// @brief Returns true if the current peer owns this entity.
 	public boolean isOwner() {
 		return (ownerPeer == Application.getInstance().getSession().getMyPeerId());
 	}
+}
 
-
+interface EntityCallback {
+	public void onCanEdit();
+	public void onFailedEdit(String reason);
+	public int getTimeout();
 }
