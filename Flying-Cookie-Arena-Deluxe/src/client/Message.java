@@ -27,7 +27,10 @@ public abstract class Message implements Serializable {
 		CREATE_ENTITY,
 		DESTROY_ENTITY,
 		ENTITY_STATE,
-		ENTITY_EVENT
+		ENTITY_EVENT,
+		ENTITY_OWNER_CHANGE,
+		ENTITY_REQ_OWN_CHANGE
+		
 	};
 	
 	Type type;
@@ -193,5 +196,31 @@ class EntityEventMessage extends Message {
 	}
 	
 }
+
+class EntityRequestOwnerMessage extends Message{
+	private static final long serialVersionUID = 7546406821023158540L;
+	public int entityId;
+	
+	public EntityRequestOwnerMessage(int entityId) {
+		super(Type.ENTITY_REQ_OWN_CHANGE);
+		this.entityId = entityId;
+		
+	}
+
+}
+
+class EntityNewOwnerMessage extends Message{
+	private static final long serialVersionUID = 3098702594934220381L;
+	public int ownerId;
+	public int entityId;
+	
+	public EntityNewOwnerMessage(int newOwnerId, int entityId) {
+		super(Type.ENTITY_OWNER_CHANGE);
+		this.ownerId = newOwnerId;
+		this.ownerId = entityId;
+	}
+
+}
+
 
 /// TODO EntityEventMessage 

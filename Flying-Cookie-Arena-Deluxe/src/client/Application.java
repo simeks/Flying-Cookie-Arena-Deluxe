@@ -1,5 +1,6 @@
 package client;
  
+import java.security.acl.Owner;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.Map;
@@ -141,6 +142,23 @@ public class Application extends SimpleApplication {
 			@Override
 			public void execute(Message m) {
 				world.processEntityEvent((EntityEventMessage)m);
+			}
+		});
+		/**
+		 *  broadcast new entityOwnerShip to all peers
+		 */
+		session.registerEffect(Message.Type.ENTITY_REQ_OWN_CHANGE, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				EntityRequestOwnerMessage msg = (EntityRequestOwnerMessage)m;
+				try {
+					session.sendToAll(new EntityNewOwnerMessage(m.peer, msg.entityId), true);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 			}
 		});
     }
