@@ -59,7 +59,7 @@ public abstract class Entity {
 		return false;
 	}
 
-	/// @brief called when the state have changed and a message to the other peers is being built. 
+	/// @brief called when the state have changed and a message to the other peers is being built. Overwrite me! 
 	protected Serializable getCustomData() {
 		return null;
 	}
