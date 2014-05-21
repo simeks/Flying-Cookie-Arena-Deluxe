@@ -64,6 +64,10 @@ public class Application extends SimpleApplication {
     	}
     }
     
+    public GameState getCurrentGameState() {
+    	return gameStates.get(currentState);
+    }
+    
     private float timeElapsed = 0.0f; // Time elapsed since last tick (in seconds)
     
     @Override

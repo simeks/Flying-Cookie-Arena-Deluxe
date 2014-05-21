@@ -150,6 +150,7 @@ public class MainState implements GameState {
         inputManager.addMapping("Quit", new KeyTrigger(KeyInput.KEY_ESCAPE));
 
     }
+    
 
 	@Override
 	public void enterState() {
@@ -160,7 +161,7 @@ public class MainState implements GameState {
 		int id = Application.getInstance().getSession().getMyPeerId();
 		int count = Application.getInstance().getSession().getPeerCount();
 		// add character before inputlisteners.
-		character = world.spawnCharacter(new Vector3f((id-count/2)*20, 50, (id-count/2)*20));
+		character = world.spawnCharacter(new Vector3f((id)*20, 50, (id)*20));
 		
     	InputManager inputManager = Application.getInstance().getInputManager();
     	inputManager.deleteMapping(Application.INPUT_MAPPING_EXIT);
@@ -181,7 +182,7 @@ public class MainState implements GameState {
 		
 		Camera camera = Application.getInstance().getCamera();
 		cameraNode.attachChild(new CameraNode("camera", camera));
-		Flag flag = world.spawnFlag(new Vector3f((id-count/2)*20+2, 50, (id-count/2)*20));
+		Flag flag = world.spawnFlag(new Vector3f((id)*20+10, 50, (id)*20));
 		flag.getSpatial().setName("myFlag");
 		
 		Node characterNode = character.getNode();

@@ -263,10 +263,12 @@ public class Session {
 						// We also addd ourself (the master peer) to the end of the list.
 						listMsg.peers.add(listMsg.new RawPeer(getMyPeerId(), null, -1));
 
-						// TODO: aggregate?
 						peer.send(listMsg, true);
 
 						peers.put(peer.getId(), peer);
+						
+						// inject the peerId to the message for its messageEffect
+						helloMsg.peer = peer.getId();
 					} else {
 						// Otherwise we just put the new peer into our peer list
 						if (helloMsg.peer >= 0
