@@ -163,6 +163,7 @@ class EntityStateMessage extends Message {
 	public Quaternion rotation;
 	public Vector3f velocity;
 	public Serializable customData;
+	public long timestamp;
 	
 	EntityStateMessage(int entityId, Vector3f position, Quaternion rotation, Vector3f velocity) {
 		super(Type.ENTITY_STATE);
@@ -170,6 +171,7 @@ class EntityStateMessage extends Message {
 		this.position = position;
 		this.rotation = rotation;
 		this.velocity = velocity;
+		this.timestamp = System.currentTimeMillis();
 	}
 	EntityStateMessage(int entityId, Vector3f position, Quaternion rotation, Vector3f velocity, Serializable customData) {
 		super(Type.ENTITY_STATE);
@@ -178,6 +180,7 @@ class EntityStateMessage extends Message {
 		this.rotation = rotation;
 		this.velocity = velocity;
 		this.customData = customData;
+		this.timestamp = System.currentTimeMillis();
 	}
 }
 

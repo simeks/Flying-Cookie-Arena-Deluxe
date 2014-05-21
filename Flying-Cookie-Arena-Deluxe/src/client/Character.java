@@ -18,7 +18,7 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 public class Character extends Entity {
-	public static final int MOVEMENT_DELAY = 500; // Delay i ms for convergence
+	public static final int MOVEMENT_DELAY = 200; // Delay i ms for convergence
 	public static final boolean NET_DEBUG = false;
 	
 	public enum Movement
@@ -212,7 +212,7 @@ public class Character extends Entity {
 	@Override
 	public void processStateMessage(EntityStateMessage msg) {
 		if(msg.customData != null) processCustomStateMessage(msg.customData);
-		setTargetState(msg.position, msg.rotation, System.currentTimeMillis());
+		setTargetState(msg.position, msg.rotation, msg.timestamp);
 		setVelocity(msg.velocity);
 	}
 
