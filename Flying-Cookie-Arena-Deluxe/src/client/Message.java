@@ -39,7 +39,8 @@ public abstract class Message implements Serializable {
 	}
 }
 
-/// Message sent from a new peer to the master peer when connecting.
+/// Message sent from a new peer to the master peer when connecting. 
+/// And when the new peer is accepted it send this to all other.
 class HelloMessage extends Message {
 	
 	private static final long serialVersionUID = -2521784129383032208L;
@@ -60,6 +61,7 @@ class PeerIdMessage extends Message {
 	}
 }
 
+/// Sent from the master peer to a new connecting peer.
 class PeerListMessage extends Message {
 	private static final long serialVersionUID = -3905149137955891510L;
 
@@ -194,7 +196,6 @@ class EntityEventMessage extends Message {
 		this.customData = customData;
 		this.entityId = entityId;
 	}
-	
 }
 
 /// TODO EntityEventMessage 
