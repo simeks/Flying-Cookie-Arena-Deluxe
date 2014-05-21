@@ -160,8 +160,25 @@ public class MainState implements GameState {
 		int id = Application.getInstance().getSession().getMyPeerId();
 		int count = Application.getInstance().getSession().getPeerCount();
 		// add character before inputlisteners.
-		character = world.spawnCharacter(new Vector3f((id-count/2)*20, 50, (id-count/2)*20));
+		if(character == null) {
+			character = world.spawnCharacter(new Vector3f((id-count/2)*20, 50, (id-count/2)*20));
+			
+			cameraNode = new Node();
+	    	cameraNode.setLocalTranslation(0, 2, 1);
+			character.getNode().attachChild(cameraNode);
+			
+			Node characterNode = character.getNode();
+			
+			characterNode.getControl(CharacterControl.class).setCollideWithGroups(World.COLLISION_GROUP_FLAG);
+			characterNode.setName("myCharacter");
+
+			Flag flag = world.spawnFlag(new Vector3f((id-count/2)*20+2, 50, (id-count/2)*20));
+			flag.getSpatial().setName("myFlag");
+		}
+		Camera camera = Application.getInstance().getCamera();
+		cameraNode.attachChild(new CameraNode("camera", camera));
 		
+			
     	InputManager inputManager = Application.getInstance().getInputManager();
     	inputManager.deleteMapping(Application.INPUT_MAPPING_EXIT);
         inputManager.addListener(actionListener, "Jump", "MoveLeft", "MoveRight", "MoveForward", 
@@ -173,22 +190,6 @@ public class MainState implements GameState {
     	
 		Application.getInstance().getNiftyDisplay().getNifty().gotoScreen("hud");
 
-
-		
-		cameraNode = new Node();
-    	cameraNode.setLocalTranslation(0, 2, 1);
-		character.getNode().attachChild(cameraNode);
-		
-		Camera camera = Application.getInstance().getCamera();
-		cameraNode.attachChild(new CameraNode("camera", camera));
-		Flag flag = world.spawnFlag(new Vector3f((id-count/2)*20+2, 50, (id-count/2)*20));
-		flag.getSpatial().setName("myFlag");
-		
-		Node characterNode = character.getNode();
-		
-		characterNode.getControl(CharacterControl.class).setCollideWithGroups(World.COLLISION_GROUP_FLAG);
-		characterNode.setName("myCharacter");
-		
 		Application.getInstance().getBulletAppState().getPhysicsSpace().addCollisionListener(collisionListener);
 	}
 
@@ -197,9 +198,6 @@ public class MainState implements GameState {
 		World world = Application.getInstance().getWorld();
 		
 		Application.getInstance().getBulletAppState().getPhysicsSpace().removeCollisionListener(collisionListener);
-		
-		character.getNode().detachAllChildren();
-		world.destroyEntity(character);
 
     	cameraNode.detachChildNamed("camera");
     	

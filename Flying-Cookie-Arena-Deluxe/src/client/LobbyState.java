@@ -128,7 +128,6 @@ public class LobbyState implements GameState {
 			}
 		});
 	 
-	    app.getWorld().clear();
 	}
 
 	@Override

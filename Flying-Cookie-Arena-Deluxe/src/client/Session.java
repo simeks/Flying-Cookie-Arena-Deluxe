@@ -16,7 +16,7 @@ import java.util.TimerTask;
 import client.LobbyServerConnection.STATUS;
 
 public class Session {
-	static final private int PEER_TIMEOUT = 999999999; // need more time in debug mkay? 15000; // Number of milliseconds without activity before we timeout a peer
+	static final private int PEER_TIMEOUT = 15000; // need more time in debug mkay? 15000; // Number of milliseconds without activity before we timeout a peer
 
 	public enum State {
 		DISCONNECTED, 
@@ -351,6 +351,16 @@ public class Session {
 						if(sessionCallback != null) {
 							sessionCallback.onPeerDisconnect(msg.timedOutPeerId, "Peer " + msg.timedOutPeerId + " timed out.");
 						}
+						// Was the peer the master peer?
+						if(msg.timedOutPeerId == masterPeerId) {
+							// Assign a new master peer
+							masterPeerId = findNextId(masterPeerId);
+
+							if(sessionCallback != null) {
+								sessionCallback.onNewMaster(msg.timedOutPeerId, masterPeerId);
+							}
+						}
+						
 						// We then remove him from our peers
 						peers.remove(msg.timedOutPeerId);
 						
@@ -402,4 +412,30 @@ public class Session {
 		
 	}
 
+	/// @brief Returns the ID of the peer that is after the specified id
+	/// Used for ownership migration.
+	public int findNextId(int id) {
+		if(peers.isEmpty()) {
+			// We're the only peer
+			return -1;
+		}
+
+		int lowest = (myPeerId > id) ? myPeerId : id;		
+		for(int i : peers.keySet()) {
+			if(i > id) {
+				lowest = Math.min(i, lowest);
+			}
+		}
+		
+		// No id found after the specified one, use the total lowest
+		if(lowest != id)
+			return lowest;
+		
+		lowest = myPeerId;
+		for(int i : peers.keySet()) {
+			lowest = Math.min(i, lowest);
+		}
+		
+		return lowest;
+	}
 }

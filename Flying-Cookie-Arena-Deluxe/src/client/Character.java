@@ -96,6 +96,8 @@ public class Character extends Entity {
 		if(position != null) {
 			setPosition(position);
 		}
+		
+		setFlags(FLAG_STATIC_OWNERSHIP);
 	}
 	
 	public Node getNode()

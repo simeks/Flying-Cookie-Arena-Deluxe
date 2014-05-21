@@ -146,6 +146,15 @@ public class Application extends SimpleApplication {
     }
 	@Override
 	public void destroy() { 
+		if(session.getState() == Session.State.CONNECTED) {
+			try {
+				session.sendToAll(new PeerTimeOutMessage(session.getMyPeerId()), false);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
 		session.unregisterEffect(Message.Type.CREATE_ENTITY);
 		session.unregisterEffect(Message.Type.DESTROY_ENTITY);
 		session.unregisterEffect(Message.Type.ENTITY_STATE);

@@ -9,17 +9,20 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
 public abstract class Entity {
+	public static final int FLAG_STATIC_OWNERSHIP = 0x1; // Entity cannot change owner, meaning it will be destroyed when owner disconnects.
+	
+	
 	public enum Type {
 		CRATE,
 		CHARACTER,
 		FLAG,
 		CAMP_FIRE
 	}
-
 	
 	protected int ownerPeer;
 	protected int entityId;
 	protected Type entityType;
+	protected int flags = 0;
 	protected World world;
 
 	private Vector3f latestPosition = new Vector3f();
@@ -128,5 +131,12 @@ public abstract class Entity {
 		return (ownerPeer == Application.getInstance().getSession().getMyPeerId());
 	}
 
-
+	public int getFlags() {
+		return flags;
+	}
+	public void setFlags(int flags) {
+		this.flags = flags;
+	}
+	
+	
 }

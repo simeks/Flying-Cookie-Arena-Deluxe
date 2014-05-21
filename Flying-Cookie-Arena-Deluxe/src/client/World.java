@@ -201,10 +201,6 @@ public class World {
 		}
 	}
 	
-	/// @brief Destroys any spawned objects.
-	public void clear() {
-		entities.clear();
-	}
 	
 	/// @brief Processes an incoming entity creation message.
 	public void processCreateEntity(CreateEntityMessage msg) {
@@ -302,15 +298,26 @@ public class World {
 		broadcastDestroyEntity(entity);
 	}
 	
-	/// @brief Removes all entities owned by the specified peer.
-	public void removeEntities(int peer) {
+	/// @brief Migrates all entities from one peer to another.
+	///	This will destroy any peer that cannot be migrated (Like character entities).
+	public void migrateEntities(int newPeer, int oldPeer) {
 		Iterator<Entity> it = entities.iterator();
 		while(it.hasNext()) {
 			Entity entity = it.next();
 
-			if(entity.getOwner() == peer) {
-				entity.destroy();
-				it.remove();
+			if(entity.getOwner() == oldPeer) {
+				if((entity.getFlags() & Entity.FLAG_STATIC_OWNERSHIP) != 0)
+				{
+					// Destroy if we cannot change ownership
+					entity.destroy();
+					it.remove();
+					
+				}
+				else
+				{
+					// Otherwise we just change owner
+					entity.setOwner(newPeer);
+				}
 			}
 		}		
 	}
