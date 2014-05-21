@@ -166,7 +166,9 @@ public class MenuState implements GameState {
 
 			@Override
 			public void onPeerDisconnect(int peerId, String reason) {
-				Application.getInstance().getWorld().removeEntities(peerId);
+				
+				int newOwner = Application.getInstance().getSession().findNextId(peerId);
+				Application.getInstance().getWorld().migrateEntities(newOwner, peerId);
 				
 				System.out.println("Peer " + peerId + " disconnected: " + reason);
 				
@@ -175,6 +177,11 @@ public class MenuState implements GameState {
 			@Override
 			public void onDisconnect(String reason) {
 				System.out.println("You got disconnected: " + reason);
+				
+			}
+			@Override
+			public void onNewMaster(int oldMaster, int newMaster) {
+				System.out.println("New master: " + newMaster + ", Old master: " + oldMaster);
 				
 			}
 		};
@@ -201,7 +208,9 @@ public class MenuState implements GameState {
 			
 			@Override
 			public void onPeerDisconnect(int peerId, String reason) {
-				Application.getInstance().getWorld().removeEntities(peerId);
+				
+				int newOwner = Application.getInstance().getSession().findNextId(peerId);
+				Application.getInstance().getWorld().migrateEntities(newOwner, peerId);
 				
 				System.out.println("Peer " + peerId + " disconnected: " + reason);
 				
@@ -210,6 +219,11 @@ public class MenuState implements GameState {
 			@Override
 			public void onDisconnect(String reason) {
 				System.out.println("You got disconnected: " + reason);
+				
+			}
+			@Override
+			public void onNewMaster(int oldMaster, int newMaster) {
+				System.out.println("New master: " + newMaster + ", Old master: " + oldMaster);
 				
 			}
 		};	
@@ -258,7 +272,10 @@ public class MenuState implements GameState {
 			}
 			@Override
 			public void onPeerDisconnect(int peerId, String reason) {
-				Application.getInstance().getWorld().removeEntities(peerId);
+				// Migrate entities from the disconnected peer.
+				
+				int newOwner = Application.getInstance().getSession().findNextId(peerId);
+				Application.getInstance().getWorld().migrateEntities(newOwner, peerId);
 				
 				System.out.println("Peer " + peerId + " disconnected: " + reason);
 				
@@ -274,6 +291,12 @@ public class MenuState implements GameState {
 						nifty.closePopup(popup.getId()); 
 				    }
 				}, 2000);
+			}
+
+			@Override
+			public void onNewMaster(int oldMaster, int newMaster) {
+				System.out.println("New master: " + newMaster + ", Old master: " + oldMaster);
+				
 			}
 		};
 		Application.getInstance().getSession().setReadDelay(5000);
