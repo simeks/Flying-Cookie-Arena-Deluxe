@@ -52,6 +52,7 @@ public class MenuState implements GameState {
 	
 	@Override
 	public void enterState() {
+		Application.getInstance().getWorld().clear();
 		Nifty nifty = niftyDisplay.getNifty();
 		Application.getInstance().getFlyByCamera().setDragToRotate(true);
 	    nifty.gotoScreen("ServerListScreen"); // start the screen
@@ -283,7 +284,13 @@ public class MenuState implements GameState {
 			@Override
 			public void onDisconnect(String reason) {
 				System.out.println("You got disconnected: " + reason);
-				
+				popup.findNiftyControl("loadingPopupStatus", Label.class).setText("Failed to connect "+reason+". ");
+				new Timer().schedule(new TimerTask() {          
+				    @Override
+				    public void run() {
+						nifty.closePopup(popup.getId()); 
+				    }
+				}, 2000);
 			}
 
 			@Override

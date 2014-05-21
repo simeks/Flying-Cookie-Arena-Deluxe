@@ -61,6 +61,15 @@ public abstract class Entity {
 	protected boolean hasCustomStateChanged() {
 		return false;
 	}
+	
+	/**
+	 * TODO 
+	 * @param ownerPeer
+	 * @param entityId
+	 */
+	protected void requestOwnerShip(int entityId){
+		EntityRequestOwnerMessage msg = new EntityRequestOwnerMessage(entityId);
+	}
 
 	/// @brief called when the state have changed and a message to the other peers is being built. Overwrite me! 
 	protected Serializable getCustomData() {

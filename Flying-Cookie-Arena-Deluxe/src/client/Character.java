@@ -291,6 +291,7 @@ public class Character extends Entity {
 
 	@Override
 	public void destroy() {
+	    Application.getInstance().getBulletAppState().getPhysicsSpace().remove(node.getControl(CharacterControl.class));
 		world.getRootNode().detachChild(node);
 	}
 }

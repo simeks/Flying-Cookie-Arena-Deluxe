@@ -112,8 +112,8 @@ public class LobbyState implements GameState {
 			
 			@Override
 			public void execute(Message m) {
-				addPlayer("Not you");
-				
+				addPlayer("Not you : " + m.peer);
+				Application.getInstance().getWorld().broadcastWorldCreation(m.peer);
 			}
 		});
 	    app.getSession().registerEffect(Message.Type.PEER_LIST, new MessageEffect() {
@@ -127,7 +127,7 @@ public class LobbyState implements GameState {
 				
 			}
 		});
-	 
+
 	}
 
 	@Override

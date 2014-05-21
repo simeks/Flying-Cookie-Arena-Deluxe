@@ -177,7 +177,7 @@ public class World {
 				try {
 					CreateEntityMessage msg = new CreateEntityMessage(entity.getId(), entity.getType(), 
 							entity.getPosition(), entity.getRotation());
-					session.sendToAll(msg, true);
+					session.sendToPeer(msg, peer, true);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -234,6 +234,7 @@ public class World {
 		Entity entity = getEntity(msg.entityId);
 		if(entity != null) {
 			entities.remove(entity);
+			entity.destroy();
 		}
 	}
 	
@@ -295,7 +296,9 @@ public class World {
 	public void destroyEntity(Entity entity) {
 		entities.remove(entity);
 		entity.destroy();
-		broadcastDestroyEntity(entity);
+		if(entity.ownerPeer == Application.getInstance().getSession().getMyPeerId()) {
+			broadcastDestroyEntity(entity);
+		}
 	}
 	
 	/// @brief Migrates all entities from one peer to another.
@@ -319,7 +322,14 @@ public class World {
 					entity.setOwner(newPeer);
 				}
 			}
-		}		
+		}
+	}
+	
+	public void clear() {
+		for(Entity e : entities) {
+			e.destroy();
+		}
+		entities.clear();
 	}
 	
 	public Node getRootNode()

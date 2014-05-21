@@ -27,7 +27,10 @@ public abstract class Message implements Serializable {
 		CREATE_ENTITY,
 		DESTROY_ENTITY,
 		ENTITY_STATE,
-		ENTITY_EVENT
+		ENTITY_EVENT,
+		ENTITY_OWNER_CHANGE,
+		ENTITY_REQ_OWN_CHANGE
+		
 	};
 	
 	Type type;
@@ -39,7 +42,8 @@ public abstract class Message implements Serializable {
 	}
 }
 
-/// Message sent from a new peer to the master peer when connecting.
+/// Message sent from a new peer to the master peer when connecting. 
+/// And when the new peer is accepted it send this to all other.
 class HelloMessage extends Message {
 	
 	private static final long serialVersionUID = -2521784129383032208L;
@@ -60,6 +64,7 @@ class PeerIdMessage extends Message {
 	}
 }
 
+/// Sent from the master peer to a new connecting peer.
 class PeerListMessage extends Message {
 	private static final long serialVersionUID = -3905149137955891510L;
 
@@ -194,7 +199,32 @@ class EntityEventMessage extends Message {
 		this.customData = customData;
 		this.entityId = entityId;
 	}
-	
 }
+
+class EntityRequestOwnerMessage extends Message{
+	private static final long serialVersionUID = 7546406821023158540L;
+	public int entityId;
+	
+	public EntityRequestOwnerMessage(int entityId) {
+		super(Type.ENTITY_REQ_OWN_CHANGE);
+		this.entityId = entityId;
+		
+	}
+
+}
+
+class EntityNewOwnerMessage extends Message{
+	private static final long serialVersionUID = 3098702594934220381L;
+	public int ownerId;
+	public int entityId;
+	
+	public EntityNewOwnerMessage(int newOwnerId, int entityId) {
+		super(Type.ENTITY_OWNER_CHANGE);
+		this.ownerId = newOwnerId;
+		this.ownerId = entityId;
+	}
+
+}
+
 
 /// TODO EntityEventMessage 
