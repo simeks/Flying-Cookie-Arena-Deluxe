@@ -18,6 +18,9 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 public class Character extends Entity {
+	public static final int MOVEMENT_DELAY = 500; // Delay i ms for convergence
+	public static final boolean NET_DEBUG = false;
+	
 	public enum Movement
 	{
 		MOVE_FORWARD,
@@ -37,7 +40,11 @@ public class Character extends Entity {
 	private AnimChannel animChannelBase;
 	private CharacterControl  controller;
 	private Spatial node;
+	private Spatial debugNode;
 	private Quaternion roty = new Quaternion();
+	
+	private Vector3f targetPosition = new Vector3f(0,0,0);
+	private long targetPositionTimestamp = 0;
 	
 	private Vector3f velocity = new Vector3f(0,0,0);
 	private boolean sprint = false;
@@ -52,6 +59,9 @@ public class Character extends Entity {
 		
 		// Load the character model
 		node = assetManager.loadModel("Models/Sinbad/Sinbad.mesh.xml");
+		if(NET_DEBUG) {
+			debugNode = assetManager.loadModel("Models/Sinbad/Sinbad.mesh.xml");
+		}
 		
 		// Create a controller for the character
 		// I guess BetterCharacterControl would be a better choice but I don't seem to get it working without the character bugging through the floor.
@@ -70,6 +80,9 @@ public class Character extends Entity {
 		animChannelBase.setAnim("IdleBase");
 
 		world.getRootNode().attachChild(node);
+		if(NET_DEBUG) {
+			world.getRootNode().attachChild(debugNode);
+		}
 		
 		// Only the owner peer is responsible for simulating the physics for the character entity.
 		if(isOwner()) {
@@ -184,6 +197,21 @@ public class Character extends Entity {
 		controller.setPhysicsLocation(position);
 	}
 	
+	public void setTargetPosition(Vector3f targetPosition, long targetPositionTimestamp)
+	{
+		this.targetPosition = targetPosition;
+		this.targetPositionTimestamp = targetPositionTimestamp;
+	}
+	
+	
+	@Override
+	public void processStateMessage(EntityStateMessage msg) {
+		if(msg.customData != null) processCustomStateMessage(msg.customData);
+		setTargetPosition(msg.position, System.currentTimeMillis());
+		setRotation(msg.rotation);
+		setVelocity(msg.velocity);
+	}
+
 	@Override
 	public void setCollisionGroup(int group) {
 		//node.getControl(CharacterControl.class).setCollisionGroup(group);
@@ -194,7 +222,29 @@ public class Character extends Entity {
 	{
 		Vector3f relVelocity = node.getLocalRotation().mult(getVelocity()).mult(tpf);
 
-		controller.setPhysicsLocation(controller.getPhysicsLocation().add(relVelocity));	
+		if(!isOwner()) {
+			// Convergence: We want to reach the target position in (MOVEMENT_DELAY - timestamp) milliseconds.
+			long currentTime = System.currentTimeMillis();
+			if(currentTime < (targetPositionTimestamp + MOVEMENT_DELAY)) {
+				Vector3f currentPosition = getPosition();
+				Vector3f direction = targetPosition.subtract(currentPosition);
+
+				
+				float scalar = Math.min(1.0f, (float)(currentTime - targetPositionTimestamp) / (float)MOVEMENT_DELAY);
+				Vector3f newPos = currentPosition.add(direction.mult(scalar));
+				setPosition(newPos);
+			}
+			
+			if(NET_DEBUG) {
+				debugNode.setLocalTranslation(targetPosition);
+			}
+			
+		}
+		else
+		{
+			controller.setPhysicsLocation(controller.getPhysicsLocation().add(relVelocity));	
+		}
+		
 		controller.setViewDirection(roty.mult(new Vector3f(0,0,1)));
 		
 		updateAnimation();

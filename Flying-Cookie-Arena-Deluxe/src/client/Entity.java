@@ -66,7 +66,7 @@ public abstract class Entity {
 	/// @brief called when the peer owner have new customData. Is processed before basic movement. 
 	protected void processCustomStateMessage(Serializable data) { }
 	
-	public final void processStateMessage(EntityStateMessage msg) {
+	public void processStateMessage(EntityStateMessage msg) {
 		if(msg.customData != null) processCustomStateMessage(msg.customData);
 		setPosition(msg.position);
 		setRotation(msg.rotation);
