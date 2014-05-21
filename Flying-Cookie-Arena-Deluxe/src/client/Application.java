@@ -136,6 +136,13 @@ public class Application extends SimpleApplication {
 				world.processEntityState((EntityStateMessage)m);
 			}
 		});
+		session.registerEffect(Message.Type.ENTITY_EVENT, new MessageEffect() {
+			
+			@Override
+			public void execute(Message m) {
+				world.processEntityEvent((EntityEventMessage)m);
+			}
+		});
     }
 	@Override
 	public void destroy() { 

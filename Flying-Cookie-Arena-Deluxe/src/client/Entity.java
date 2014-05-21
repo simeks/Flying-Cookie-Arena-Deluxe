@@ -25,6 +25,8 @@ public abstract class Entity {
 	private Vector3f latestPosition = new Vector3f();
 	private Vector3f latestVelocity = new Vector3f();
 	private Quaternion latestRotation = new Quaternion();
+	private long latestStateBuild;
+	private final static long MAX_STATE_SILINCE = 1000; 
 	
 	
 	public Entity(int ownerId, World world, int entityId, Type entityType) {
@@ -32,6 +34,7 @@ public abstract class Entity {
 		this.world = world;
 		this.entityId = entityId;
 		this.entityType = entityType;
+		this.latestStateBuild = 0;
 	}
 
 	public abstract void update(float tpf);
@@ -71,7 +74,8 @@ public abstract class Entity {
 	}
 	
 	public final EntityStateMessage buildStateMessage() {
-		if(!hasMovementStateChanged() && !hasCustomStateChanged()) {
+		if(System.currentTimeMillis() < latestStateBuild+MAX_STATE_SILINCE
+				|| (!hasMovementStateChanged() && !hasCustomStateChanged())) {
 			return null;
 		}
 		latestPosition = getPosition().clone();
@@ -88,6 +92,21 @@ public abstract class Entity {
 		return (!getPosition().equals(latestPosition)
 				|| !getRotation().equals(latestRotation)
 				|| !getVelocity().equals(latestVelocity));
+	}
+
+	public final void processEventMessage(EntityEventMessage e) {
+		processCustomStateMessage(e.customData);
+	}
+	public final boolean sendEventMessage() {
+		EntityEventMessage msg = new EntityEventMessage(entityId, getCustomData());
+		Session session = Application.getInstance().getSession();
+		try {
+			session.sendToAll(msg, true);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+		return true;
 	}
 	
 	public int getId() {

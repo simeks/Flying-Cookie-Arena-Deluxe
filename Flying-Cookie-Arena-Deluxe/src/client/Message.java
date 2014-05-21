@@ -26,7 +26,8 @@ public abstract class Message implements Serializable {
 		CHAT_MSG,
 		CREATE_ENTITY,
 		DESTROY_ENTITY,
-		ENTITY_STATE
+		ENTITY_STATE,
+		ENTITY_EVENT
 	};
 	
 	Type type;
@@ -179,3 +180,18 @@ class EntityStateMessage extends Message {
 		this.customData = customData;
 	}
 }
+
+class EntityEventMessage extends Message {
+	private static final long serialVersionUID = -7263225364667973224L;
+	public Serializable customData;
+	public int entityId;
+	
+	public EntityEventMessage(int entityId, Serializable customData) {
+		super(Type.ENTITY_EVENT);
+		this.customData = customData;
+		this.entityId = entityId;
+	}
+	
+}
+
+/// TODO EntityEventMessage 

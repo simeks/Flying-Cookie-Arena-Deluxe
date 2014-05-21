@@ -193,6 +193,13 @@ public class World {
 			entity.processStateMessage(msg);
 		}
 	}
+
+	public void processEntityEvent(EntityEventMessage msg) {
+		Entity entity = getEntity(msg.entityId);
+		if(entity != null) {
+			entity.processEventMessage(msg);
+		}
+	}
 	
 	/// @brief Destroys any spawned objects.
 	public void clear() {
