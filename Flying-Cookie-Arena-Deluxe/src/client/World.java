@@ -62,9 +62,20 @@ public class World {
             }
         }
     
-    
+   
     public void resetPhysics(){
-        
+    	 /*
+         * TODO
+         */
+    	this.bulletAppState = null;
+    	try {
+    		this.bulletAppState = Application.getInstance().getBulletAppState();
+    	} catch (Exception e){
+    		e.printStackTrace();
+    		System.out.println("Could not retrieve default physics");
+    		
+    	}
+    	
     }
     
     

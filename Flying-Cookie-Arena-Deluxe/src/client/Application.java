@@ -98,6 +98,9 @@ public class Application extends SimpleApplication {
 		
     	// Initialize bullet for physics.
     	bulletAppState = new BulletAppState();
+    	
+    	/* for debugging. Makes collision shapes visible */
+//    	bulletAppState.getPhysicsSpace().enableDebug(assetManager); 
     	stateManager.attach(bulletAppState);
 
     	cam.setFrustumFar(2000.0f);
