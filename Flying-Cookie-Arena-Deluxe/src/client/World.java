@@ -16,6 +16,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.terrain.geomipmap.TerrainQuad;
 import com.jme3.terrain.heightmap.AbstractHeightMap;
+import com.jme3.terrain.heightmap.HeightMap;
 import com.jme3.terrain.heightmap.HillHeightMap;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
@@ -110,7 +111,7 @@ public class World {
 
 			AbstractHeightMap heightmap = null;
 			try {
-				heightmap = new HillHeightMap(1025, 1000, 1.0f, 300.0f, 15);
+				heightmap = new HillHeightMap(1025, 1, 1.0f, 2.0f, 255);
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
