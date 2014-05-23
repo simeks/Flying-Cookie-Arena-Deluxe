@@ -141,9 +141,30 @@ public class MenuState implements GameState {
 	
 	// @brief callback from join button
 	public void joinGameLobby(String server) {
-		final Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
-		final Element popup = nifty.createPopup("loadingPopup");
+		Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
+		Element popup = nifty.createPopup("loadingPopup");
 		nifty.showPopup(nifty.getCurrentScreen(), popup.getId(), null);
+		joinGameLobby(server.split(";"), 0, popup);
+	}
+	private void joinGameLobby(final String[] serverAddresses, final int test, final Element popup) {
+		final Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
+		
+		Application.getInstance().getSession().disconnect();
+		
+		if(serverAddresses.length <= test || test < 0) {
+			nifty.closePopup(popup.getId());
+			return;
+		}
+		
+		String testThisAddress = serverAddresses[test];
+		if(testThisAddress.indexOf(":") != -1) {
+			testThisAddress = testThisAddress.substring(0, testThisAddress.indexOf(":"));
+		}
+
+		int port = Application.GAME_PORT;
+		
+		popup.findNiftyControl("loadingPopupStatus", Label.class).setText("connecting try # "+(test+1)+": "+testThisAddress+":"+port+"... ");
+		
 		
 		SessionCallback callback = new SessionCallback() {
 			@Override
@@ -155,13 +176,7 @@ public class MenuState implements GameState {
 
 			@Override
 			public void onFailure(String error) {
-				popup.findNiftyControl("loadingPopupStatus", Label.class).setText("Failed to connect "+error+". ");
-				new Timer().schedule(new TimerTask() {          
-				    @Override
-				    public void run() {
-						nifty.closePopup(popup.getId()); 
-				    }
-				}, 2000);
+				joinGameLobby(serverAddresses, test+1, popup);
 			}
 
 			@Override
@@ -186,7 +201,7 @@ public class MenuState implements GameState {
 			}
 		};
 		try {
-			Application.getInstance().getSession().connectToSession(InetAddress.getByName("localhost"), Application.GAME_PORT, callback);
+			Application.getInstance().getSession().connectToSession(InetAddress.getByName(testThisAddress), port, callback);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -299,7 +314,7 @@ public class MenuState implements GameState {
 				
 			}
 		};
-		Application.getInstance().getSession().setReadDelay(5000);
+		Application.getInstance().getSession().setReadDelay(0);
 		try {
 			Application.getInstance().getSession().connectToSession(InetAddress.getByName(ip), Application.GAME_PORT, callback);
 		} catch (UnknownHostException e) {

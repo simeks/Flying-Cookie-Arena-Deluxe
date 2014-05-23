@@ -6,10 +6,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringWriter;
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -100,7 +105,44 @@ public class LobbyServerConnection implements Runnable {
 		return sendMessage(formatMessage("l", null, null));
 	}
 	
+	/// @author http://stackoverflow.com/a/2845292
+	private String getInternAddress() throws SocketException {
+		String ret = "";
+		for (
+				final Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces( );
+			    interfaces.hasMoreElements( );
+			)
+			{
+			    final NetworkInterface cur = interfaces.nextElement( );
+
+				if ( cur.isLoopback( ) )
+				{
+				    continue;
+				}
+
+			    for ( final InterfaceAddress addr : cur.getInterfaceAddresses( ) )
+			    {
+			        final InetAddress inet_addr = addr.getAddress( );
+
+			        if ( !( inet_addr instanceof Inet4Address ) )
+			        {
+			            continue;
+			        }
+
+			        ret += inet_addr.getHostAddress( );
+			    }
+			}
+		return ret;
+	}
+	
 	public boolean createServer(String name, int port) {
+		String iip = "";
+		try {
+			iip = getInternAddress();
+		} catch (SocketException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Vector<String> keys = new Vector<String>();
 		Vector<String> values = new Vector<String>();
 		keys.add("n");
@@ -111,6 +153,8 @@ public class LobbyServerConnection implements Runnable {
 		values.add("1");
 		keys.add("m");
 		values.add("20");
+		keys.add("iip");
+		values.add(iip);
 		return sendMessage(formatMessage("n", keys, values));
 	}
 	public boolean updateServer(int count, int maxCount) {
@@ -123,6 +167,7 @@ public class LobbyServerConnection implements Runnable {
 		return sendMessage(formatMessage("r", keys, values));
 	}
 	
+	/// @brief builds a json string from message
 	private String formatMessage(String messageId, Vector<String> keys, Vector<String> values) {
 		String message = "{"+'"'+"m"+'"'+":"+'"'+""+messageId.replace(serverDelimiter, "")+'"';
 		if(keys != null) {
@@ -192,11 +237,11 @@ public class LobbyServerConnection implements Runnable {
 					    	JSONObject server = (JSONObject)entry.getValue();
 					    	String address = (String) entry.getKey();
 					    	address = address.substring(0, address.indexOf(":"));
-					    	
+
+					    	String name="?",count="?",maxCount="?", port="";
 					    	if(server.containsKey("p")) {
-					    		address += ":"+(String)server.get("p");
+					    		port = "";
 					    	}
-					    	String name="?",count="?",maxCount="?";
 					    	if(server.containsKey("n")) {
 					    		name = (String)server.get("n");
 					    	}
@@ -206,6 +251,13 @@ public class LobbyServerConnection implements Runnable {
 					    	if(server.containsKey("m")) {
 					    		maxCount = (String)server.get("m");
 					    	}
+					    	
+				    		address += ":"+port;
+					    	if(server.containsKey("iip")) {
+					    		address += ";"+(String)server.get("iip");
+					    		address += ":"+port;
+					    	}
+					    	address += ";127.0.0.1:"+port;
 					    	
 					    	map.put(address, name+". "+count+"/"+maxCount);
 					    }
