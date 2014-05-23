@@ -1,5 +1,7 @@
 package client;
 
+import java.util.Random;
+
 import com.jme3.bullet.collision.PhysicsCollisionEvent;
 import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
@@ -12,6 +14,7 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.MouseAxisTrigger;
+import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
@@ -95,6 +98,9 @@ public class MainState implements GameState {
 			else if (name.equals("Sprint")) {
 				character.setSprint(keyPressed);
 			}
+			else if (name.equals("Interact")) {
+
+			}
 			else if (name.equals("Quit")) {
 				Application.getInstance().changeState(GameStateId.LOBBY_STATE);
 			}
@@ -149,6 +155,7 @@ public class MainState implements GameState {
         inputManager.addMapping("invRotateX", new MouseAxisTrigger(MouseInput.AXIS_Y, true));
         inputManager.addMapping("Sprint", new KeyTrigger(KeyInput.KEY_LSHIFT));
         inputManager.addMapping("Quit", new KeyTrigger(KeyInput.KEY_ESCAPE));
+        inputManager.addMapping("Interact", new KeyTrigger(KeyInput.KEY_E));
 
     }
     
@@ -177,6 +184,15 @@ public class MainState implements GameState {
 
 			Flag flag = world.spawnFlag(new Vector3f((id-count/2)*20+2, 50, (id-count/2)*20));
 			flag.getSpatial().setName("myFlag");
+
+			// Lets spawn some campfires if we're the master
+			if(Application.getInstance().getSession().isMaster()) {
+				Random rand = new Random();
+				for(int i = 0; i < 5; ++i) {
+					CampFire fire = world.spawnCampFire(new Vector3f(rand.nextInt(400)-200, 0.25f, rand.nextInt(400)-200));
+
+				}
+			}			
 		}
 		Camera camera = Application.getInstance().getCamera();
 		cameraNode.attachChild(new CameraNode("camera", camera));
@@ -193,6 +209,7 @@ public class MainState implements GameState {
 		Application.getInstance().getNiftyDisplay().getNifty().gotoScreen("hud");
 
 		Application.getInstance().getBulletAppState().getPhysicsSpace().addCollisionListener(collisionListener);
+		
 	}
 
 	@Override

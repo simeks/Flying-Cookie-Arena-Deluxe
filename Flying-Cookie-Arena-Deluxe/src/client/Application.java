@@ -8,6 +8,8 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import client.GameState.GameStateId;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.input.InputManager;
@@ -74,6 +76,12 @@ public class Application extends SimpleApplication {
     @Override
 	public void simpleUpdate(float tpf) {
     	timeElapsed += tpf;
+    	
+    	if(currentState == GameStateId.LOBBY_STATE) {
+    		if(((LobbyState)gameStates.get(currentState)).isReady()) {
+    			changeState(GameStateId.MAIN_STATE);
+    		}
+    	}
     	
 		gameStates.get(currentState).update(tpf);
 		session.update();

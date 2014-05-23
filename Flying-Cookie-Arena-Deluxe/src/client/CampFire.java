@@ -1,5 +1,9 @@
 package client;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -94,6 +98,14 @@ public class CampFire extends Entity {
 	}
 
 	@Override
+	public void interact() {
+		// Toggle lit
+		lit = lit ? false : true;
+		
+		
+	}
+
+	@Override
 	public void setPosition(Vector3f position) {
     	pointLight.setPosition(position.add(new Vector3f(0,2,0)));
 		node.move(position);
@@ -113,7 +125,7 @@ public class CampFire extends Entity {
 	@Override
 	public Vector3f getVelocity()
 	{
-		return null;
+		return new Vector3f(0,0,0);
 	}
 	
 	@Override
@@ -123,7 +135,7 @@ public class CampFire extends Entity {
 	
 	@Override
 	public void setCollisionGroup(int group) {
-		node.getControl(RigidBodyControl.class).setCollisionGroup(group);
+		//node.getControl(RigidBodyControl.class).setCollisionGroup(group);
 	}
 	
 	@Override
@@ -132,6 +144,28 @@ public class CampFire extends Entity {
 		
 	}
 	
+	@Override
+	protected void processCustomStateMessage(Serializable data) {
+		if(data instanceof Map<?, ?>) {
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = (Map<String, Object>) data;
+			if(map.containsKey("lit")) {
+				lit = (boolean) map.get("lit");
+			}
+		}
+	}
+	
+	@Override
+	protected Serializable getCustomData() {
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("lit", lit);
+		return (Serializable) map;
+	}	
+
+	@Override
+	protected boolean hasCustomStateChanged() {
+ 		return true;
+	}
 
 	@Override
 	public void destroy() {
@@ -142,4 +176,9 @@ public class CampFire extends Entity {
 	public Spatial getSpatial() {
 		return node;
 	}
+	@Override
+	public void collideWith(Ray ray, CollisionResults results)
+	{
+		node.collideWith(ray, results);
+	}	
 }

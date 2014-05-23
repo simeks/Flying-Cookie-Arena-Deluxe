@@ -139,4 +139,10 @@ public class Crate extends Entity {
 	public void destroy() {
 		world.getRootNode().detachChild(geometry);
 	}
+	
+	@Override
+	public void collideWith(Ray ray, CollisionResults results)
+	{
+		geometry.collideWith(ray, results);
+	}
 }

@@ -32,6 +32,7 @@ public class LobbyState implements GameState {
 
 	private NiftyJmeDisplay niftyDisplay;
 	private ArrayList<String> playerNames = new ArrayList<>();
+	private boolean ready = false;
 
 	/// @brief called when exit is clicked. 
 	public void exitLobbyState() {
@@ -39,10 +40,14 @@ public class LobbyState implements GameState {
 		Application.getInstance().getSession().disconnect();
 		Application.getInstance().changeState(GameState.GameStateId.MENU_STATE);
 	}
+	
+	public boolean isReady() {
+		return ready;
+	}
 
 	/// @brief called when ready is clicked
 	public void toggleReady() {
-		Application.getInstance().changeState(GameState.GameStateId.MAIN_STATE);
+		ready = ready ? false : true;
 	}
 
 	/// @brief called when the screen is ready. 
@@ -90,6 +95,8 @@ public class LobbyState implements GameState {
 	
 	@Override
 	public void enterState() {
+		ready = false;
+		
 		Application app = Application.getInstance();
 	    Nifty nifty = niftyDisplay.getNifty();
 	    nifty.gotoScreen("ServerLobbyScreen"); // start the screen

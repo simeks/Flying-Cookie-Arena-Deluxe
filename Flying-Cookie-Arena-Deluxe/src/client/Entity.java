@@ -9,7 +9,9 @@ import client.Session.State;
 
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.collision.CollisionResults;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
@@ -47,6 +49,9 @@ public abstract class Entity {
 		this.latestStateBuild = 0;
 	}
 
+	/// @brief Called whenever a character interacts with an entity.
+	public void interact() {}
+	
 	public abstract void update(float tpf);
 	
 	public abstract void destroy();
@@ -211,6 +216,9 @@ public abstract class Entity {
 	public void setFlags(int flags) {
 		this.flags = flags;
 	}
+
+	// Performs a test checking if the object intersects the specified ray.
+	public abstract void collideWith(Ray ray, CollisionResults results);
 }
 
 interface EntityCallback {

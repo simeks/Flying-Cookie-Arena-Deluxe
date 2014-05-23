@@ -8,10 +8,12 @@ import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.collision.CollisionResults;
 import com.jme3.light.AmbientLight;
 import com.jme3.light.DirectionalLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.terrain.geomipmap.TerrainQuad;
@@ -157,6 +159,31 @@ public class World {
 			entity.update(tpf);
 		}
 	}
+	
+	/// Tries to interact with any object found in the specified direction
+	/// closestDistance is the closest distance to an object required to interact
+	/// with it.
+	public void interactWithItem(Vector3f position, Vector3f direction, float closestDistance) {
+		Ray ray = new Ray(position, direction.normalize());
+
+		Entity closestObject = null;
+		for (Entity o : entities) {
+			CollisionResults results = new CollisionResults();
+			o.collideWith(ray, results);
+
+			if (results.size() > 0) {
+				if (results.getClosestCollision().getDistance() < closestDistance) {
+					closestObject = o;
+					closestDistance = results.getClosestCollision().getDistance();
+				}
+			}
+		}
+
+		// Interact with the closest object, if any
+		if (closestObject != null) {
+			closestObject.interact();
+		}
+	}	
 	
 	/// Broadcasts the current state of all entities owned by this peer to all other peers.
 	/// This is used for frequent state regeneration and is meant to be called frequently 

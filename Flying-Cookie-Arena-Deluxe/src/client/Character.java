@@ -9,9 +9,11 @@ import com.jme3.bullet.collision.PhysicsCollisionListener;
 import com.jme3.bullet.collision.shapes.CapsuleCollisionShape;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
+import com.jme3.collision.CollisionResults;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
+import com.jme3.math.Ray;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
@@ -294,4 +296,10 @@ public class Character extends Entity {
 	    Application.getInstance().getBulletAppState().getPhysicsSpace().remove(node.getControl(CharacterControl.class));
 		world.getRootNode().detachChild(node);
 	}
+	
+	@Override
+	public void collideWith(Ray ray, CollisionResults results)
+	{
+		node.collideWith(ray, results);
+	}	
 }
