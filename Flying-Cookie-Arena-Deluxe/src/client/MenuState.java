@@ -49,6 +49,7 @@ public class MenuState implements GameState {
 	private NiftyJmeDisplay niftyDisplay;
 	private Vector<String> serversInList;
 	
+	private Element popup = null;
 	
 	@Override
 	public void enterState() {
@@ -142,7 +143,7 @@ public class MenuState implements GameState {
 	// @brief callback from join button
 	public void joinGameLobby(String server) {
 		Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
-		Element popup = nifty.createPopup("loadingPopup");
+		final Element popup = getPopup();
 		nifty.showPopup(nifty.getCurrentScreen(), popup.getId(), null);
 		joinGameLobby(server.split(";"), 0, popup);
 	}
@@ -264,7 +265,7 @@ public class MenuState implements GameState {
 		final Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
 		String ip = nifty.getCurrentScreen().findNiftyControl("ServerListDirectConnectField", TextField.class).getText();
 		
-		final Element popup = nifty.createPopup("loadingPopup");
+		final Element popup = getPopup();
 		nifty.showPopup(nifty.getCurrentScreen(), popup.getId(), null);
 		
 		SessionCallback callback = new SessionCallback() {
@@ -282,7 +283,7 @@ public class MenuState implements GameState {
 				new Timer().schedule(new TimerTask() {          
 				    @Override
 				    public void run() {
-						nifty.closePopup(popup.getId()); 
+						nifty.closePopup(popup.getId());
 				    }
 				}, 2000);
 			}
@@ -300,13 +301,6 @@ public class MenuState implements GameState {
 			@Override
 			public void onDisconnect(String reason) {
 				System.out.println("You got disconnected: " + reason);
-				popup.findNiftyControl("loadingPopupStatus", Label.class).setText("Failed to connect "+reason+". ");
-				new Timer().schedule(new TimerTask() {          
-				    @Override
-				    public void run() {
-						nifty.closePopup(popup.getId()); 
-				    }
-				}, 2000);
 			}
 
 			@Override
@@ -330,6 +324,14 @@ public class MenuState implements GameState {
 		}
 	}
 
+	private Element getPopup() {
+		if(popup == null) {
+			final Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
+			popup = nifty.createPopup("loadingPopup");
+		}
+		return popup;
+	}
+	
 	// @brief callback from quit button
 	public void quit() {
 		exitState();

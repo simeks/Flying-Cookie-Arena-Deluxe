@@ -54,16 +54,17 @@ public class LobbyState implements GameState {
 	public void onStartScreen() {
 		Nifty nifty = niftyDisplay.getNifty();
 		Chat chat = nifty.getCurrentScreen().findNiftyControl("LobbyChat", Chat.class);
-
-		for(String player : playerNames) {
-			chat.removePlayer(player);
-		}
-		
-		if(!playerNames.contains("You")) {
-			playerNames.add("You");
-		}
-		for(String player : playerNames) {
-			chat.addPlayer(player, nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
+		if(chat != null) {
+			for(String player : playerNames) {
+				chat.removePlayer(player);
+			}
+			
+			if(!playerNames.contains("You")) {
+				playerNames.add("You");
+			}
+			for(String player : playerNames) {
+				chat.addPlayer(player, nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
+			}
 		}
 	}
 	
@@ -71,7 +72,7 @@ public class LobbyState implements GameState {
 		Nifty nifty = niftyDisplay.getNifty();
 		
 		Chat chat = nifty.getCurrentScreen().findNiftyControl("LobbyChat", Chat.class);
-		if(chat instanceof Chat) {
+		if(chat != null) {
 			chat.addPlayer(name, nifty.getRenderEngine().createImage(nifty.getCurrentScreen(), "Textures/avatar1.png", false));
 		} else {
 			playerNames.add(name);
