@@ -147,14 +147,13 @@ public class MenuState implements GameState {
 		joinGameLobby(server.split(";"), 0, popup);
 	}
 	private void joinGameLobby(final String[] serverAddresses, final int test, final Element popup) {
-		final Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
-		
-		Application.getInstance().getSession().disconnect();
+		final Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();		
 		
 		if(serverAddresses.length <= test || test < 0) {
 			nifty.closePopup(popup.getId());
 			return;
 		}
+		
 		
 		String testThisAddress = serverAddresses[test];
 		if(testThisAddress.indexOf(":") != -1) {
@@ -201,6 +200,7 @@ public class MenuState implements GameState {
 			}
 		};
 		try {
+			Application.getInstance().getSession().disconnect();
 			Application.getInstance().getSession().connectToSession(InetAddress.getByName(testThisAddress), port, callback);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
