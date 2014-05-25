@@ -244,6 +244,7 @@ public class MenuState implements GameState {
 		};	
 		
 		try {
+			Application.getInstance().getSession().disconnect();
 			Application.getInstance().getSession().createSession(Application.GAME_PORT, callback);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -316,6 +317,7 @@ public class MenuState implements GameState {
 		};
 		Application.getInstance().getSession().setReadDelay(0);
 		try {
+			Application.getInstance().getSession().disconnect();
 			Application.getInstance().getSession().connectToSession(InetAddress.getByName(ip), Application.GAME_PORT, callback);
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block

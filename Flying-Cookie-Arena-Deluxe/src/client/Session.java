@@ -33,6 +33,7 @@ public class Session {
 	private int masterPeerId = -1;
 	private int nextPeerId = 0;
 	private long readDelay = 0;
+	private long connectionTimeoutTimestamp = 0;
 
 	private SessionCallback sessionCallback;
 
@@ -76,18 +77,11 @@ public class Session {
 	}
 
 	public void connectToSession(InetAddress destAddr, int destPort,
-			final SessionCallback c) throws Exception {
-		setConnectionCallback(c);
+			SessionCallback c) throws Exception {
 		
+		setConnectionCallback(c);
 		if(c != null) {
-			new Timer().schedule(new TimerTask() {          
-			    @Override
-			    public void run() {
-			    	if(state != State.CONNECTED) {
-			    		c.onFailure("Timed out");
-			    	}
-			    }
-			}, 5000);
+			connectionTimeoutTimestamp = System.currentTimeMillis()+5000;
 		}
 		
 		if (state == State.DISCONNECTED) {
@@ -193,6 +187,12 @@ public class Session {
 				
 			}
 
+		}
+		if(state == State.AWAITING_CONNECTION && connectionTimeoutTimestamp > 0 && sessionCallback != null) {
+			if(System.currentTimeMillis() > connectionTimeoutTimestamp) {
+				sessionCallback.onFailure("Timeout");
+				connectionTimeoutTimestamp = 0;
+			}
 		}
 	}
 
