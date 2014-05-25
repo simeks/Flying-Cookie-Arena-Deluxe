@@ -22,6 +22,10 @@ import com.jme3.scene.Spatial;
 public class Character extends Entity {
 	public static final int MOVEMENT_DELAY = 200; // Delay i ms for convergence
 	public static final boolean NET_DEBUG = false;
+	public static final float WALK_SPEED = 30.0f;
+	public static final float STRAFE_SPEED = 25.0f;
+	public static final float SPRINT_MULTIPLIER = 1.5f;
+	
 	
 	public enum Movement
 	{
@@ -43,7 +47,7 @@ public class Character extends Entity {
 	private CharacterControl  controller;
 	private Spatial node;
 	private Spatial debugNode;
-	private Quaternion roty = new Quaternion();
+	private Quaternion roty = new Quaternion(new float[]{0.0f, (float) Math.PI, 0.0f});
 	
 	private Vector3f targetPosition = new Vector3f(0,0,0);
 	private Quaternion targetRotation = new Quaternion();
@@ -111,21 +115,21 @@ public class Character extends Entity {
 	{
 		if(move == Movement.MOVE_FORWARD)
 		{
-			velocity = velocity.add(new Vector3f(0,0,35.0f));
+			velocity = velocity.add(new Vector3f(0,0,WALK_SPEED));
 		}
 		else if(move == Movement.MOVE_BACKWARD)
 		{
-			velocity = velocity.add(new Vector3f(0,0,-35.0f));
+			velocity = velocity.add(new Vector3f(0,0,-WALK_SPEED));
 			
 		}
 		else if(move == Movement.MOVE_LEFT)
 		{
-			velocity = velocity.add(new Vector3f(25.0f,0,0));
+			velocity = velocity.add(new Vector3f(STRAFE_SPEED,0,0));
 			
 		}
 		else if(move == Movement.MOVE_RIGHT)
 		{
-			velocity = velocity.add(new Vector3f(-25.0f,0,0));
+			velocity = velocity.add(new Vector3f(-STRAFE_SPEED,0,0));
 			
 		}
 	}
@@ -134,20 +138,20 @@ public class Character extends Entity {
 	{
 		if(move == Movement.MOVE_FORWARD)
 		{
-			velocity = velocity.add(new Vector3f(0,0,-35.0f));
+			velocity = velocity.add(new Vector3f(0,0,-WALK_SPEED));
 		}
 		else if(move == Movement.MOVE_BACKWARD)
 		{
-			velocity = velocity.add(new Vector3f(0,0,35.0f));
+			velocity = velocity.add(new Vector3f(0,0,WALK_SPEED));
 		}
 		else if(move == Movement.MOVE_LEFT)
 		{
-			velocity = velocity.add(new Vector3f(-25.0f,0,0));
+			velocity = velocity.add(new Vector3f(-STRAFE_SPEED,0,0));
 			
 		}
 		else if(move == Movement.MOVE_RIGHT)
 		{
-			velocity = velocity.add(new Vector3f(25.0f,0,0));
+			velocity = velocity.add(new Vector3f(STRAFE_SPEED,0,0));
 			
 		}
 	}	
@@ -189,7 +193,7 @@ public class Character extends Entity {
 	public Vector3f getVelocity()
 	{
 		if(sprint)
-			return velocity.mult(2.0f);
+			return velocity.mult(SPRINT_MULTIPLIER);
 		else
 			return velocity;
 	}
@@ -268,7 +272,7 @@ public class Character extends Entity {
 	private void updateAnimation() {
 		if(animState == AnimationState.IDLE) // Is the character currently in the idling animation?
 		{
-			if(getVelocity().length() >= 20.0f) { // Moving 
+			if(getVelocity().length() >= 10.0f) { // Moving 
 				animChannelTop.setAnim("RunTop");
 				animChannelBase.setAnim("RunBase");
 				animChannelTop.setLoopMode(LoopMode.Loop);

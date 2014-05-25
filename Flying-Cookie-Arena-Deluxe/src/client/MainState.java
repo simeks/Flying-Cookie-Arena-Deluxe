@@ -98,8 +98,9 @@ public class MainState implements GameState {
 			else if (name.equals("Sprint")) {
 				character.setSprint(keyPressed);
 			}
-			else if (name.equals("Interact")) {
-
+			else if (name.equals("Interact") && keyPressed) {
+				Camera camera = Application.getInstance().getCamera();
+				Application.getInstance().getWorld().interactWithItem(character.getPosition(), camera.getDirection(), 15.0f);
 			}
 			else if (name.equals("Quit")) {
 				Application.getInstance().changeState(GameStateId.LOBBY_STATE);
@@ -171,7 +172,7 @@ public class MainState implements GameState {
 		
 		// add character before inputlisteners.
 		if(character == null) {
-			character = world.spawnCharacter(new Vector3f((id-count/2)*20, 50, (id-count/2)*20));
+			character = world.spawnCharacter(new Vector3f((id-count/2)*20, 15, (id-count/2)*20));
 			
 			cameraNode = new Node();
 	    	cameraNode.setLocalTranslation(0, 2, 1);
@@ -189,7 +190,7 @@ public class MainState implements GameState {
 			if(Application.getInstance().getSession().isMaster()) {
 				Random rand = new Random();
 				for(int i = 0; i < 5; ++i) {
-					CampFire fire = world.spawnCampFire(new Vector3f(rand.nextInt(400)-200, 0.25f, rand.nextInt(400)-200));
+					world.spawnCampFire(new Vector3f(rand.nextInt(400)-200, 0.25f, rand.nextInt(400)-200));
 
 				}
 			}			
@@ -200,7 +201,7 @@ public class MainState implements GameState {
     	InputManager inputManager = Application.getInstance().getInputManager();
     	inputManager.deleteMapping(Application.INPUT_MAPPING_EXIT);
         inputManager.addListener(actionListener, "Jump", "MoveLeft", "MoveRight", "MoveForward", 
-        		"MoveBackward", "Sprint", "Quit");
+        		"MoveBackward", "Sprint", "Quit", "Interact");
         inputManager.addListener(analogListener, "RotateX", "RotateY", "invRotateX", "invRotateY");
 
         // Hide the mouse cursor

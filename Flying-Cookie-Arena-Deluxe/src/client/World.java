@@ -168,6 +168,11 @@ public class World {
 
 		Entity closestObject = null;
 		for (Entity o : entities) {
+			// We can't interact with our own character
+			if(o instanceof Character && ((Character)o).isOwner()) {
+				continue;
+			}
+			
 			CollisionResults results = new CollisionResults();
 			o.collideWith(ray, results);
 

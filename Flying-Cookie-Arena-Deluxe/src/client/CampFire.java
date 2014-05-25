@@ -97,18 +97,44 @@ public class CampFire extends Entity {
     	
 	}
 
+	public void setLit(boolean lit)
+	{
+		if(this.lit == lit)
+			return;
+		
+		if(!lit)
+		{
+		    flame.setLowLife(0.0f);
+		    flame.setHighLife(0.0f);
+			pointLight.setColor(ColorRGBA.Black);
+			this.lit = false;
+		}
+		else
+		{
+		    flame.setLowLife(1.0f);
+		    flame.setHighLife(4.0f);
+			pointLight.setColor(lightColor);
+			this.lit = true;
+		}
+	}
+	
 	@Override
 	public void interact() {
 		// Toggle lit
-		lit = lit ? false : true;
+		setLit(lit == false);
 		
-		
+		try {
+			Application.getInstance().getSession().sendToAll(new EntityEventMessage(buildStateMessage()), true);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void setPosition(Vector3f position) {
     	pointLight.setPosition(position.add(new Vector3f(0,2,0)));
-		node.move(position);
+		node.setLocalTranslation(position);
 	}
 
 	@Override
@@ -150,7 +176,8 @@ public class CampFire extends Entity {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> map = (Map<String, Object>) data;
 			if(map.containsKey("lit")) {
-				lit = (boolean) map.get("lit");
+				setLit((boolean) map.get("lit"));
+				
 			}
 		}
 	}
