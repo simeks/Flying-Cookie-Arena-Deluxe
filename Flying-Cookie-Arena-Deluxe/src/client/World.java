@@ -42,6 +42,9 @@ public class World {
 	// List of all crates in the world
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 
+	public ArrayList<Entity> getEntities() {
+		return entities;
+	}
     
     /* pause game physics */
     public void pausePhysics(){
@@ -255,7 +258,11 @@ public class World {
 			entity.setCollisionGroup(COLLISION_GROUP_CAMP_FIRE);
 			break;
 		case CHARACTER:
-			entity = new Character(msg.peer, this, msg.entityId, msg.position);
+			entity = new Character(msg.peer, this, msg.entityId, msg.position, 1.0f);
+			entity.setCollisionGroup(COLLISION_GROUP_CHARACTER);
+			break;
+		case AI_CHARACTER:
+			entity = new AICharacter(msg.peer, this, msg.entityId, msg.position);
 			entity.setCollisionGroup(COLLISION_GROUP_CHARACTER);
 			break;
 		case CRATE:
@@ -314,6 +321,18 @@ public class World {
 	public Character spawnCharacter(Vector3f position) {
 		int id = generateEntityID();
 		Character character = new Character(Application.getInstance().getSession().getMyPeerId(), 
+				this, id, position, 1.0f);
+		entities.add(character);
+		character.setCollisionGroup(COLLISION_GROUP_CHARACTER);
+		character.getSpatial().setUserData("id", id);
+		
+		broadcastNewEntity(character, position);
+		
+		return character;
+	}
+	public AICharacter spawnAICharacter(Vector3f position) {
+		int id = generateEntityID();
+		AICharacter character = new AICharacter(Application.getInstance().getSession().getMyPeerId(), 
 				this, id, position);
 		entities.add(character);
 		character.setCollisionGroup(COLLISION_GROUP_CHARACTER);

@@ -76,8 +76,8 @@ public class Character extends Entity {
 	private AnimControl animControl;
 	private AnimChannel animChannelTop;
 	private AnimChannel animChannelBase;
-	private CharacterControl  controller;
-	private Spatial node;
+	protected CharacterControl  controller;
+	protected Spatial node;
 	private Spatial debugNode;
 	private Quaternion roty = new Quaternion(new float[]{0.0f, (float) Math.PI, 0.0f});
 
@@ -88,11 +88,11 @@ public class Character extends Entity {
 
 
 
-	private Vector3f velocity = new Vector3f(0,0,0);
+	protected Vector3f velocity = new Vector3f(0,0,0);
 	private boolean sprint = false;
 
 
-	public Character(int ownerId, World world, int entityId, Vector3f position)
+	public Character(int ownerId, World world, int entityId, Vector3f position, float scale)
 	{
 		super(ownerId, world, entityId, Type.CHARACTER);
 
@@ -107,9 +107,10 @@ public class Character extends Entity {
 
 		// Create a controller for the character
 		// I guess BetterCharacterControl would be a better choice but I don't seem to get it working without the character bugging through the floor.
-		CapsuleCollisionShape shape = new CapsuleCollisionShape(3.0f, 4.0f, 1);
+		CapsuleCollisionShape shape = new CapsuleCollisionShape(3.0f*scale, 4.0f*scale, 1);
 		controller = new CharacterControl(shape, 0.05f);
 		node.addControl(controller);
+		node.setLocalScale(scale);
 
 		controller.setJumpSpeed(25.0f);
 		controller.addCollideWithGroup(World.COLLISION_GROUP_TERRAIN);

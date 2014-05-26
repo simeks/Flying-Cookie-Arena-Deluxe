@@ -23,7 +23,8 @@ public abstract class Entity {
 		CRATE,
 		CHARACTER,
 		FLAG,
-		CAMP_FIRE
+		CAMP_FIRE,
+		AI_CHARACTER
 	}
 	
 	protected int ownerPeer;

@@ -194,7 +194,10 @@ public class MainState implements GameState {
 				for(int i = 0; i < 5; ++i) {
 					Flag flag = world.spawnFlag(new Vector3f(rand.nextInt(400)-200, Flag.poleHeight*0.5f, rand.nextInt(400)-200));
 				}
-			}			
+				
+				// Spawn some AI character
+				world.spawnAICharacter(new Vector3f(rand.nextInt(100)-50, 50, rand.nextInt(100)-50));
+			}
 		}
 		Camera camera = Application.getInstance().getCamera();
 		cameraNode.attachChild(new CameraNode("camera", camera));
