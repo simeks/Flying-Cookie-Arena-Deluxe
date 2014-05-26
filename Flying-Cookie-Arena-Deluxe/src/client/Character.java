@@ -1,5 +1,7 @@
 package client;
 
+import java.util.Iterator;
+
 import com.jme3.animation.AnimChannel;
 import com.jme3.animation.AnimControl;
 import com.jme3.animation.LoopMode;
@@ -20,6 +22,29 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 
 public class Character extends Entity {
+	
+	@Override
+	public void interact() {
+		
+		Iterator<Spatial> iter = ((Node) node).getChildren().iterator();
+		while(iter.hasNext()) {
+		Node child = (Node) iter.next();
+		
+		if (child.getUserData("id") != null){
+			if(world.getEntity((int) child.getUserData("id")) instanceof Flag){
+				
+				
+				((Flag)world.getEntity((int) child.getUserData("id"))).editEntity();
+				((Flag)world.getEntity((int) child.getUserData("id"))).pickupFlag(getNode());
+				
+			}
+		}
+		
+		iter.remove();
+		}
+		
+	}
+
 	public static final int MOVEMENT_DELAY = 200; // Delay i ms for convergence
 	public static final boolean NET_DEBUG = false;
 	public static final float WALK_SPEED = 30.0f;

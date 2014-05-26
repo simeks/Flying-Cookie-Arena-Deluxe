@@ -31,7 +31,7 @@ public class Flag extends Entity {
 	private int state;
 	private int latestState;
     
-	static final float poleHeight = 200.0f;
+	static final float poleHeight = 40.0f;
 	static final float flagHeight = 5.0f;
 	static final float radius = 0.5f;
 	static final int samples = 16;
