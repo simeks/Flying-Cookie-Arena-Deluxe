@@ -31,7 +31,7 @@ import de.lessvoid.xml.xpp3.Attributes;
 public class LobbyState implements GameState {
 
 	private NiftyJmeDisplay niftyDisplay;
-	private ArrayList<String> playerNames = new ArrayList<>();
+	private ArrayList<String> playerNames = new ArrayList<String>();
 	private boolean ready = false;
 
 	/// @brief called when exit is clicked. 

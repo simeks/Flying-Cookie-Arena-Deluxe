@@ -21,7 +21,7 @@ import java.util.NavigableSet;
 import java.util.Random;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.DelayQueue;
@@ -61,8 +61,8 @@ public class NetRead implements Runnable {
 	
 	// all missed that is expected to come, based on packet.id. each string ip:port holds Int packet.id and 
 	// long time ms detected missing. the highest packet.id is latest received for that in:port. 
-	private ConcurrentHashMap<String, ConcurrentLinkedDeque<Integer>> latestReliables = 
-			new ConcurrentHashMap<String, ConcurrentLinkedDeque<Integer>>();
+	private ConcurrentHashMap<String, ConcurrentLinkedQueue<Integer>> latestReliables = 
+			new ConcurrentHashMap<String, ConcurrentLinkedQueue<Integer>>();
 	private ConcurrentHashMap<String, ConcurrentSkipListMap<Integer, Long>> latestReliablesTimes = 
 			new ConcurrentHashMap<String, ConcurrentSkipListMap<Integer, Long>>();
 	private long timestampLatestClared = 0;
@@ -194,20 +194,20 @@ public class NetRead implements Runnable {
 	/// @brief checks if this packet already have been processed. 
 	private boolean hasBeenProcessed(NetPacket packet, String id, long timeStamp) {
 		if(latestReliables.containsKey(id)) {
-			ConcurrentLinkedDeque<Integer> list = latestReliables.get(id);
+			ConcurrentLinkedQueue<Integer> list = latestReliables.get(id);
 			ConcurrentSkipListMap<Integer, Long> timesMap = latestReliablesTimes.get(id);
 			
 			if(list.contains(packet.id)) {
 				return true;
 			}
-			list.addLast(packet.id);
+			list.add(packet.id);
 			timesMap.put(packet.id, packet.sentTimeFirst);
 			latestReliablesTimes.put(id, timesMap);
 			latestReliables.put(id, list);
 			return false;
 		}
-		ConcurrentLinkedDeque<Integer> list = new ConcurrentLinkedDeque<Integer>();
-		list.push(packet.id);
+		ConcurrentLinkedQueue<Integer> list = new ConcurrentLinkedQueue<Integer>();
+		list.add(packet.id);
 		latestReliables.put(id, list);
 
 		ConcurrentSkipListMap<Integer, Long> timesMap = new ConcurrentSkipListMap<Integer, Long>();
@@ -217,8 +217,8 @@ public class NetRead implements Runnable {
 	}
 	/// @brief removes old still tracking reliable packets.
 	private void cleanReliable(long timeStamp) {
-		for (Entry<String, ConcurrentLinkedDeque<Integer>> e : latestReliables.entrySet()) {
-		    ConcurrentLinkedDeque<Integer> list = e.getValue();
+		for (Entry<String, ConcurrentLinkedQueue<Integer>> e : latestReliables.entrySet()) {
+			ConcurrentLinkedQueue<Integer> list = e.getValue();
 			ConcurrentSkipListMap<Integer, Long> timesMap = latestReliablesTimes.get(e.getKey());
 		    
 			Iterator<Integer> it = list.iterator();

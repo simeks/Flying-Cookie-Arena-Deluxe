@@ -133,12 +133,12 @@ public class Flag extends Entity {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> map = (Map<String, Object>) data;
 			if(map.containsKey("state")) {
-				int ownsersState = (int) map.get("state");
+				int ownsersState = (Integer) map.get("state");
 				if(ownsersState == SPAWN) {
 					returnFlag();
 					setLatestState(SPAWN);
 				} else if(ownsersState == CARRYD && map.containsKey("attachHereEntityId")) {
-					Entity s = world.getEntity((int) map.get("attachHereEntityId"));
+					Entity s = world.getEntity((Integer) map.get("attachHereEntityId"));
 					if(s != null && s.getSpatial() instanceof Node) {
 						pickupFlag(((Node) s.getSpatial()));
 					}
