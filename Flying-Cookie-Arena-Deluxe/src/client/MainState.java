@@ -135,6 +135,7 @@ public class MainState implements GameState {
 		final GameState state = this;
 		nifty.addScreen("hud", new ScreenBuilder("Nifty Screen") {{
 			controller(new client.MyScreenController(state));
+			
 		}}.build(nifty));
 		
 		initInput();
@@ -183,20 +184,20 @@ public class MainState implements GameState {
 			characterNode.getControl(CharacterControl.class).setCollideWithGroups(World.COLLISION_GROUP_FLAG);
 			characterNode.setName("myCharacter");
 
-			Random rand = new Random();
 			// Lets spawn some campfires if we're the master
 			if(Application.getInstance().getSession().isMaster()) {
+				Random rand = new Random();
 				for(int i = 0; i < 5; ++i) {
 					world.spawnCampFire(new Vector3f(rand.nextInt(400)-200, 0.25f, rand.nextInt(400)-200));
 
 				}
 				
+				for(int i = 0; i < 5; ++i) {
+					Flag flag = world.spawnFlag(new Vector3f(rand.nextInt(400)-200, Flag.poleHeight*0.5f, rand.nextInt(400)-200));
+				}
+				
 				// Spawn some AI character
 				world.spawnAICharacter(new Vector3f(rand.nextInt(200)-50, 30, rand.nextInt(200)-50));
-			}
-			
-			for(int i = 0; i < 3; ++i) {
-				Flag flag = world.spawnFlag(new Vector3f(rand.nextInt(400)-200, Flag.poleHeight*0.5f, rand.nextInt(400)-200));
 			}
 		}
 		Camera camera = Application.getInstance().getCamera();

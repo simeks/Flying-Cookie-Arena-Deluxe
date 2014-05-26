@@ -117,6 +117,9 @@ public class Flag extends Entity {
 	public void pickupFlag(Node attachHere) {
 		node.getControl(GhostControl.class).setEnabled(false);
 		node.getControl(RigidBodyControl.class).setEnabled(false);
+		
+		Spatial oldNode = node.getParent();
+		
 		world.getRootNode().detachChild(node);
 		setPosition(new Vector3f(0,flagHeight/2,-radius*2));
 		
@@ -131,10 +134,22 @@ public class Flag extends Entity {
 			}
 		}
 		
+		// update hud
+		if(attachHere.getUserData("id") != null) {
+			Entity character = world.getEntity((Integer)attachHere.getUserData("id"));
+			if(character.isOwner()) {
+				Application.getInstance().getHud().setFlags(flags+1);
+			}
+		}
+		if(oldNode.getUserData("id") != null) {
+			Entity oldCharacter = world.getEntity((Integer)oldNode.getUserData("id"));
+			if(oldCharacter.isOwner()) {
+				Application.getInstance().getHud().setFlags(Application.getInstance().getHud().getFlags()-1);
+			}
+		}
+		
 		attachHere.attachChild(node);
 		setPosition(new Vector3f(getPosition().getX(), getPosition().getY()+flags*Flag.flagHeight, getPosition().getZ()));
-		
-		
 		
 		setState(CARRYD);
 	}

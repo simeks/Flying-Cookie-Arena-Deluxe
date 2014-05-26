@@ -39,7 +39,7 @@ public class Character extends Entity {
 		while(iter.hasNext()) {
 			Spatial child = iter.next();
 			
-			if (child.getUserData("id") != null){
+			if (child.getUserData("id") != null) {
 				if(world.getEntity((Integer) child.getUserData("id")) instanceof Flag){
 					Flag flag =((Flag)world.getEntity((Integer) child.getUserData("id")));
 					if(highetstFlag == null) {
