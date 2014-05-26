@@ -54,6 +54,10 @@ public class Character extends Entity {
 			highetstFlag.editEntity();
 			highetstFlag.pickupFlag(character.getNode());
 		}
+		
+		if(isOwner() || character.isOwner()) {
+			world.playBackstab(getPosition());
+		}
 	}
 
 	public static final int MOVEMENT_DELAY = 500; // Delay i ms for convergence
@@ -139,6 +143,8 @@ public class Character extends Entity {
 			setPosition(position);
 		}
 
+		world.playJoinedGame();
+
 		setFlags(FLAG_STATIC_OWNERSHIP);
 	}
 
@@ -201,6 +207,7 @@ public class Character extends Entity {
 	public void jump()
 	{
 		controller.jump();
+		world.playJump(getPosition());
 	}
 
 	// Rotates the character the specified number of degrees on the y-axis.

@@ -186,13 +186,13 @@ public class MenuState implements GameState {
 				Application.getInstance().getWorld().migrateEntities(newOwner, peerId);
 				
 				System.out.println("Peer " + peerId + " disconnected: " + reason);
-				
+				Application.getInstance().getWorld().playDisconnect();
 			}
 
 			@Override
 			public void onDisconnect(String reason) {
 				System.out.println("You got disconnected: " + reason);
-				
+				Application.getInstance().getWorld().playDisconnect();
 			}
 			@Override
 			public void onNewMaster(int oldMaster, int newMaster) {
@@ -229,12 +229,13 @@ public class MenuState implements GameState {
 				Application.getInstance().getWorld().migrateEntities(newOwner, peerId);
 				
 				System.out.println("Peer " + peerId + " disconnected: " + reason);
-				
+				Application.getInstance().getWorld().playDisconnect();
 			}
 
 			@Override
 			public void onDisconnect(String reason) {
 				System.out.println("You got disconnected: " + reason);
+				Application.getInstance().getWorld().playDisconnect();
 				
 			}
 			@Override
@@ -295,12 +296,13 @@ public class MenuState implements GameState {
 				Application.getInstance().getWorld().migrateEntities(newOwner, peerId);
 				
 				System.out.println("Peer " + peerId + " disconnected: " + reason);
-				
+				Application.getInstance().getWorld().playDisconnect();
 			}
 
 			@Override
 			public void onDisconnect(String reason) {
 				System.out.println("You got disconnected: " + reason);
+				Application.getInstance().getWorld().playDisconnect();
 			}
 
 			@Override

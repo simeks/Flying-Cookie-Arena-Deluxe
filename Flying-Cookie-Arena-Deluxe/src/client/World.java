@@ -7,6 +7,7 @@ import java.util.Random;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.audio.AudioNode;
+import com.jme3.audio.AudioSource.Status;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -49,10 +50,12 @@ public class World {
 	private AudioNode[] audio_joined;
 	private AudioNode[] audio_fire;
 	private AudioNode[] audio_backstab;
+	private AudioNode[] audio_dc;
 	
-	public void playJump() {
+	public void playJump(Vector3f position) {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_jump.length);
+		audio_jump[n].setLocalTranslation(position);
 		audio_jump[n].playInstance();
 	}
 	public void playJoinedGame() {
@@ -60,48 +63,72 @@ public class World {
 		int n = Dice.nextInt(audio_joined.length);
 		audio_joined[n].playInstance();
 	}
-	public void playBackstab() {
+	public void playBackstab(Vector3f position) {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_backstab.length);
+		audio_backstab[n].setLocalTranslation(position);
 		audio_backstab[n].playInstance();
 	}
-	public void playFire() {
+	public void playFire(Vector3f position) {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_fire.length);
+		audio_fire[n].setLocalTranslation(position);
 		audio_fire[n].playInstance();
+	}
+	public void playDisconnect() {
+		Random Dice = new Random();
+		int n = Dice.nextInt(audio_dc.length);
+		audio_dc[n].playInstance();
 	}
 	
 	public void initAudio() {
 
 		String fires[] = { "fire1.wav", "fire2.wav", "fire3.wav" };
+		audio_fire = new AudioNode[fires.length];
 		for(int i=0; i<fires.length; i++) {
 			audio_fire[i] = new AudioNode(assetManager, "Sounds/Effects/"+fires[i], false);
-			audio_fire[i].setPositional(false);
+			audio_fire[i].setPositional(true);
+			audio_fire[i].setLocalTranslation(new Vector3f(0,0,0)); // changes later
 			audio_fire[i].setLooping(false);
 			audio_fire[i].setVolume(1);
 			getRootNode().attachChild(audio_fire[i]);
 		}
 		
 		String jumps[] = { "jump1.wav", "jump2.wav", "jump3.wav" };
+		audio_jump = new AudioNode[jumps.length];
 		for(int i=0; i<jumps.length; i++) {
 			audio_jump[i] = new AudioNode(assetManager, "Sounds/Effects/"+jumps[i], false);
-			audio_jump[i].setPositional(false);
+			audio_jump[i].setPositional(true);
+			audio_jump[i].setLocalTranslation(new Vector3f(0,0,0)); // changes later
 			audio_jump[i].setLooping(false);
-			audio_jump[i].setVolume(1);
+			audio_jump[i].setVolume(0.5f);
 			getRootNode().attachChild(audio_jump[i]);
 		}
 
 		String backstab[] = { "backstab1.wav", "backstab2.wav", "backstab3.wav" };
+		audio_backstab = new AudioNode[backstab.length];
 		for(int i=0; i<backstab.length; i++) {
 			audio_backstab[i] = new AudioNode(assetManager, "Sounds/Effects/"+backstab[i], false);
-			audio_backstab[i].setPositional(false);
+			audio_backstab[i].setPositional(true);
+			audio_backstab[i].setLocalTranslation(new Vector3f(0,0,0)); // changes later
 			audio_backstab[i].setLooping(false);
 			audio_backstab[i].setVolume(1);
 			getRootNode().attachChild(audio_backstab[i]);
 		}
 
 
+		String dc[] = { "dc1.wav", "dc2.wav", "dc3.wav" };
+		audio_dc = new AudioNode[dc.length];
+		for(int i=0; i<dc.length; i++) {
+			audio_dc[i] = new AudioNode(assetManager, "Sounds/Effects/"+dc[i], false);
+			audio_dc[i].setPositional(false);
+			audio_dc[i].setLooping(false);
+			audio_dc[i].setVolume(1);
+			getRootNode().attachChild(audio_dc[i]);
+		}
+
 		String joined[] = { "newplayerjoined.wav" };
+		audio_joined = new AudioNode[joined.length];
 		for(int i=0; i<joined.length; i++) {
 			audio_joined[i] = new AudioNode(assetManager, "Sounds/Effects/"+joined[i], false);
 			audio_joined[i].setPositional(false);
@@ -219,6 +246,9 @@ public class World {
 		// Create the sky
 		rootNode.attachChild(SkyFactory.createSky(assetManager,
 				"Textures/Sky/Bright/BrightSky.dds", false));
+		
+		// sound
+		initAudio();
 	}
 	
 	/// @brief Updates all entities in the world.
