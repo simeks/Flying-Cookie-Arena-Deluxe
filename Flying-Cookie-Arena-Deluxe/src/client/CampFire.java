@@ -119,7 +119,7 @@ public class CampFire extends Entity {
 	}
 	
 	@Override
-	public void interact() {
+	public void interact(Character character) {
 		// Toggle lit
 		setLit(lit == false);
 		
@@ -176,7 +176,7 @@ public class CampFire extends Entity {
 			@SuppressWarnings("unchecked")
 			Map<String, Object> map = (Map<String, Object>) data;
 			if(map.containsKey("lit")) {
-				setLit((boolean) map.get("lit"));
+				setLit((Boolean) map.get("lit"));
 				
 			}
 		}
