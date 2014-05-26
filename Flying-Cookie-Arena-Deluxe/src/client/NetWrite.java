@@ -47,6 +47,7 @@ public class NetWrite  {
 				sendPacket(packet);
 			}
 		}
+		
 	}
 	
 	public void send(InetAddress destAddr, int destPort, Message msg, boolean reliable) {

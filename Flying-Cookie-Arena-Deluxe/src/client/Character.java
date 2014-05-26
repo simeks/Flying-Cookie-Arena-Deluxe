@@ -274,12 +274,12 @@ public class Character extends Entity {
 				Vector3f currentPosition = getPosition();
 				Vector3f direction = targetPosition.subtract(currentPosition);
 				Vector3f newPos = currentPosition.add(direction.mult(scalar));
-				setPosition(targetPosition);
+				setPosition(newPos);
 
 				Quaternion currentRotation = getRotation();
 				Quaternion newRotation = currentRotation;
 				newRotation.slerp(targetRotation, scalar);
-				setRotation(targetRotation);
+				setRotation(newRotation);
 
 			}
 			else
