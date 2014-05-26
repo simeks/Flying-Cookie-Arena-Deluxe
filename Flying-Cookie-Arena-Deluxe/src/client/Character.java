@@ -29,9 +29,8 @@ public class Character extends Entity {
 		Vector3f theirDirection = character.getRotation().mult(Vector3f.UNIT_Z).normalize(); 
 		Vector3f myDirection = character.getRotation().mult(Vector3f.UNIT_Z).normalize();
 		
-		if(theirDirection.dot(myDirection) > Math.cos(Math.PI*0.5)) {
-			return;
-		}
+		float d = theirDirection.dot(myDirection); 
+		System.out.println("Dot: " + d + ", R: " + Math.cos(Math.PI*0.5));
 		
 		Iterator<Spatial> iter = ((Node) node).getChildren().iterator();
 		while(iter.hasNext()) {
