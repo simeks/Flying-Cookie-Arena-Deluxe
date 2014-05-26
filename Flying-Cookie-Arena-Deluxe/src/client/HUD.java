@@ -10,73 +10,33 @@ import com.jme3.ui.Picture;
 
 // Heads-up display for the character view
 public class HUD {
-	static final float pictureSize = 64.0f; // Size in pixels of the small "tool" pictures.
-
-	private BitmapText weaponText;
-	private BitmapText tooltipText;
-	
 	private Node guiNode;
+	private BitmapText flagText;
+	private int numberOfFlags = 0;
 	
-	public enum Weapon
-	{
-		NONE
-		// TODO: Add weapons here
-	};
-	
-	
-	private Weapon activeWeapon = Weapon.NONE;
-	
-	// Hides the currently visible tool
-	private void removeActiveTool()
-	{
-		activeWeapon = Weapon.NONE;
-		weaponText.setText("");
+	public void setNumberOfFlags(int n) {
+		numberOfFlags = n;
+		flagText.setText("Flags: " + n);
 	}
-	
-	// Changes the active weapon indicator on the hud
-	public void changeWeapon(Weapon weapon)
-	{
-		Weapon previousWeapon = activeWeapon;
-		removeActiveTool();
-		
+	public int getNumberOfFlags() {
+		return numberOfFlags;
 	}
-	public void setToolTip(String tooltip)
-	{
-		if(tooltip != "")
-		{
-			tooltipText.setText("ToolTip: " + tooltip);
-		}
-		else
-		{
-			tooltipText.setText("");
-		}
-	}
-	
 	
 	public HUD(AssetManager assetManager, Node parentNode)
 	{ 
 		BitmapFont guiFont = assetManager.loadFont("Interface/Fonts/Console.fnt");
 		guiNode = new Node("HUD");
 		parentNode.attachChild(guiNode);
+		
+		flagText = new BitmapText(guiFont, false);
+		flagText.setLocalScale(2.5f);
+		flagText.setLocalTranslation(20, 40, 0); // position
+		flagText.setColor(ColorRGBA.White);
+		guiNode.attachChild(flagText);
+		
 
-		weaponText = new BitmapText(guiFont, false);          
-		weaponText.setSize(guiFont.getCharSet().getRenderedSize());
-		weaponText.setColor(ColorRGBA.White);
-		weaponText.setText(""); 
-		weaponText.setLocalTranslation(20, pictureSize + 40, 0); // position
-		
-		guiNode.attachChild(weaponText);
-		
-		tooltipText = new BitmapText(guiFont, false);          
-		tooltipText.setSize(guiFont.getCharSet().getRenderedSize());
-		tooltipText.setColor(ColorRGBA.White);
-		tooltipText.setText(""); 
-		tooltipText.setLocalTranslation(20, pictureSize + 80, 0); // position
-
-		guiNode.attachChild(tooltipText);
-		
-		
 		guiNode.setQueueBucket(Bucket.Gui);
 		
+		setNumberOfFlags(0);
 	}
 }

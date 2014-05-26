@@ -41,6 +41,7 @@ public class Application extends SimpleApplication {
 	private Session session = new Session();
 	private World world = null;
 	private LobbyServerConnection lobbyServer = new LobbyServerConnection("130.240.202.79", 5000);
+	private HUD gameHud;
 
 	private Map<GameState.GameStateId, GameState> gameStates = 
 			new EnumMap<GameState.GameStateId, GameState>(GameState.GameStateId.class);
@@ -189,6 +190,8 @@ public class Application extends SimpleApplication {
 				world.processEntityOwnerChange((EntityNewOwnerMessage)m);
 			}
 		});
+		
+		gameHud = new HUD(assetManager, rootNode);
     }
 	@Override
 	public void destroy() { 
@@ -228,6 +231,9 @@ public class Application extends SimpleApplication {
 	
 	public LobbyServerConnection getLobbyServerConnection() {
 		return lobbyServer;
+	}
+	public HUD getHud() {
+		return gameHud;
 	}
 	
 	static public Application getInstance() {
