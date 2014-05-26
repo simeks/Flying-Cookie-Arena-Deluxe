@@ -3,8 +3,10 @@ package client;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.audio.AudioNode;
 import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.control.RigidBodyControl;
@@ -42,6 +44,72 @@ public class World {
 	// List of all crates in the world
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 
+
+	private AudioNode[] audio_jump;
+	private AudioNode[] audio_joined;
+	private AudioNode[] audio_fire;
+	private AudioNode[] audio_backstab;
+	
+	public void playJump() {
+		Random Dice = new Random();
+		int n = Dice.nextInt(audio_jump.length);
+		audio_jump[n].playInstance();
+	}
+	public void playJoinedGame() {
+		Random Dice = new Random();
+		int n = Dice.nextInt(audio_joined.length);
+		audio_joined[n].playInstance();
+	}
+	public void playBackstab() {
+		Random Dice = new Random();
+		int n = Dice.nextInt(audio_backstab.length);
+		audio_backstab[n].playInstance();
+	}
+	public void playFire() {
+		Random Dice = new Random();
+		int n = Dice.nextInt(audio_fire.length);
+		audio_fire[n].playInstance();
+	}
+	
+	public void initAudio() {
+
+		String fires[] = { "fire1.wav", "fire2.wav", "fire3.wav" };
+		for(int i=0; i<fires.length; i++) {
+			audio_fire[i] = new AudioNode(assetManager, "Sounds/Effects/"+fires[i], false);
+			audio_fire[i].setPositional(false);
+			audio_fire[i].setLooping(false);
+			audio_fire[i].setVolume(1);
+			getRootNode().attachChild(audio_fire[i]);
+		}
+		
+		String jumps[] = { "jump1.wav", "jump2.wav", "jump3.wav" };
+		for(int i=0; i<jumps.length; i++) {
+			audio_jump[i] = new AudioNode(assetManager, "Sounds/Effects/"+jumps[i], false);
+			audio_jump[i].setPositional(false);
+			audio_jump[i].setLooping(false);
+			audio_jump[i].setVolume(1);
+			getRootNode().attachChild(audio_jump[i]);
+		}
+
+		String backstab[] = { "backstab1.wav", "backstab2.wav", "backstab3.wav" };
+		for(int i=0; i<backstab.length; i++) {
+			audio_backstab[i] = new AudioNode(assetManager, "Sounds/Effects/"+backstab[i], false);
+			audio_backstab[i].setPositional(false);
+			audio_backstab[i].setLooping(false);
+			audio_backstab[i].setVolume(1);
+			getRootNode().attachChild(audio_backstab[i]);
+		}
+
+
+		String joined[] = { "newPlayerJoined1.wav", "newPlayerJoined2.wav", "newPlayerJoined3.wav" };
+		for(int i=0; i<backstab.length; i++) {
+			audio_joined[i] = new AudioNode(assetManager, "Sounds/Effects/"+backstab[i], false);
+			audio_joined[i].setPositional(false);
+			audio_joined[i].setLooping(false);
+			audio_joined[i].setVolume(1);
+			getRootNode().attachChild(audio_joined[i]);
+		}
+	}
     
     /* pause game physics */
     public void pausePhysics(){
