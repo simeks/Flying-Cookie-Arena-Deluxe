@@ -163,8 +163,8 @@ public class World {
 	/// Tries to interact with any object found in the specified direction
 	/// closestDistance is the closest distance to an object required to interact
 	/// with it.
-	public void interactWithItem(Vector3f position, Vector3f direction, float closestDistance) {
-		Ray ray = new Ray(position, direction.normalize());
+	public void interactWithItem(Character character, Vector3f direction, float closestDistance) {
+		Ray ray = new Ray(character.getPosition(), direction.normalize());
 
 		Entity closestObject = null;
 		for (Entity o : entities) {
@@ -186,7 +186,7 @@ public class World {
 
 		// Interact with the closest object, if any
 		if (closestObject != null) {
-			closestObject.interact();
+			closestObject.interact(character);
 		}
 	}	
 	

@@ -50,7 +50,7 @@ public abstract class Entity {
 	}
 
 	/// @brief Called whenever a character interacts with an entity.
-	public void interact() {}
+	public void interact(Character character) {}
 	
 	public abstract void update(float tpf);
 	

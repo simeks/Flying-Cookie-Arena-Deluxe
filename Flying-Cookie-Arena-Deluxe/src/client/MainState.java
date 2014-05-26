@@ -52,7 +52,7 @@ public class MainState implements GameState {
 			}
 			Entity OtherEntity = null;
 			if(other.getUserData("id") != null) {
-				OtherEntity = Application.getInstance().getWorld().getEntity((int)other.getUserData("id"));
+				OtherEntity = Application.getInstance().getWorld().getEntity((Integer)other.getUserData("id"));
 			}
 			if(other.getName().substring(0, 4).equals("flag")) {
 				if(OtherEntity instanceof Flag) {
@@ -100,7 +100,7 @@ public class MainState implements GameState {
 			}
 			else if (name.equals("Interact") && keyPressed) {
 				Camera camera = Application.getInstance().getCamera();
-				Application.getInstance().getWorld().interactWithItem(character.getPosition(), camera.getDirection(), 15.0f);
+				Application.getInstance().getWorld().interactWithItem(character, camera.getDirection(), 15.0f);
 			}
 			else if (name.equals("Quit")) {
 				Application.getInstance().changeState(GameStateId.LOBBY_STATE);
