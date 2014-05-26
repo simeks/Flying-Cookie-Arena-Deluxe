@@ -35,21 +35,29 @@ public class Character extends Entity {
 		}
 		
 		Iterator<Spatial> iter = ((Node) node).getChildren().iterator();
+		Flag highetstFlag = null;
 		while(iter.hasNext()) {
 			Spatial child = iter.next();
 			
 			if (child.getUserData("id") != null){
 				if(world.getEntity((Integer) child.getUserData("id")) instanceof Flag){
-
-					((Flag)world.getEntity((Integer) child.getUserData("id"))).editEntity();
-					((Flag)world.getEntity((Integer) child.getUserData("id"))).pickupFlag(character.getNode());
-
-					return;
+					Flag flag =((Flag)world.getEntity((Integer) child.getUserData("id")));
+					if(highetstFlag == null) {
+						highetstFlag = flag;
+					} else if(flag.getPosition().getY() > highetstFlag.getPosition().getY()) {
+						highetstFlag = flag;
+					}
 				}
-				
 			}
 		}
-
+		if(highetstFlag != null) {
+			highetstFlag.editEntity();
+			highetstFlag.pickupFlag(character.getNode());
+		}
+		
+		if(isOwner() || character.isOwner()) {
+			world.playBackstab(getPosition());
+		}
 	}
 
 	public static final int MOVEMENT_DELAY = 500; // Delay i ms for convergence
@@ -136,6 +144,8 @@ public class Character extends Entity {
 			setPosition(position);
 		}
 
+		world.playJoinedGame();
+
 		setFlags(FLAG_STATIC_OWNERSHIP);
 	}
 
@@ -198,6 +208,7 @@ public class Character extends Entity {
 	public void jump()
 	{
 		controller.jump();
+		world.playJump(getPosition());
 	}
 
 	// Rotates the character the specified number of degrees on the y-axis.

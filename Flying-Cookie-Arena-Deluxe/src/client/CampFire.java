@@ -115,6 +115,7 @@ public class CampFire extends Entity {
 		    flame.setHighLife(4.0f);
 			pointLight.setColor(lightColor);
 			this.lit = true;
+			world.playFire(getPosition());
 		}
 	}
 	
@@ -122,7 +123,6 @@ public class CampFire extends Entity {
 	public void interact(Character character) {
 		// Toggle lit
 		setLit(lit == false);
-		
 		try {
 			Application.getInstance().getSession().sendToAll(new EntityEventMessage(buildStateMessage()), true);
 		} catch (Exception e) {

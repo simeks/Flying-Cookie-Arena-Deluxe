@@ -196,7 +196,7 @@ public class MainState implements GameState {
 				}
 				
 				// Spawn some AI character
-				world.spawnAICharacter(new Vector3f(rand.nextInt(100)-50, 50, rand.nextInt(100)-50));
+				world.spawnAICharacter(new Vector3f(rand.nextInt(200)-50, 30, rand.nextInt(200)-50));
 			}
 		}
 		Camera camera = Application.getInstance().getCamera();
