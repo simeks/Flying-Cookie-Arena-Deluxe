@@ -103,7 +103,7 @@ public class Flag extends Entity {
 		node.getControl(GhostControl.class).setEnabled(false);
 		node.getControl(RigidBodyControl.class).setEnabled(false);
 		world.getRootNode().detachChild(node);
-		setPosition(new Vector3f(0,0,0));
+		setPosition(new Vector3f(0,flagHeight/2,-radius*2));
 		attachHere.attachChild(node);
 		setState(CARRYD);
 	}

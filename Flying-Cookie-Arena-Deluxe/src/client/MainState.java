@@ -193,7 +193,6 @@ public class MainState implements GameState {
 				
 				for(int i = 0; i < 5; ++i) {
 					Flag flag = world.spawnFlag(new Vector3f(rand.nextInt(400)-200, Flag.poleHeight*0.5f, rand.nextInt(400)-200));
-					flag.getSpatial().setName("myFlag");
 				}
 			}			
 		}
