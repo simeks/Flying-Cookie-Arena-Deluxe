@@ -243,7 +243,7 @@ public class Character extends Entity {
 	{
 		this.targetPosition = targetPosition;
 		this.targetRotation = targetRotation;
-		this.targetStateTimestamp = targetStateTimestamp;
+		this.targetStateTimestamp = System.currentTimeMillis();
 	}
 
 
