@@ -183,15 +183,17 @@ public class MainState implements GameState {
 			characterNode.getControl(CharacterControl.class).setCollideWithGroups(World.COLLISION_GROUP_FLAG);
 			characterNode.setName("myCharacter");
 
-			Flag flag = world.spawnFlag(new Vector3f((id-count/2)*20+2, Flag.poleHeight/2, (id-count/2)*20));
-			flag.getSpatial().setName("myFlag");
-
 			// Lets spawn some campfires if we're the master
 			if(Application.getInstance().getSession().isMaster()) {
 				Random rand = new Random();
 				for(int i = 0; i < 5; ++i) {
 					world.spawnCampFire(new Vector3f(rand.nextInt(400)-200, 0.25f, rand.nextInt(400)-200));
 
+				}
+				
+				for(int i = 0; i < 5; ++i) {
+					Flag flag = world.spawnFlag(new Vector3f(rand.nextInt(400)-200, Flag.poleHeight*0.5f, rand.nextInt(400)-200));
+					flag.getSpatial().setName("myFlag");
 				}
 			}			
 		}

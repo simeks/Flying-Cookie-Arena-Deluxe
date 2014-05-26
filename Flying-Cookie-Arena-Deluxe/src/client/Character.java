@@ -26,6 +26,13 @@ public class Character extends Entity {
 	@Override
 	public void interact(Character character) {
 		
+		Vector3f theirDirection = character.getRotation().mult(Vector3f.UNIT_Z).normalize(); 
+		Vector3f myDirection = character.getRotation().mult(Vector3f.UNIT_Z).normalize();
+		
+		if(theirDirection.dot(myDirection) > Math.cos(Math.PI*0.5)) {
+			return;
+		}
+		
 		Iterator<Spatial> iter = ((Node) node).getChildren().iterator();
 		while(iter.hasNext()) {
 			Spatial child = iter.next();
