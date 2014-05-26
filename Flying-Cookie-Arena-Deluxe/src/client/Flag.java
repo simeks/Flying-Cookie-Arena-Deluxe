@@ -2,7 +2,9 @@ package client;
 
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Random;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.bullet.BulletAppState;
@@ -67,8 +69,21 @@ public class Flag extends Entity {
 		Geometry flag = new Geometry("flag", b);
 		Material mat2 = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
 		mat2.setBoolean("UseMaterialColors",true);
-		mat2.setColor("Ambient", ColorRGBA.Black);
-		mat2.setColor("Diffuse", ColorRGBA.Black);
+		
+		Random rand = new Random();
+		mat2.setColor("Ambient", new ColorRGBA(
+			rand.nextFloat(),
+			rand.nextFloat(),
+			rand.nextFloat(),
+			1f
+		));
+		mat2.setColor("Diffuse", new ColorRGBA(
+			rand.nextFloat(),
+			rand.nextFloat(),
+			rand.nextFloat(),
+			1f
+		));
+		
 		flag.setMaterial(mat2);
 		flag.setLocalRotation(new Quaternion().fromAngleAxis( FastMath.PI/2 , new Vector3f(0,1,0) ));
 		flag.setLocalTranslation(new Vector3f(flagHeight/2+radius, poleHeight/2-flagHeight/2, 0));
@@ -104,7 +119,23 @@ public class Flag extends Entity {
 		node.getControl(RigidBodyControl.class).setEnabled(false);
 		world.getRootNode().detachChild(node);
 		setPosition(new Vector3f(0,flagHeight/2,-radius*2));
+		
+		int flags = 0;
+		Iterator<Spatial> myIter = attachHere.getChildren().iterator();
+		while(myIter.hasNext()) {
+			Spatial myChild = myIter.next();
+			if (myChild.getUserData("id") != null){
+				if(world.getEntity((Integer) myChild.getUserData("id")) instanceof Flag){
+					flags++;
+				}
+			}
+		}
+		
 		attachHere.attachChild(node);
+		setPosition(new Vector3f(getPosition().getX(), getPosition().getY()+flags*Flag.flagHeight, getPosition().getZ()));
+		
+		
+		
 		setState(CARRYD);
 	}
 	
