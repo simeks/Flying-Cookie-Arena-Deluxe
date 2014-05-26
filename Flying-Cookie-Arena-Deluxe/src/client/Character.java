@@ -51,7 +51,7 @@ public class Character extends Entity {
 
 	}
 
-	public static final int MOVEMENT_DELAY = 200; // Delay i ms for convergence
+	public static final int MOVEMENT_DELAY = 500; // Delay i ms for convergence
 	public static final boolean NET_DEBUG = false;
 	public static final float WALK_SPEED = 30.0f;
 	public static final float STRAFE_SPEED = 25.0f;
@@ -268,19 +268,24 @@ public class Character extends Entity {
 		if(!isOwner()) {
 			// Convergence: We want to reach the target position in (MOVEMENT_DELAY - timestamp) milliseconds.
 			long currentTime = System.currentTimeMillis();
+			//System.out.println("My time : " + currentTime + ", His time: " + targetStateTimestamp);
 			if(currentTime < (targetStateTimestamp + MOVEMENT_DELAY)) {
 				float scalar = Math.min(1.0f, (float)(currentTime - targetStateTimestamp) / (float)MOVEMENT_DELAY);
 
 				Vector3f currentPosition = getPosition();
 				Vector3f direction = targetPosition.subtract(currentPosition);
 				Vector3f newPos = currentPosition.add(direction.mult(scalar));
-				setPosition(newPos);
 
 				Quaternion currentRotation = getRotation();
 				Quaternion newRotation = currentRotation;
 				newRotation.slerp(targetRotation, scalar);
-				setRotation(newRotation);
+				
 
+			}
+			else
+			{
+				setPosition(targetPosition);
+				setRotation(targetRotation);
 			}
 
 			if(NET_DEBUG) {
