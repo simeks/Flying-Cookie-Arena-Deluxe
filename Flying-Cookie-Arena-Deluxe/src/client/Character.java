@@ -25,24 +25,21 @@ public class Character extends Entity {
 
 	@Override
 	public void interact(Character character) {
-
+		
 		Iterator<Spatial> iter = ((Node) node).getChildren().iterator();
 		while(iter.hasNext()) {
 			Spatial child = iter.next();
 			
+			if (child.getUserData("id") != null){
+				if(world.getEntity((Integer) child.getUserData("id")) instanceof Flag){
 
+					((Flag)world.getEntity((Integer) child.getUserData("id"))).editEntity();
+					((Flag)world.getEntity((Integer) child.getUserData("id"))).pickupFlag(character.getNode());
 
-				if (child.getUserData("id") != null){
-					if(world.getEntity((int) child.getUserData("id")) instanceof Flag){
-
-
-						((Flag)world.getEntity((int) child.getUserData("id"))).editEntity();
-						((Flag)world.getEntity((int) child.getUserData("id"))).pickupFlag(character.getNode());
-
-					}
+					return;
+				}
 				
 			}
-			iter.remove();
 		}
 
 	}
