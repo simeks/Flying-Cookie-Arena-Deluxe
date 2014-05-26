@@ -102,8 +102,8 @@ public class World {
 
 
 		String joined[] = { "newPlayerJoined1.wav", "newPlayerJoined2.wav", "newPlayerJoined3.wav" };
-		for(int i=0; i<backstab.length; i++) {
-			audio_joined[i] = new AudioNode(assetManager, "Sounds/Effects/"+backstab[i], false);
+		for(int i=0; i<joined.length; i++) {
+			audio_joined[i] = new AudioNode(assetManager, "Sounds/Effects/"+joined[i], false);
 			audio_joined[i].setPositional(false);
 			audio_joined[i].setLooping(false);
 			audio_joined[i].setVolume(1);
