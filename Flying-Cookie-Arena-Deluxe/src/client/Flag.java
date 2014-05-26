@@ -138,13 +138,13 @@ public class Flag extends Entity {
 		if(attachHere.getUserData("id") != null) {
 			Entity character = world.getEntity((Integer)attachHere.getUserData("id"));
 			if(character.isOwner()) {
-				Application.getInstance().getHud().setFlags(flags+1);
+				Application.getInstance().getHud().setNumberOfFlags(flags+1);
 			}
 		}
 		if(oldNode.getUserData("id") != null) {
 			Entity oldCharacter = world.getEntity((Integer)oldNode.getUserData("id"));
 			if(oldCharacter.isOwner()) {
-				Application.getInstance().getHud().setFlags(Application.getInstance().getHud().getFlags()-1);
+				Application.getInstance().getHud().setNumberOfFlags(Application.getInstance().getHud().getNumberOfFlags()-1);
 			}
 		}
 		
