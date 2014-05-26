@@ -27,10 +27,12 @@ public class Character extends Entity {
 	public void interact(Character character) {
 		
 		Vector3f theirDirection = character.getRotation().mult(Vector3f.UNIT_Z).normalize(); 
-		Vector3f myDirection = character.getRotation().mult(Vector3f.UNIT_Z).normalize();
+		Vector3f myDirection = getRotation().mult(Vector3f.UNIT_Z).normalize();
 		
-		float d = theirDirection.dot(myDirection); 
-		System.out.println("Dot: " + d + ", R: " + Math.cos(Math.PI*0.5));
+		float d = theirDirection.dot(myDirection); 		
+		if(d < Math.cos(Math.PI*0.35)) {
+			return;
+		}
 		
 		Iterator<Spatial> iter = ((Node) node).getChildren().iterator();
 		while(iter.hasNext()) {
