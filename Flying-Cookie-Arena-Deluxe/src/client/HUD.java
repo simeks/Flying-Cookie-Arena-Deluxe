@@ -14,14 +14,20 @@ public class HUD {
 	private BitmapText flagText;
 	private int numberOfFlags = 0;
 	
+	/// @brief Sets the number of flags for the flag counter in the HUD.
 	public void setNumberOfFlags(int n) {
 		numberOfFlags = n;
 		flagText.setText("Flags: " + n);
 	}
+	
+	/// @return The number of flags currently displayed.
 	public int getNumberOfFlags() {
 		return numberOfFlags;
 	}
 	
+	/// Constructor
+	/// @param assetManager JMonkey asset manager.
+	/// @param parentNode The node which we should attach the HUD to.
 	public HUD(AssetManager assetManager, Node parentNode)
 	{ 
 		BitmapFont guiFont = assetManager.loadFont("Interface/Fonts/Console.fnt");
