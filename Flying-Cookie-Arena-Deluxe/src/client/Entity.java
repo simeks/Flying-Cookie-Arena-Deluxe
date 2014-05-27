@@ -98,8 +98,11 @@ public abstract class Entity {
 	public final boolean editEntity() {
 		return editEntity(null);
 	}
-	
-	
+
+	/// @brief will ask for ownership for this entity 
+	/// @param EntityCallback c  called when ownership transfer is a successes or failure
+	/// @see EntityCallback
+	/// @return boolean if successfully sent the message
 	public final boolean editEntity(EntityCallback c) {
 		if(c == null) {
 			
@@ -118,13 +121,15 @@ public abstract class Entity {
 				public int getTimeout() { return 0; }
 			};
 		}
+		
+		// we can edit if we alredy is owner
 		if(isOwner()) {
 			c.onCanEdit();
 			return true;
 		}
 		
+		// send ownership transfer request
 		EntityRequestOwnerMessage msg = new EntityRequestOwnerMessage(entityId);
-		
 		try {
 			Application.getInstance().getSession().sendToPeer(msg, getOwner(), true);
 		} catch (Exception e) {
@@ -133,6 +138,7 @@ public abstract class Entity {
 			return false;
 		}
 		
+		// handles the callback timeout
 		setCallback(c);
 		if(c.getTimeout() > 0) {
 			final EntityCallback finalCallback = c;
@@ -260,7 +266,10 @@ public abstract class Entity {
 
 /// @brief callback for entity ownership change. It is up to the entity to handle when happens when. 
 interface EntityCallback {
+	/// @brief when the transfer went thru
 	public void onCanEdit();
+	/// @brief when the ownership transfer failed
 	public void onFailedEdit(String reason);
+	/// @brief gets the maximum time for holding the request open before calling onFailedEdit(String) for timeout reason. 
 	public int getTimeout();
 }
