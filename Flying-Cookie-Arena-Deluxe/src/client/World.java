@@ -34,7 +34,7 @@ public class World {
 	private TerrainQuad terrain;
 	private int nextEntityId = 0;
 	
-	// Our different collision groups
+	// Our different collision groups for jmonkey
 	public static final int COLLISION_GROUP_CRATE = PhysicsCollisionObject.COLLISION_GROUP_01;
 	public static final int COLLISION_GROUP_CHARACTER = PhysicsCollisionObject.COLLISION_GROUP_02;
 	public static final int COLLISION_GROUP_FLAG = PhysicsCollisionObject.COLLISION_GROUP_03;
@@ -50,6 +50,7 @@ public class World {
 		return entities;
 	}
 
+	/// @brief audio nodes
 	private AudioNode[] audio_jump;
 	private AudioNode[] audio_joined;
 	private AudioNode[] audio_fire;
@@ -86,7 +87,7 @@ public class World {
 		audio_fire[n].setLocalTranslation(position);
 		audio_fire[n].playInstance();
 	}
-	
+
 	/// @brief Plays the disconnect sound effect.
 	public void playDisconnect() {
 		Random Dice = new Random();
@@ -399,7 +400,7 @@ public class World {
 		}
 	}
 	
-	/// Spawns a box at the specified world coordinates
+	/// @brief Spawns a box at the specified world coordinates
 	public CampFire spawnCampFire(Vector3f position) {
 		int id = generateEntityID();
 		CampFire fire = new CampFire(Application.getInstance().getSession().getMyPeerId(), 
@@ -414,7 +415,7 @@ public class World {
 	}
 
 
-	/// Spawns a box at the specified world coordinates
+	/// @brief Spawns a box at the specified world coordinates
 	public Crate spawnBox(Vector3f position) {
 		int id = generateEntityID();
 		Crate crate = new Crate(Application.getInstance().getSession().getMyPeerId(), 
@@ -472,7 +473,6 @@ public class World {
 		
 		return flag;
 	}
-	
 	/// Destroys the specified entity, removing it from the world.
 	public void destroyEntity(Entity entity) {
 		entities.remove(entity);

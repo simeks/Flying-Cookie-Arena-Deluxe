@@ -87,7 +87,7 @@ class PeerListMessage extends Message {
 		super(Type.PEER_LIST);
 	}
 }
-
+/* message to verify if a connection is established */
 class PingMessage extends Message {
 	private static final long serialVersionUID = -1182365839943998551L;
 
@@ -95,7 +95,7 @@ class PingMessage extends Message {
 		super(Type.PING);
 	}
 }
-
+/* response message to a Ping message*/
 class PongMessage extends Message {
 	private static final long serialVersionUID = 5844168245440896356L;
 
@@ -103,7 +103,7 @@ class PongMessage extends Message {
 		super(Type.PONG);
 	}
 }
-
+/* message when a peer time outs */
 class PeerTimeOutMessage extends Message {
 	private static final long serialVersionUID = 3688046389297696524L;
 	public int timedOutPeerId;
@@ -112,7 +112,7 @@ class PeerTimeOutMessage extends Message {
 		this.timedOutPeerId = timedOutPeerId;
 	}
 }
-
+/* message when someone gets kicked */
 class KickedMessage extends Message {
 	private static final long serialVersionUID = 1217488624618728877L;
 	public String reason;

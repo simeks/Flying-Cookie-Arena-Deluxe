@@ -57,6 +57,7 @@ public class Application extends SimpleApplication {
 	
     public static void main(String[] args){
 		Logger.getLogger("com.jme3").setLevel(Level.SEVERE);
+		//starts the application!
         Application.getInstance().start();
     }
 
@@ -97,6 +98,7 @@ public class Application extends SimpleApplication {
 		}
 	}
 
+    /* called on application start */
 	@Override
     public void simpleInitApp() {
 		setPauseOnLostFocus(false);
@@ -213,22 +215,25 @@ public class Application extends SimpleApplication {
 		super.destroy();
 	}
 	
+	/* returns the physics handler */
 	public BulletAppState getBulletAppState() {
 		return bulletAppState;
 	}
-	
+	/* returns the Nifty GUI */
 	public NiftyJmeDisplay getNiftyDisplay() {
 		return niftyDisplay;
 	}
-	
+	/* get the actual session  */
 	public Session getSession() {
 		return session;
 	}
 
+	/* returns the world */
 	public World getWorld() {
 		return world;
 	}
 	
+	/* get the lobbyserverconnection object*/
 	public LobbyServerConnection getLobbyServerConnection() {
 		return lobbyServer;
 	}
