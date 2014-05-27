@@ -71,10 +71,7 @@ public class MenuState implements GameState {
 			}
 
 			@Override
-			public void onAck() {
-				// TODO Auto-generated method stub
-				
-			}
+			public void onError(String msg) { }
 		});
 		if(!serverConnection.isConnected()) {
 			serverConnection.connect();

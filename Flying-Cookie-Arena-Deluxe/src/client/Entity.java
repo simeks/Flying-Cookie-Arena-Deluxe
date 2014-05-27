@@ -41,7 +41,7 @@ public abstract class Entity {
 	
 	private EntityCallback callback = null;
 	
-	
+	/// @brief to be called from World!
 	public Entity(int ownerId, World world, int entityId, Type entityType) {
 		this.ownerPeer = ownerId;
 		this.world = world;
@@ -50,14 +50,14 @@ public abstract class Entity {
 		this.latestStateBuild = 0;
 	}
 
-	/// @brief Called whenever a character interacts with an entity.
+	/// @brief Called whenever a character interacts with this entity.
 	public void interact(Character character) {}
 	
 	public abstract void update(float tpf);
 	
 	public abstract void destroy();
 	
-	// Returns the position of the object
+	/// @brief Returns the position of the object
 	public abstract Vector3f getPosition();
 	protected abstract void setPosition(Vector3f position);
 	
@@ -67,6 +67,8 @@ public abstract class Entity {
 	public abstract Vector3f getVelocity();
 	protected abstract void setVelocity(Vector3f velocity);
 
+	/// @brief sets the collision group, world handles this when an entity is created
+	/// @see World.COLLISION_GROUP_X variables
 	public abstract void setCollisionGroup(int group);
 	public abstract Spatial getSpatial();
 	
@@ -75,13 +77,15 @@ public abstract class Entity {
 		return false;
 	}
 	
+	/// @brief will ask for ownership for this entity 
+	/// @return boolean if successfully sent the message
 	public final boolean editEntity() {
 		return editEntity(null);
 	}
 	public final boolean editEntity(EntityCallback c) {
 		if(c == null) {
 			
-			// build default callback that sends what we probably edited to the other peers. 
+			// build default callback that sends what we probably edited something to the other peers. 
 			c = new EntityCallback() {
 				
 				@Override
@@ -139,7 +143,8 @@ public abstract class Entity {
 	}
 	/// @brief called when the peer owner have new customData. Is processed before basic movement. 
 	protected void processCustomStateMessage(Serializable data) { }
-	
+
+	/// @brief when a new state message is received about this entity
 	public void processStateMessage(EntityStateMessage msg) {
 		if(msg.customData != null) processCustomStateMessage(msg.customData);
 		setPosition(msg.position);
@@ -147,6 +152,7 @@ public abstract class Entity {
 		setVelocity(msg.velocity);
 	}
 	
+	/// @brief builds a stateMessage or returns null if nothing have changed and we recently sent something. 
 	public final EntityStateMessage buildStateMessage() {
 		long timestamp = System.currentTimeMillis();
 		boolean updateState = (latestStateBuild+MAX_STATE_SILINCE < timestamp);
@@ -170,9 +176,12 @@ public abstract class Entity {
 				|| !getVelocity().equals(latestVelocity));
 	}
 
+	/// @brief called when a new event message is received about this entity
 	public final void processEventMessage(EntityEventMessage e) {
 		processCustomStateMessage(e.state.customData);
 	}
+	
+	/// @brief sends states in a reliable fashion. 
 	public final boolean sendEventMessage() {
 		EntityEventMessage msg = new EntityEventMessage(
 			new EntityStateMessage(entityId, getPosition(), getRotation(), getVelocity(), getCustomData())
@@ -197,6 +206,7 @@ public abstract class Entity {
 		return ownerPeer;
 	}
 	
+	/// @brief if this peer is owner of this entity (in context of frequent regeneration ownership)
 	public void setOwner(int peerId) {
 		ownerPeer = peerId;
 		
@@ -222,6 +232,7 @@ public abstract class Entity {
 	public abstract void collideWith(Ray ray, CollisionResults results);
 }
 
+/// @brief callback for entity ownership change. It is up to the entity to handle when happens when. 
 interface EntityCallback {
 	public void onCanEdit();
 	public void onFailedEdit(String reason);

@@ -37,7 +37,7 @@ public class LobbyServerConnection implements Runnable {
 	private BufferedReader fromServer;
 	private DataOutputStream toServer;
 	private LobbyServerCallback callback = null;
-	final protected String serverDelimiter = "#del#";
+	final protected String serverDelimiter = "#del#"; // protocol specific
 	
 	enum STATUS {
 		CONNECTED, CONNECTING, DISCONNECTED, CONNECTION_FAILED
@@ -96,11 +96,12 @@ public class LobbyServerConnection implements Runnable {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void setCallback(LobbyServerCallback callback) {
 		this.callback = callback;
 	}
-	
+
+	/// @brief will start to receive list of servers to callback
 	public boolean subscribeToServerList() {
 		return sendMessage(formatMessage("l", null, null));
 	}
@@ -134,7 +135,8 @@ public class LobbyServerConnection implements Runnable {
 			}
 		return ret;
 	}
-	
+
+	/// @brief sends info about my server
 	public boolean createServer(String name, int port) {
 		String iip = "";
 		try {
@@ -157,6 +159,8 @@ public class LobbyServerConnection implements Runnable {
 		values.add(iip);
 		return sendMessage(formatMessage("n", keys, values));
 	}
+	
+	/// @brief sends message of information about my server to be updated
 	public boolean updateServer(int count, int maxCount) {
 		Vector<String> keys = new Vector<String>();
 		Vector<String> values = new Vector<String>();
@@ -270,13 +274,14 @@ public class LobbyServerConnection implements Runnable {
 			} else if(message.equals("f")) {
 				System.out.println("failed: "+json);
 			} else if(message.equals("k")) {
-				callback.onAck();
+				
 			} else {
-				System.out.println("unknown message: "+message);
+				callback.onError("unknown message: "+message);
 			}
 		}
 	}
 	
+	/// @brief connects to the server 
 	public void connect() {
 		if(status == STATUS.CONNECTED || status == STATUS.CONNECTING) {
 			return;

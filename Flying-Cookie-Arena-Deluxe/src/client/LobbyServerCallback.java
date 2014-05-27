@@ -2,8 +2,12 @@ package client;
 
 import java.util.Map;
 
+/// @brief callback from lobby server connection
 public interface LobbyServerCallback {
 	
+	/// @brief callback when something is received
 	public void onReceiveServerList(Map<String, String> servers, String status);
-	public void onAck();
+	
+	/// @brief callback when something goes wrong
+	public void onError(String msg);
 }

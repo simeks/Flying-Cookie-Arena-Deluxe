@@ -11,6 +11,10 @@ import de.lessvoid.nifty.controls.ChatTextSendEvent;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
 
+/***
+ * @brief Callback for Nifty (gui). 
+ * 
+ */
 public class MyScreenController implements ScreenController {
 	
 	GameState gs;
@@ -55,7 +59,7 @@ public class MyScreenController implements ScreenController {
 		}
 	}
 
-	
+	/// @brief when a test is sent from chat
 	@NiftyEventSubscriber(pattern=".*LobbyChat")
 	public final void onSendText(final String id, final ChatTextSendEvent event) {
 		if(!(gs instanceof LobbyState)) {
@@ -75,6 +79,7 @@ public class MyScreenController implements ScreenController {
 	@Override
 	public void onEndScreen() { }
 
+	/// @brief when the gui is ready
 	@Override
 	public void onStartScreen() {
 		if(gs instanceof LobbyState) {
