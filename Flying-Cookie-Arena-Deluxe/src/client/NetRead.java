@@ -29,6 +29,7 @@ import java.util.concurrent.Delayed;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+/// Class used for reading data from a socket.
 public class NetRead implements Runnable {
 	public class ReceivedMessage implements Delayed {
 		final public static int MAX_TTL = 5000;
@@ -69,6 +70,9 @@ public class NetRead implements Runnable {
 	private volatile boolean quit = false;
 	private long readDelay = 0; // for testing and debugging
 	
+	/// Constructor
+	/// @param socket Socket used to receive data from.
+	/// @param netWrite The write module linked to this read module.
 	public NetRead(DatagramSocket socket, NetWrite netWrite) {
 		this.socket = socket;
 		this.netWrite = netWrite;
@@ -93,9 +97,14 @@ public class NetRead implements Runnable {
 		}
 	}
 	
+	/// @return The current read delay
+	/// @see setReadDelay
 	public long getReadDelay() {
 		return readDelay;
 	}
+	
+	/// Sets a "fake" delay for the reading, used for debugging purposes.
+	/// @see getReadDelay
 	public void setReadDelay(long delay) {
 		this.readDelay = delay;
 	}
@@ -105,10 +114,12 @@ public class NetRead implements Runnable {
 		return incomingMessages.poll();
 	}
 	
+	/// Stops the read-thread.
 	public void stop() {
 		quit = true;
 	}
 	
+	/// Sends an acknowledgement of the specified packet.
 	private void sendAck(InetAddress destAddr, int destPort, int packetId) {
 		AckPacket packet = new AckPacket(0, packetId);
 		
@@ -131,6 +142,7 @@ public class NetRead implements Runnable {
 		
 	}
 	
+	/// Parses an incoming UDP packet.
 	private void parsePacket(final DatagramPacket udpPacket) {
 		NetPacket packet = null;
 		try {

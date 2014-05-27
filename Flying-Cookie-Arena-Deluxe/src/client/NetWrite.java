@@ -12,6 +12,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class NetWrite  {
+	
+	/// A outgoing packets, containing the packet and a destination.
 	private class OutgoingPacket {
 		public InetAddress addr;
 		public int port;
@@ -31,11 +33,13 @@ public class NetWrite  {
 	private LinkedBlockingQueue<OutgoingPacket> unackedPackets = new LinkedBlockingQueue<OutgoingPacket>(); // Holds sent packets that haven't been acked yet.
 	private int nextPacketId = 0;
 	
-	
+	/// Constructor
+	/// @param socket The socket which this class should use for writing.
 	public NetWrite(DatagramSocket socket) {
 		this.socket = socket;
 	}
 
+	/// Updates writer, mainly sending any non-acked packets that requires resending.
 	public void update() {
 		
 		long threshold = 500; // 0.5s, TODO: Change this.
@@ -50,6 +54,9 @@ public class NetWrite  {
 		
 	}
 	
+	/// Sends the specified message to the specified destination.
+	/// @reliable If this is set to true the writer will try to send this packet reliably, meaning it will handle packet losses.
+	///				If set to false the packets will be sent unreliable, used when you don't care that packets may get lost.
 	public void send(InetAddress destAddr, int destPort, Message msg, boolean reliable) {
 		OutgoingPacket packet = new OutgoingPacket(destAddr, destPort, new MessagePacket(nextPacketId++, msg));
 		sendPacket(packet);
@@ -68,10 +75,12 @@ public class NetWrite  {
 		}
 	}
 	
+	/// Stop waiting for acks for the specified packet.
 	private void stopTrackReliable(OutgoingPacket packet) {
 		unackedPackets.remove(packet);
 	}
 	
+	/// Sends the specified packet.
 	private void sendPacket(OutgoingPacket packet) {
 		long time = System.currentTimeMillis();
 		packet.packet.sentTime = time;
