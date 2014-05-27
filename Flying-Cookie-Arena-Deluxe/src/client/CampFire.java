@@ -32,16 +32,23 @@ public class CampFire extends Entity {
 	private boolean lit = true;
 	
 
+	/// @return The camp fires current position.
 	public Vector3f getPosition()
 	{
 		return node.getWorldTranslation();
 	}
 	
+	/// @return Scene node in the JMonkey scene manager.
 	public Node getNode()
 	{
 		return node;
 	}
 	
+	/// Constructor
+	/// @param ownerId Id of the peer that owns this entity.
+	/// @param world The world that this entity belongs to.
+	/// @param entityId Id of this entity.
+	/// @param position Initial position of this entity.
 	public CampFire(int ownerId, World world, int entityId, Vector3f position)
 	{
 		super(ownerId, world, entityId, Type.CAMP_FIRE);
@@ -97,6 +104,8 @@ public class CampFire extends Entity {
     	
 	}
 
+	/// @brief Sets whetever this camp fire should be lit.
+	/// @param lit True if the camp fire should be lit, false if not.
 	public void setLit(boolean lit)
 	{
 		if(this.lit == lit)

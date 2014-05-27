@@ -16,9 +16,9 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 
 public abstract class Entity {
-	public static final int FLAG_STATIC_OWNERSHIP = 0x1; // Entity cannot change owner, meaning it will be destroyed when owner disconnects.
+	public static final int FLAG_STATIC_OWNERSHIP = 0x1; //< Entity cannot change owner, meaning it will be destroyed when owner disconnects.
 	
-	
+	/// The various entity types available.
 	public enum Type {
 		CRATE,
 		CHARACTER,
@@ -53,23 +53,35 @@ public abstract class Entity {
 	/// @brief Called whenever a character interacts with this entity.
 	public void interact(Character character) {}
 	
+	/// @brief Updates this entity. Should be called once every frame.
 	public abstract void update(float tpf);
 	
+	/// @brief Destroys this entity, called when the entity is destroyed and removed from the world.
 	public abstract void destroy();
 	
 	/// @brief Returns the position of the object
 	public abstract Vector3f getPosition();
+	
+	/// @brief Sets the position of this entity.
 	protected abstract void setPosition(Vector3f position);
 	
+	/// @return The rotation of this entity.
 	public abstract Quaternion getRotation();
+	
+	/// @brief Sets the rotation of this entity.
 	protected abstract void setRotation(Quaternion rotation);
 	
+	/// @return The velocity of this entity.
 	public abstract Vector3f getVelocity();
+	
+	/// @brief Sets the velocity of this entity.
 	protected abstract void setVelocity(Vector3f velocity);
 
 	/// @brief sets the collision group, world handles this when an entity is created
 	/// @see World.COLLISION_GROUP_X variables
 	public abstract void setCollisionGroup(int group);
+	
+	/// @return Spatial node in the JMonkey scene tree.
 	public abstract Spatial getSpatial();
 	
 	/// @brief determines if the custom state (other then basic movement) have changed. 
@@ -82,6 +94,8 @@ public abstract class Entity {
 	public final boolean editEntity() {
 		return editEntity(null);
 	}
+	
+	
 	public final boolean editEntity(EntityCallback c) {
 		if(c == null) {
 			
@@ -170,6 +184,7 @@ public abstract class Entity {
 		return new EntityStateMessage(entityId, getPosition(), getRotation(), getVelocity(), data);
 	}
 	
+	/// @return True if the state has changed.
 	protected final boolean hasMovementStateChanged() {
 		return (!getPosition().equals(latestPosition)
 				|| !getRotation().equals(latestRotation)
@@ -196,12 +211,15 @@ public abstract class Entity {
 		return true;
 	}
 	
+	/// @return The id of this entity.
 	public int getId() {
 		return entityId;
 	}
+	/// @return The type of this entity.
 	public Type getType() {
 		return entityType;
 	}
+	/// @return The id of the peer that owns this entity.
 	public int getOwner() {
 		return ownerPeer;
 	}
@@ -221,9 +239,13 @@ public abstract class Entity {
 		return (ownerPeer == Application.getInstance().getSession().getMyPeerId());
 	}
 
+	/// @return Entity flags for this entity.
+	/// @see FLAG_STATIC_OWNERSHIP
 	public int getFlags() {
 		return flags;
 	}
+	/// @brief Sets flags for this entity.
+	/// @see FLAG_STATIC_OWNERSHIP
 	public void setFlags(int flags) {
 		this.flags = flags;
 	}

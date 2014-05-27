@@ -42,7 +42,7 @@ public class Session {
 			Message.Type.class);
 	
 
-	// / @brief Creates a new empty session.
+	/// @brief Creates a new empty session.
 	public void createSession(int myPort, SessionCallback c) throws Exception {
 		if (state == State.DISCONNECTED) {
 			socket = new DatagramSocket(myPort);
@@ -68,9 +68,9 @@ public class Session {
 		sessionCallback = c;
 	}
 
-	// / @brief Connects to an existing session.
-	// / @param destAddr Address to the master peer of the session.
-	// / @param destPort Port to the master peer of the session.
+	/// @brief Connects to an existing session.
+	/// @param destAddr Address to the master peer of the session.
+	/// @param destPort Port to the master peer of the session.
 	public void connectToSession(InetAddress destAddr, int destPort)
 			throws Exception {
 		connectToSession(destAddr, destPort, null);
@@ -123,8 +123,8 @@ public class Session {
 	}
 	
 
-	// / @brief for debuging and testing, sets read delay in ms on alla packets
-	// read from socket.
+	/// @brief for debuging and testing, sets read delay in ms on alla packets
+	/// read from socket.
 	public void setReadDelay(long delay) {
 		readDelay = delay;
 		if (state != State.DISCONNECTED) {
@@ -132,7 +132,7 @@ public class Session {
 		}
 	}
 
-	// / @brief Sends a message to all peers.
+	/// @brief Sends a message to all peers.
 	public void sendToAll(Message msg, boolean reliable) throws Exception {
 		if (state == State.CONNECTED) {
 			for (Peer peer : peers.values()) {
@@ -143,7 +143,7 @@ public class Session {
 		}
 	}
 
-	// / @brief Sends a message to the specified peer.
+	/// @brief Sends a message to the specified peer.
 	public void sendToPeer(Message msg, int peer, boolean reliable)
 			throws Exception {
 		if (state == State.CONNECTED) {
@@ -153,6 +153,7 @@ public class Session {
 		}
 	}
 
+	/// Updates the session, should be called once every frame.
 	public void update() {
 		if (state != State.DISCONNECTED) {
 			netWrite.update();
@@ -196,32 +197,41 @@ public class Session {
 		}
 	}
 
+	/// @return My peer id, -1 if the id is invalid (Not connected).
 	public int getMyPeerId() {
 		return myPeerId;
 	}
 
+	/// @return Returns the number of peers available in the session (Not including yourself).
 	public int getPeerCount() {
 		return peers.size();
 	}
 
-	// / @brief Returns true if the local peer is the master of this session.
+	/// @brief Returns true if the local peer is the master of this session.
 	public boolean isMaster() {
 		return (myPeerId == masterPeerId);
 	}
 
+	/// @return Current state of the session.
+	/// @see Session.State
 	public State getState() {
 		return state;
 	}
 
+	/// @brief Registers a message effect for the specified message type.
+	/// @param type The type of the message to listen for.
+	/// @param effect The message effect instance.
+	/// @remark Will overwrite any existing message effect of that type.
 	public void registerEffect(Message.Type type, MessageEffect effect) {
 		messageEffects.put(type, effect);
 	}
 
+	/// @brief Unregisters a message effect for a specific message type.
 	public void unregisterEffect(Message.Type type) {
 		messageEffects.remove(type);
 	}
 
-	// / @brief Processes incoming packets.
+	/// @brief Processes incoming packets.
 	private void processIncoming() {
 		if (state != State.DISCONNECTED) {
 			NetRead.ReceivedMessage recvMsg = null;
@@ -403,6 +413,7 @@ public class Session {
 		}
 	}
 
+	/// Clean up, shutting down the session.
 	private void cleanup() {
 		socket.close();
 		netRead.stop();
