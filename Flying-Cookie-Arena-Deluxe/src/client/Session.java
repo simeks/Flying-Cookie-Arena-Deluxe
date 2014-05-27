@@ -18,6 +18,7 @@ import client.LobbyServerConnection.STATUS;
 public class Session {
 	static final private int PEER_TIMEOUT = 15000; // need more time in debug mkay? 15000; // Number of milliseconds without activity before we timeout a peer
 
+	/* the different connection states a peer can have to a session */
 	public enum State {
 		DISCONNECTED, 
 		AWAITING_CONNECTION, // State while we're waiting for the master peer to acknowledge us.
@@ -37,6 +38,7 @@ public class Session {
 
 	private SessionCallback sessionCallback;
 
+	/* holds all peers in the session and maps the peer to an Integer */
 	private Map<Integer, Peer> peers = new HashMap<Integer, Peer>();
 	private Map<Message.Type, MessageEffect> messageEffects = new EnumMap<Message.Type, MessageEffect>(
 			Message.Type.class);
@@ -76,6 +78,7 @@ public class Session {
 		connectToSession(destAddr, destPort, null);
 	}
 
+	/* connect to a session at the given destination address and portnumber*/
 	public void connectToSession(InetAddress destAddr, int destPort,
 			SessionCallback c) throws Exception {
 		
@@ -111,7 +114,8 @@ public class Session {
 		}
 
 	}
-
+	
+	/* disconnect from the server */
 	public void disconnect() {
 		if (state != State.DISCONNECTED) {
 			if(sessionCallback != null) {
