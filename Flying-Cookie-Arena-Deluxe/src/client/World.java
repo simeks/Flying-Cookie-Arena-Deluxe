@@ -35,6 +35,7 @@ public class World {
 	private int nextEntityId = 0;
 	
 
+	/// @brief collision groups for jmonkey
 	public static final int COLLISION_GROUP_CRATE = PhysicsCollisionObject.COLLISION_GROUP_01;
 	public static final int COLLISION_GROUP_CHARACTER = PhysicsCollisionObject.COLLISION_GROUP_02;
 	public static final int COLLISION_GROUP_FLAG = PhysicsCollisionObject.COLLISION_GROUP_03;
@@ -49,41 +50,52 @@ public class World {
 		return entities;
 	}
 
+	/// @brief audio nodes
 	private AudioNode[] audio_jump;
 	private AudioNode[] audio_joined;
 	private AudioNode[] audio_fire;
 	private AudioNode[] audio_backstab;
 	private AudioNode[] audio_dc;
 	
+	/// @brief play jump sound at position
 	public void playJump(Vector3f position) {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_jump.length);
 		audio_jump[n].setLocalTranslation(position);
 		audio_jump[n].playInstance();
 	}
+	
+	/// @brief play joined the game sound
 	public void playJoinedGame() {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_joined.length);
 		audio_joined[n].playInstance();
 	}
+
+	/// @brief play backstab sound at position
 	public void playBackstab(Vector3f position) {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_backstab.length);
 		audio_backstab[n].setLocalTranslation(position);
 		audio_backstab[n].playInstance();
 	}
+	
+	/// @brief play fire sound at position
 	public void playFire(Vector3f position) {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_fire.length);
 		audio_fire[n].setLocalTranslation(position);
 		audio_fire[n].playInstance();
 	}
+
+	/// @brief play disconnect sound
 	public void playDisconnect() {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_dc.length);
 		audio_dc[n].playInstance();
 	}
 	
+	/// @brief init all sound
 	public void initAudio() {
 
 		String fires[] = { "fire1.wav", "fire2.wav", "fire3.wav" };
@@ -339,6 +351,7 @@ public class World {
 		}
 	}
 
+	/// @brief Processes the specified event message.
 	public void processEntityEvent(EntityEventMessage msg) {
 		Entity entity = getEntity(msg.entityId);
 		if(entity != null) {
@@ -402,7 +415,7 @@ public class World {
 	}
 
 
-	// Spawns a box at the specified world coordinates
+	/// @brief Spawns a box at the specified world coordinates
 	public Crate spawnBox(Vector3f position) {
 		int id = generateEntityID();
 		Crate crate = new Crate(Application.getInstance().getSession().getMyPeerId(), 
@@ -416,6 +429,7 @@ public class World {
 		return crate;
 	}
 	
+	/// @brief spawns a character at postion
 	public Character spawnCharacter(Vector3f position) {
 		int id = generateEntityID();
 		Character character = new Character(Application.getInstance().getSession().getMyPeerId(), 
@@ -428,6 +442,7 @@ public class World {
 		
 		return character;
 	}
+	/// @brief spawns a AIcharacter at postion
 	public AICharacter spawnAICharacter(Vector3f position) {
 		int id = generateEntityID();
 		AICharacter character = new AICharacter(Application.getInstance().getSession().getMyPeerId(), 
@@ -441,6 +456,7 @@ public class World {
 		return character;
 	}
 
+	/// @brief spawns a flag at postion
 	public Flag spawnFlag(Vector3f position) {
 		int id = generateEntityID();
 		Flag flag = new Flag(Application.getInstance().getSession().getMyPeerId(), 
@@ -453,7 +469,8 @@ public class World {
 		
 		return flag;
 	}
-	
+
+	/// @brief destroy the entity
 	public void destroyEntity(Entity entity) {
 		entities.remove(entity);
 		entity.destroy();
@@ -485,7 +502,8 @@ public class World {
 			}
 		}
 	}
-	
+
+	/// @brief removes all entitys
 	public void clear() {
 		for(Entity e : entities) {
 			e.destroy();
@@ -543,6 +561,7 @@ public class World {
 		return entityId;
 	}
 
+	/// @brief called when a message for new ownership is received. 
 	public void processEntityOwnerChange(EntityNewOwnerMessage m) {
 		Entity entity = getEntity(m.entityId);
 		if(entity != null) {
