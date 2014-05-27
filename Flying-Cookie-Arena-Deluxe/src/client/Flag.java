@@ -114,6 +114,7 @@ public class Flag extends Entity {
 		world.getRootNode().attachChild(node);
 	}
 	
+	/// @brief places the flag on the given node and sets edits the hud if owner is involved. 
 	public void pickupFlag(Node attachHere) {
 		node.getControl(GhostControl.class).setEnabled(false);
 		node.getControl(RigidBodyControl.class).setEnabled(false);
@@ -154,6 +155,7 @@ public class Flag extends Entity {
 		setState(CARRYD);
 	}
 	
+	/// @brief places flag at a position
 	public void dropFlag(Vector3f position) {
 		node.getControl(GhostControl.class).setEnabled(true);
 		node.getControl(RigidBodyControl.class).setEnabled(true);
@@ -163,6 +165,7 @@ public class Flag extends Entity {
 		setState(DROPPED);
 	}
 	
+	/// @brief returns flag to its original position
 	public void returnFlag() {
 		node.getControl(GhostControl.class).setEnabled(true);
 		node.getControl(RigidBodyControl.class).setEnabled(true);

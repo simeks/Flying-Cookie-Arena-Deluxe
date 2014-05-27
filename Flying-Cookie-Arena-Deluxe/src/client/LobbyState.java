@@ -41,6 +41,7 @@ public class LobbyState implements GameState {
 		Application.getInstance().changeState(GameState.GameStateId.MENU_STATE);
 	}
 	
+	/// @brief when ready will the application jump in to the game. 
 	public boolean isReady() {
 		return ready;
 	}
@@ -52,6 +53,8 @@ public class LobbyState implements GameState {
 
 	/// @brief called when the screen is ready. 
 	public void onStartScreen() {
+		
+		// adds players to gui if they was added before the screen was ready. 
 		Nifty nifty = niftyDisplay.getNifty();
 		Chat chat = nifty.getCurrentScreen().findNiftyControl("LobbyChat", Chat.class);
 		if(chat != null) {
@@ -68,6 +71,7 @@ public class LobbyState implements GameState {
 		}
 	}
 	
+	/// @brief adds a player to the gui
 	private void addPlayer(String name) {
 		Nifty nifty = niftyDisplay.getNifty();
 		
@@ -98,13 +102,14 @@ public class LobbyState implements GameState {
 	public void enterState() {
 		ready = false;
 		
+		 // start the screen
 		Application app = Application.getInstance();
 	    Nifty nifty = niftyDisplay.getNifty();
-	    nifty.gotoScreen("ServerLobbyScreen"); // start the screen
-	    
+	    nifty.gotoScreen("ServerLobbyScreen");
 	    app.getGuiViewPort().addProcessor(niftyDisplay);
 	    app.getFlyByCamera().setDragToRotate(true);
 
+	    // places a chat in gui when a chat message is received
 	    app.getSession().registerEffect(Message.Type.CHAT_MSG, new MessageEffect() {
 			
 			@Override
@@ -116,6 +121,7 @@ public class LobbyState implements GameState {
 			}
 		});
 	    
+	    // adds player in gui when a new peer is sending its hello message
 	    app.getSession().registerEffect(Message.Type.HELLO, new MessageEffect() {
 			
 			@Override
@@ -124,6 +130,8 @@ public class LobbyState implements GameState {
 				Application.getInstance().getWorld().broadcastWorldCreation(m.peer);
 			}
 		});
+
+	    // adds player in gui when we joins the server and master sends the peer list
 	    app.getSession().registerEffect(Message.Type.PEER_LIST, new MessageEffect() {
 			
 			@Override
@@ -154,6 +162,8 @@ public class LobbyState implements GameState {
 	}
 	
 	public LobbyState() {
+		
+	    // create gui
 		niftyDisplay = Application.getInstance().getNiftyDisplay();
 		Nifty nifty = niftyDisplay.getNifty();
 		
@@ -161,7 +171,6 @@ public class LobbyState implements GameState {
 	    nifty.loadControlFile("nifty-default-controls.xml");
 	 
 	    final LobbyState state = this;
-	    
 	    nifty.addScreen("ServerLobbyScreen", new ScreenBuilder("Nifty Screen") {{
 	    	
 	    	controller(new client.MyScreenController(state));

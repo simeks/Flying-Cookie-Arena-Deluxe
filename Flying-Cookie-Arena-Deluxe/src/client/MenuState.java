@@ -53,16 +53,18 @@ public class MenuState implements GameState {
 	
 	@Override
 	public void enterState() {
-		Application.getInstance().getWorld().clear();
+		Application.getInstance().getWorld().clear(); // empty world
 		Nifty nifty = niftyDisplay.getNifty();
 		Application.getInstance().getFlyByCamera().setDragToRotate(true);
 	    nifty.gotoScreen("ServerListScreen"); // start the screen
 	    
+	    // loading for the server list status
 	    nifty.getCurrentScreen().findNiftyControl("ServerListStatus", Label.class).setText("Loading... ");
 	    
 	    //nifty = niftyDisplay.getNifty();
 	    //nifty.getCurrentScreen().findElementByName("ServerListServerNameField").setFocus();
 	    
+	    // starts server connection and subscribes to the list of servers
 	    LobbyServerConnection serverConnection = Application.getInstance().getLobbyServerConnection();
 	    serverConnection.setCallback(new LobbyServerCallback() {
 			@Override
@@ -90,7 +92,8 @@ public class MenuState implements GameState {
 	public void update(float dt) {
 		
 	}
-	
+
+	/// @brief updates the gui for list of servers
 	public void updateServerList(Map<String, String> servers, String nextUpdate) {
 		Nifty nifty = niftyDisplay.getNifty();
 		Screen screen = nifty.getCurrentScreen();
@@ -144,25 +147,28 @@ public class MenuState implements GameState {
 		nifty.showPopup(nifty.getCurrentScreen(), popup.getId(), null);
 		joinGameLobby(server.split(";"), 0, popup);
 	}
+	
+	/// @brief will try 3 different addresses: external ip and internal ip that the server published. if all fails it will give localhost a try
 	private void joinGameLobby(final String[] serverAddresses, final int test, final Element popup) {
 		final Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();		
 		
+		// basecase, if all addresses was tested. 
 		if(serverAddresses.length <= test || test < 0) {
 			nifty.closePopup(popup.getId());
 			return;
 		}
 		
-		
+		// parse address
 		String testThisAddress = serverAddresses[test];
 		if(testThisAddress.indexOf(":") != -1) {
 			testThisAddress = testThisAddress.substring(0, testThisAddress.indexOf(":"));
 		}
-
 		int port = Application.GAME_PORT;
 		
+		// info popup
 		popup.findNiftyControl("loadingPopupStatus", Label.class).setText("connecting try # "+(test+1)+": "+testThisAddress+":"+port+"... ");
 		
-		
+		// connects
 		SessionCallback callback = new SessionCallback() {
 			@Override
 			public void onSuccess() {
@@ -258,14 +264,18 @@ public class MenuState implements GameState {
 		Application.getInstance().changeState(GameState.GameStateId.LOBBY_STATE);
 	}
 
-	// @brief callback from direct connect button
+	/// @brief callback from direct connect button
 	public void directConnect() {
+		
+		// Retrieve ip from the text field
 		final Nifty nifty = Application.getInstance().getNiftyDisplay().getNifty();
 		String ip = nifty.getCurrentScreen().findNiftyControl("ServerListDirectConnectField", TextField.class).getText();
 		
+		// info popup
 		final Element popup = getPopup();
 		nifty.showPopup(nifty.getCurrentScreen(), popup.getId(), null);
 		
+		// connects
 		SessionCallback callback = new SessionCallback() {
 
 			@Override
@@ -389,6 +399,7 @@ public class MenuState implements GameState {
 	    	width("0px");
     	}}.build(nifty);
     	
+    	// info popup
     	new PopupBuilder("loadingPopup") {{
     		 childLayoutCenter();
     		 backgroundColor("#000a");
@@ -406,6 +417,7 @@ public class MenuState implements GameState {
 	 		}});
 		}}.registerPopup(nifty);
 	    
+		// build gui
 	    final MenuState state = this;
 	    nifty.addScreen("ServerListScreen", new ScreenBuilder("Nifty Screen") {{
 	    	
