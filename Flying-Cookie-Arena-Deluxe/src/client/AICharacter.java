@@ -7,6 +7,11 @@ import com.jme3.math.Vector3f;
 
 public class AICharacter extends Character {
 
+	/// Constructor
+	/// @param ownerId Id of the peer that owns this entity.
+	/// @param world The world that this entity belongs to.
+	/// @param entityId Id of this entity.
+	/// @param position Initial position of this entity.
 	public AICharacter(int ownerId, World world, int entityId, Vector3f position) {
 		super(ownerId, world, entityId, position, 2.0f);
 		entityType = Type.AI_CHARACTER;
@@ -16,13 +21,16 @@ public class AICharacter extends Character {
 
 	private Character target = null;
 	private float targetTimer = 0.0f;
+	private boolean moving = false;
 	
+	/// Looks for a new target to follow
 	private void findTarget() {
 		
 		for(Entity e : world.getEntities()) {
 			if(e instanceof Character) {
 				Character c = (Character)e;
 				
+				// We take the character with the most nodes (flags) attached to him.
 				if((target == null) || target.getNode().getChildren().size() < c.getNode().getChildren().size()) {
 					target = c;
 				}
@@ -30,7 +38,6 @@ public class AICharacter extends Character {
 		}		
 	}
 	
-	private boolean moving = false;
 	
 	@Override
 	public void update(float tpf) {

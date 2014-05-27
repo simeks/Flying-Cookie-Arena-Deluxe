@@ -34,7 +34,7 @@ public class World {
 	private TerrainQuad terrain;
 	private int nextEntityId = 0;
 	
-
+	// Our different collision groups
 	public static final int COLLISION_GROUP_CRATE = PhysicsCollisionObject.COLLISION_GROUP_01;
 	public static final int COLLISION_GROUP_CHARACTER = PhysicsCollisionObject.COLLISION_GROUP_02;
 	public static final int COLLISION_GROUP_FLAG = PhysicsCollisionObject.COLLISION_GROUP_03;
@@ -45,6 +45,7 @@ public class World {
 	// List of all crates in the world
 	private ArrayList<Entity> entities = new ArrayList<Entity>();
 
+	/// @return A list of all the entities in the world.
 	public ArrayList<Entity> getEntities() {
 		return entities;
 	}
@@ -55,35 +56,45 @@ public class World {
 	private AudioNode[] audio_backstab;
 	private AudioNode[] audio_dc;
 	
+	/// @brief Plays the jump sound effect at the specified position.
 	public void playJump(Vector3f position) {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_jump.length);
 		audio_jump[n].setLocalTranslation(position);
 		audio_jump[n].playInstance();
 	}
+
+	/// @brief Plays the join game sound effect.
 	public void playJoinedGame() {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_joined.length);
 		audio_joined[n].playInstance();
 	}
+
+	/// @brief Plays the "flag steal" sound effect at the specified position.
 	public void playBackstab(Vector3f position) {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_backstab.length);
 		audio_backstab[n].setLocalTranslation(position);
 		audio_backstab[n].playInstance();
 	}
+	
+	/// @brief Plays the "ignite campfire" sound effect at the specified position.
 	public void playFire(Vector3f position) {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_fire.length);
 		audio_fire[n].setLocalTranslation(position);
 		audio_fire[n].playInstance();
 	}
+	
+	/// @brief Plays the disconnect sound effect.
 	public void playDisconnect() {
 		Random Dice = new Random();
 		int n = Dice.nextInt(audio_dc.length);
 		audio_dc[n].playInstance();
 	}
 	
+	/// @brief Initializes the sound effects.
 	public void initAudio() {
 
 		String fires[] = { "fire1.wav", "fire2.wav", "fire3.wav" };
@@ -180,7 +191,7 @@ public class World {
     }
     
     
-
+    /// Constructor
 	public World() {
 		this.bulletAppState = Application.getInstance().getBulletAppState();
 		this.assetManager = Application.getInstance().getAssetManager();
@@ -339,6 +350,7 @@ public class World {
 		}
 	}
 
+	/// @brief Processes an incoming entity event message.
 	public void processEntityEvent(EntityEventMessage msg) {
 		Entity entity = getEntity(msg.entityId);
 		if(entity != null) {
@@ -387,7 +399,7 @@ public class World {
 		}
 	}
 	
-	// Spawns a box at the specified world coordinates
+	/// Spawns a box at the specified world coordinates
 	public CampFire spawnCampFire(Vector3f position) {
 		int id = generateEntityID();
 		CampFire fire = new CampFire(Application.getInstance().getSession().getMyPeerId(), 
@@ -402,7 +414,7 @@ public class World {
 	}
 
 
-	// Spawns a box at the specified world coordinates
+	/// Spawns a box at the specified world coordinates
 	public Crate spawnBox(Vector3f position) {
 		int id = generateEntityID();
 		Crate crate = new Crate(Application.getInstance().getSession().getMyPeerId(), 
@@ -416,6 +428,8 @@ public class World {
 		return crate;
 	}
 	
+	/// @brief Spawns a character entity.
+	/// @param position Initial position of the entity.
 	public Character spawnCharacter(Vector3f position) {
 		int id = generateEntityID();
 		Character character = new Character(Application.getInstance().getSession().getMyPeerId(), 
@@ -428,6 +442,9 @@ public class World {
 		
 		return character;
 	}
+
+	/// @brief Spawns an AI-controlled character entity.
+	/// @param position Initial position of the entity.
 	public AICharacter spawnAICharacter(Vector3f position) {
 		int id = generateEntityID();
 		AICharacter character = new AICharacter(Application.getInstance().getSession().getMyPeerId(), 
@@ -441,6 +458,8 @@ public class World {
 		return character;
 	}
 
+	/// @brief Spawns a flag entity.
+	/// @param position Initial position of the entity.
 	public Flag spawnFlag(Vector3f position) {
 		int id = generateEntityID();
 		Flag flag = new Flag(Application.getInstance().getSession().getMyPeerId(), 
@@ -454,6 +473,7 @@ public class World {
 		return flag;
 	}
 	
+	/// Destroys the specified entity, removing it from the world.
 	public void destroyEntity(Entity entity) {
 		entities.remove(entity);
 		entity.destroy();
@@ -486,6 +506,7 @@ public class World {
 		}
 	}
 	
+	/// Clears the world, destroying any existing entities.
 	public void clear() {
 		for(Entity e : entities) {
 			e.destroy();
@@ -493,6 +514,7 @@ public class World {
 		entities.clear();
 	}
 	
+	/// @return Root JMonkey node for this world.
 	public Node getRootNode()
 	{
 		return rootNode;
@@ -543,6 +565,7 @@ public class World {
 		return entityId;
 	}
 
+	/// @brief Processes a message about a changed ownership.
 	public void processEntityOwnerChange(EntityNewOwnerMessage m) {
 		Entity entity = getEntity(m.entityId);
 		if(entity != null) {
