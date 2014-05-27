@@ -23,6 +23,10 @@ import com.jme3.scene.Spatial;
 
 public class Character extends Entity {
 
+/*
+ * Player takes flag from another player
+ * @see client.Entity#interact(client.Character)
+ */
 	@Override
 	public void interact(Character character) {
 		
@@ -34,6 +38,7 @@ public class Character extends Entity {
 			return;
 		}
 		
+		/* iterates through the list of possible entities (flags) carried by the player whos flag should be taken*/
 		Iterator<Spatial> iter = ((Node) node).getChildren().iterator();
 		Flag highetstFlag = null;
 		while(iter.hasNext()) {

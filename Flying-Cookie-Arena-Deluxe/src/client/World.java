@@ -163,7 +163,7 @@ public class World {
             }
         }
     
-   
+   /* reset all physics when the game resets */
     public void resetPhysics(){
     	 /*
          * TODO

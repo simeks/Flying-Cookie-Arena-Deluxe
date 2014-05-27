@@ -13,6 +13,7 @@ import com.jme3.math.Vector3f;
 public abstract class Message implements Serializable {
 	private static final long serialVersionUID = 8351610195856354822L;
 
+	/* ID's for different types of messages */
 	public enum Type {
 		HELLO,
 		PEER_ID,
@@ -150,6 +151,7 @@ class CreateEntityMessage extends Message {
 	}
 }
 
+/* destroy a message...*/
 class DestroyEntityMessage extends Message {
 	private static final long serialVersionUID = -662257788394323903L;
 	public int entityId;
@@ -159,7 +161,7 @@ class DestroyEntityMessage extends Message {
 		this.entityId = entityId;
 	}
 }
-
+/* used for general state changes of an entity */
 class EntityStateMessage extends Message {
 	private static final long serialVersionUID = -6643225186660773294L;
 
@@ -200,7 +202,9 @@ class EntityEventMessage extends Message {
 		this.entityId = state.entityId;
 	}
 }
-
+/* used when requesting to take over an entity from a user. Reliable message. A change will not occur if the other player 
+ * dont ACK the request
+ */
 class EntityRequestOwnerMessage extends Message{
 	private static final long serialVersionUID = 7546406821023158540L;
 	public int entityId;
@@ -212,7 +216,7 @@ class EntityRequestOwnerMessage extends Message{
 	}
 
 }
-
+/* used when an entity changes owner, like a flag being stolen from another player*/
 class EntityNewOwnerMessage extends Message{
 	private static final long serialVersionUID = 3098702594934220381L;
 	public int ownerId;
