@@ -40,8 +40,12 @@ public abstract class Entity {
 	private final static long MAX_STATE_SILINCE = 1000; 
 	
 	private EntityCallback callback = null;
-	
-	/// @brief to be called from World!
+
+	/// Constructor
+	/// @param ownerId Id of the peer that owns this entity.
+	/// @param world The world that this entity belongs to.
+	/// @param entityId Id of this entity.
+	/// @param entityType Type of this entity.
 	public Entity(int ownerId, World world, int entityId, Type entityType) {
 		this.ownerPeer = ownerId;
 		this.world = world;

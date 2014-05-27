@@ -7,7 +7,7 @@ public class Peer {
 	private NetWrite netWrite;
 	private InetAddress addr;
 	private int port;
-	private String peerName;
+	private String peerName; //TODO this is not used ATM, can be used in a GUI upgrade in the future
 	
 	private long lastHeartbeat; // When did we last communicate with this peer?
 	private long lastPing = -1; // When did we last send a ping to this peer.
@@ -36,34 +36,37 @@ public class Peer {
 		lastPing = 0;
 	}
 	
+	/* send a message (reliable if needed) */
 	public void send(Message msg, boolean reliable) {
 		netWrite.send(addr, port, msg, reliable);
 	}
-	
+	/* get the destination internet address */
 	public InetAddress getDestAddr() {
 		return addr;
 	}
 	
+	/* returns the portnumber of the peer */
 	public int getDestPort() {
 		return port;
 	}
-	
+	/* returns the netwrite object of a peer */
 	public NetWrite getNetWrite() {
 		return netWrite;
 	}
-	
+	/* get the id of a peer */
 	public int getId() {
 		return id;
 	}
-	
+	/* set id of a peer */
 	public void setId(int id) {
 		this.id = id;
 	}
-	
+	/* set the peer name */
 	public void setPeerName(String name){
 		this.peerName = name;
 	}
 	
+	/* returns the name of the peer */
 	public String getPeerName(){
 		return peerName;
 	}
